@@ -1,0 +1,309 @@
+/* 
+    Document   : main.less
+    Created on : Aug 1, 2012, 12:07:19 AM
+    Author     : ElyDeLaCruz
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+@import url(common-classes.less);
+@import url(mixins.less);
+@import url(color-scheme-1.less);
+@import url(modules.less);
+
+* {
+    -webkit-box-sizing: box-content;
+    -moz-box-sizing: box-content;
+    -ms-box-sizing: box-content;
+    -o-box-sizing: box-content;
+    box-sizing: box-content;
+}
+
+html, body {
+    margin: 0; pading: 0;
+    text-align: center;
+    font: normal 96% "Century Gothic", Helvetica, Verdana, Arial, Sans-serif;
+    background: #888888;
+    color: #555555;
+}
+body {
+    overflow: scroll;
+}
+#wrapper,
+#wrapper > header,
+#wrapper > nav,
+#wrapper > footer,
+#wrapper > section {
+    position: relative;
+    width: 100%;
+    min-width: 960px;
+    height: auto;
+    text-align: left;
+}
+
+a {
+    //.transition(all, 0.16s, linear);
+}   
+
+#wrapper {
+    text-align: left;
+    min-width: 920px;
+    > header {
+        position: fixed;
+        background: desaturate(@blue, 20%);
+        height: 36px;
+        z-index: 101;
+        .m0; .p0; .box-shadow(3px 3px 5px 0 fadeout(#000000, 72%);
+    }
+    > header h1 {
+        margin: 0 10px;
+        height: 20px;
+        color: fadeout(#AADDFF, 60%);
+        font: normal 29px Impact, Arial Black, Comic-sans, sans-serif;
+    }
+    > nav {
+        position: fixed;
+        top: 36px;
+        height: 44px;
+        border-top: #8888888;
+        border-bottom: 2px solid #777777;
+        .basic-gradient(#888888, #cccccc);
+        .box-shadow(1px 1px 20px 0 #777777);
+        z-index: 99;
+    }
+    > nav .menu {
+        margin-left: 10px;
+    }
+    > nav > ul > li  {
+        border-left: 1px solid #888888;
+        border-right: 1px solid #888888;
+        box-shadow: 1px 0 5px #dddddd inset;
+        .m0; .p0;
+    }
+    > nav > ul > li.first {
+        border-left: none;
+    }
+    > nav > ul > li.last {
+        border-right: none;
+    }
+    > nav li a {
+        .dBlock; .fl; .w100p;
+        color: @color-3-2;
+        text-decoration: none;
+        height: 44px;
+    }
+    > nav li a:hover {
+        color: @color-3-4;
+        background: fadeout(#FFFFFF, 38%);
+    }
+    > nav li a:active {
+        .box-shadow(3px 3px 10px 0 fadeout(black, 60%) inset);
+        background: white;
+    }
+    > nav li a span {
+        .m10px;
+    }
+    > nav li ul {
+        .pos-abs;
+        top: 44px;
+        width: 220px;
+        z-index: 200;
+        background: #CCCCCC;
+        border: 2px solid #aaaaaa;
+        .border-radius-bottom(20px);
+        .box-shadow(5px 5px 20px 0 fadeout(black, 60%));
+    }
+    > nav li ul li {
+        border: 1px solid #bbbbbb;
+        border-left: none;
+        border-right: none;
+        .basic-gradient(#cccccc, #eeeeee);
+    }
+    > nav li ul li a:active,
+    > nav li ul li a.active {
+        .box-shadow(none);
+    }
+    > nav li ul li.last {
+        .border-radius-bottom(20px);
+    }
+    > nav li ul li.last a {
+        .border-radius-bottom(20px);
+    }
+    > nav li ul li a span {
+        margin-left: 20px;
+    }
+    > section {
+        top: 80px;
+        .box-shadow(0 0 20px 0 fadeout(#000000, 20%);
+    }
+}
+
+#left {
+    position: fixed;
+    width: 23%;
+    height: 100%;
+    top: 80px;
+    background: #555555;
+    .transition();
+    min-width: 220px;
+    .box-shadow(0 0 60px 0 #333333 inset);
+    z-index: 98;
+    > .handle {
+        .pos-abs; .fr;
+        right: -20px;
+        width: 20px;
+        height: 20px;
+    }
+    > .handle a {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        margin: 0;
+        padding: 3px;
+    }
+}
+#left.collapsed {
+    width: 0 !important;
+}
+
+#main {
+    position: relative;
+    width: 75%;
+    min-width: 720px;
+    left: 23%;
+    padding: 1% 0;
+}    
+#main.expanded {
+    width: 100% !important;
+}
+form,
+.form {
+    fieldset {
+        margin: 1%;
+        background: #dfdfdf;
+        border: 1px solid #aaaaaa;
+        padding: 0;
+        width: 96%;
+        .cb;
+        .border-radius(20px);
+    }
+    legend {
+        font: bold;
+        color: @color-3-3;
+        padding: 10px 20px;
+        border: 1px solid @color-3-4;
+        .basic-gradient(@color-3-5, lighten(@color-3-5, 20%));
+        .border-radius(20px);
+    }
+
+    .form-item {
+        //background: fadeout(white, 72%);
+        &nth:child {
+            font-weight: bold;
+        }
+        .m10px; .p10px; .fl;
+        .border-radius(10px);
+    }
+    label {
+        font-size: 83%;
+        &[for]:hover {
+            cursor: pointer;
+        }
+    }
+    label:nth-child(1) {
+        .fw-bld;
+    }
+    input, select, textarea {
+        .p10px;
+        color: #333333;
+        font-size: 14px;
+        border: 3px solid fadeout(@color-3-5, 38%);
+        font: normal 98% Helvetica, Verdana, Arial, Sans-serif;
+        .border-radius(5px);
+        .box-shadow(3px 3px 5px #CCCCCC inset);
+    }
+}
+
+table {
+    .cb;
+    width: 96%;
+    margin: 1%;
+    border: 1px solid #555555;
+    background: #AAAAAA;
+    .border-radius(10px);
+    .box-shadow(1px 1px 3px 0 #888888);
+    thead, tfoot{
+        .basic-gradient();
+    }
+    tbody td {
+        border: 1px solid #888888;
+        .p10px;
+    }
+    thead th, 
+    tfoot th {
+        border: 1px solid #555555;
+        box-shadow: 1px 1px 5px 0 #EEEEEE inset;
+        .p5px;
+    }
+    thead tr:first-child th {
+        .border-radius-top(10px);
+    }
+    tfoot tr:first-child th {
+        .border-radius-bottom(10px);
+    }
+    tr td {
+        .p10px;
+    }
+    tr:nth-child(2n + 1) td {
+        background: #FFFFFF;
+    }
+    tr:nth-child(2n) td {
+        background: #DDDDDD;
+    }
+}
+
+.ui-widget {
+    font-size: 96% !important;
+}
+
+.ui-dialog,
+.ui-datepicker {
+    .box-shadow(1px 1px 20px 0 fadeout(#000000, 62%));
+}
+
+.controls a,
+.controls .btn,
+.controls button,
+.controls input[type="submit"],
+.controls input[type="reset"] {
+    .dBlock; .fl;
+    font-size: 12px;
+    text-decoration: none;
+    color: #333333;
+    border: 1px solid #555555;
+    box-shadow: 1px 1px 5px 0 fadeout(#555555, 72%), 1px 1px 5px 0 #EEEEEE inset;
+    text-shadow: 1px 1px #EEEEEE;
+    margin: 3px;    
+    .border-radius(5px);
+    .basic-gradient(#EEEEEE, #888888);
+    .transition();
+    padding: 10px;
+    &:hover {
+        .basic-gradient(#FFFFFF, #AAAAAA);
+        text-shadow: 1px 1px #FFFFFF;
+        border: 1px solid #555555;
+        cursor: pointer;
+    }
+    &:active,
+    &.active {
+        .basic-gradient(#FFFFFF, #AAAAAA);
+        text-shadow: 1px 1px #FFFFFF;
+        box-shadow: 1px 1px 5px 0 fadeout(#EEEEEE, 72%), 1px 1px 5px 0 #555555 inset;
+        color: #000000;
+    }
+}
+
+.controls .btn.big-btn {
+    font-size: 16px;
+    padding: 13px;
+    margin: 5px;
+}

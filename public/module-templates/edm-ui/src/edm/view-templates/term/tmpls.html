@@ -1,0 +1,55 @@
+<!-- Table body template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="term-index-row-tmpl" type="text/html">
+    <tbody>
+    <tr>
+    <!-- ko template: {name: 'table-row-index-column'} --><!-- /ko -->
+    <td class="name-column" data-bind="text: $data.name"></td>
+    <td class="alias-column" data-bind="text: $data.alias"></td>
+    <td class="term_group_alias-column" 
+        data-bind="text: $data.term_group_alias"></td>
+    <!-- ko template: {name: 'table-row-crud-options'} --><!-- /ko -->
+    </tr>
+    </tbody>
+</script>
+
+<!-- Table Row Crud options template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="table-row-crud-options" type="text/html">
+    <td class="options-column controls">
+        <div data-bind="if: $root.crudOptions" class="form-item">
+            <a class="btn" 
+               data-bind="if: $root.crudOptions.editBtn,
+               attr: $root.crudOptions.editBtn.getAttribs()">edit</a>
+            <a class="btn" 
+               data-bind="if: $root.crudOptions.deleteBtn,
+               attr: $root.crudOptions.deleteBtn.getAttribs()">delete</a>
+        </div>
+    </td>
+</script>
+
+<!-- Table Row index column
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="table-row-index-column" type="text/html">
+    <td class="index-column controls">
+        <div class="form-item">
+            <input data-bind="attr: " type="checkbox" />
+            <label data-bind="html: $index + ').'"></label>
+        </div>
+    </td>
+</script>
+
+<!-- Table filter tmpl
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="table-filter-tmpl" type="text/html">
+    <div class="form-item filter">
+        <label for="">Filter by</label><br />
+        <input type="text" list="filter-list" /> 
+        <datalist id="filter-list">
+            <option>Name</option>
+            <option>Alias</option>
+            <option>Term Group Alias</option>
+        </datalist>
+    </div>
+</script>
+

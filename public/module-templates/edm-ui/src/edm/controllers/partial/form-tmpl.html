@@ -1,0 +1,71 @@
+
+<!-- Select form element template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-select-tmpl" type="text/html">
+    <select data-bind="attr: getHtmlAttribs(), foreach: options">
+        <option data-bind="text: $data.label, attr: {value: $data.value}">
+        </option>
+    </select>
+</script>
+
+<!-- Datalist input field template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-datalist-input-tmpl" type="text/html">
+    <!-- ko template: 'form-input-tmpl' --><!-- /ko -->
+    <datalist data-bind="foreach: data">
+        <option data-bind="text: $data.label, attr: {value: $data.value}">
+        </option>
+    </datalist>
+</script>
+
+<!-- Input element
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-input-tmpl" type="text/html">
+    <label data-bind="text: label, attr: getHtmlAttrib('for')"></label>
+    <!-- ko if: clearBreakAfterLabel -->
+    <br class="cb" />
+    <!-- /ko -->
+    <!-- ko if: breakAfterLabel -->
+    <br />
+    <!-- /ko -->
+    <!-- ko ifnot: appendInputTmpl -->
+    <input data-bind="attr: getHtmlAttribs()" />
+    <!-- /ko -->
+    <!-- ko if: appendInputTmpl, template: getAppendInputTmpl() -->
+    <!-- /ko -->
+</script>
+
+<!-- Text area
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-textarea-tmpl" type="text/html">
+    <textarea data-bind="attr: getHtmlAttribs(), text: getText()"></textarea>
+</script>
+
+<!-- Form template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-tmpl" type="text/html">
+    <form data-bind="attr: getHtmlAttribs()">
+        <!-- ko template: {name: fieldsetTmpl, foreach: fieldsets} -->
+        <!-- /ko -->
+    </form>
+</script>
+
+<!-- Form fieldset template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-fieldset-tmpl" type="text/html">
+    <fieldset data-bind="attr: getHtmlAttribs()">
+        <!-- ko if: legend -->
+        <legend data-bind="text: legend"></legend>
+        <!-- /ko -->
+        <!-- ko template: {name: formItemTmpl, foreach: formItems} -->
+        <!-- /ko -->
+    </fieldset>
+</script>
+
+<!-- Select form element template
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-->
+<script id="form-item-tmpl" type="text/html">
+    <div data-bind="attr: getHtmlAttribs()">
+        <!-- ko template: fieldTmpl -->
+    </div>
+</script>

@@ -1,0 +1,16 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* colors
+-------------------------------------------------------------------*/
+.c-orange, .c-ff9900 { color: #ff9900; } 
+.c-red, .c-ff0000 { color: #FF0000; } 
+.c-blue, .c-003399 { color: #003399; } 
+.c-light-blue, .c-6699cc { color: #6699CC; } 
+.c-cool-gray, .c-778899{ color: #778899; }
+.c-green, .c-009900 { color: #009900; }
+
+/* background colors
+-------------------------------------------------------------------*/
+.bg-blue, .bg-003399 { background-color: #003399; }  
+.bg-light-blue, .bg-6699cc { background-color: #6699CC; } 

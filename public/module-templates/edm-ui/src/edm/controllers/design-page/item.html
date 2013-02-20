@@ -1,0 +1,102 @@
+<div id="item-tabs">
+    <ul>
+        <li><a href="#item-items"><span>Items</span></a></li>
+        <li><a href="#item-create"><span>Create</span></a></li>
+    </ul>
+    <div id="item-items">
+        <!-- ko template: {name: 'table-tmpl'} -->
+        <!-- /ko -->
+    </div><!-- /#item-index -->
+    <div id="item-create">
+        <p>Fill out the form below to add a item.<br>  
+            All fields preceeded by an asterisk (<span class="red">*</span>)
+            are required.</p>
+        <form method="post">
+            <fieldset>
+                <div class="form-item">
+                    <span class="red">*</span>
+                    <label for="category">Category:</label><br>
+                    <select name="category" id="category">
+                        <option value="null" label="-- Select a Category --">-- Select a Category --</option>
+                        <option value="68" label="Blog">Blog</option>
+                        <option value="82" label=" - 3D"> - 3D</option>
+                        <option value="71" label=" - Html 5 and Css"> - Html 5 and Css</option>
+                        <option value="70" label=" - Javascript and JQuery"> - Javascript and JQuery</option>
+                        <option value="69" label=" - Php and Zend Framework"> - Php and Zend Framework</option>
+                        <option value="20" label="Extensible Data Manager">Extensible Data Manager</option>
+                        <option value="51" label="Home">Home</option>
+                        <option value="81" label=" - About"> - About</option>
+                        <option value="60" label="Portfolio">Portfolio</option>
+                        <option value="53" label=" - Branding/Identity Design"> - Branding/Identity Design</option>
+                        <option value="54" label=" - Multimedia Development/Design"> - Multimedia Development/Design</option>
+                        <option value="52" label=" - Web Development"> - Web Development</option>
+                        <option value="64" label="Services">Services</option>
+                        <option value="27" label="Testing">Testing</option>
+                        <option value="49" label="Uncategorized">Uncategorized</option>
+                    </select></div>      
+            </fieldset>
+            <fieldset>
+                <div class="form-item"><span class="red">*</span>
+                    <label for="title">Title:</label><br>
+                    <input type="text" name="title" id="title" value="" size="38" maxlength="128">
+                </div>                <br class="cb">
+                <div class="form-item">
+                    <label for="alias">Alias:</label><br>
+                    <input type="text" name="alias" id="alias" value="" size="38" maxlength="64">
+                </div>                <br class="cb">
+                <div class="form-item">
+                    <label for="content">Content:</label><br>
+                    <textarea name="content" id="content" cols="60" rows="13"></textarea>
+                </div><br>
+                <div class="form-item">
+                    <label for="autoExcerptLength">Auto Excerpt Length:</label><br>
+                    <input type="text" name="autoExcerptLength" id="autoExcerptLength" value="1024" size="28" maxlength="4"><br class="cb">
+                    <div class="description tsml">Default: "1024"; Maximum: "9999".  <br>*Used when "Excerpt" is left blank.</div>
+                </div>                <br class="cb">
+                <div class="form-item">
+                    <label for="excerpt">Excerpt:</label><br>
+                    <textarea name="excerpt" id="excerpt" cols="60" rows="13"></textarea>
+                </div>                <br class="cb">
+                <div class="form-item"><span class="red">*</span>
+                    <label for="status">Status:</label><br>
+                    <select name="status" id="status">
+                        <option value="0" label="-- Select Item Status --">-- Select Item Status --</option>
+                        <option value="archived" label="Archived">Archived</option>
+                        <option value="published" label="Published" selected="selected">Published</option>
+                        <option value="unpublished" label="Unpublished">Unpublished</option>
+                    </select>
+                </div>                
+                <div class="form-item"><span class="red">*</span>
+                    <label for="commentStatus">Commenting:</label><br>
+                    <select name="commentStatus" id="commentStatus">
+                        <option value="0" label="-- Select Comment Status --">-- Select Comment Status --</option>
+                        <option value="approved" label="Approved">Approved</option>
+                        <option value="awaiting-approval" label="Awaiting Approval">Awaiting Approval</option>
+                        <option value="disabled" label="Disabled" selected="selected">Disabled</option>
+                        <option value="disapproved" label="Disapproved">Disapproved</option>
+                        <option value="enabled" label="Enabled">Enabled</option>
+                        <option value="spam" label="Spam">Spam</option>
+                    </select></div>                
+                <div class="form-item"><span class="red">*</span>
+                    <label for="accessGroup">Access Group:</label><br>
+                    <select name="accessGroup" id="accessGroup">
+                        <option value="0" label="-- Select an Access Group --">-- Select an Access Group --</option>
+                        <option value="cms-author" label="Cms - Author">Cms - Author</option>
+                        <option value="cms-editor" label="Cms - Editor">Cms - Editor</option>
+                        <option value="cms-manager" label="Cms - Manager">Cms - Manager</option>
+                        <option value="cms-publisher" label="Cms - Publisher">Cms - Publisher</option>
+                        <option value="cms-super-admin" label="Cms - Super Admin">Cms - Super Admin</option>
+                        <option value="cms-user" label="Cms - User">Cms - User</option>
+                        <option value="guest" label="Guest" selected="selected">Guest</option>
+                        <option value="user" label="User">User</option>
+                    </select></div>    
+            </fieldset>
+            <fieldset class="controls">
+                <div class="form-item"><input type="submit" name="submit" id="submit" value="Save" ></div>                
+                <div class="form-item"><input type="reset" name="clear" id="clear" value="Clear"></div>            
+            </fieldset>
+        <br class="cb" />
+        </form>      
+        <br class="cb" />
+    </div><!-- /#item-create -->
+</div><!-- /#item-tabs" -->
