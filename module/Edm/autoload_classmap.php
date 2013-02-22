@@ -4,7 +4,10 @@ return array(
     'Edm\Module'                        => __DIR__ . '/Module.php',
     'Edm\Controller\IndexController'    => __DIR__ . '/src/Edm/Controller/IndexController.php',
     'Edm\Controller\TermController'     => __DIR__ . '/src/Edm/Controller/TermController.php',
+    'Edm\Model\Term'                    => __DIR__ . '/src/Edm/Model/Term.php',
     'Edm\Model\TermTable'               => __DIR__ . '/src/Edm/Model/TermTable.php',
+//    'Edm\Table\UserTable'               => __DIR__ . '/src/Edm/Table/UserTable.php',
+//    'Edm\Model\UserModel'               => __DIR__ . '/src/Edm/Model/User.php',
 //    'EdmTest\Framework\TestCase'        => __DIR__ . '/tests/Edm/Framework/TestCase.php',
 //    'EdmTest\SampleTest'                => __DIR__ . '/tests/Edm/SampleTest.php',
 );

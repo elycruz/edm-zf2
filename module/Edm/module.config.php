@@ -49,6 +49,15 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
+//                            'update' => array(
+//                                'type' => 'Segment',
+//                                'options' => array(
+//                                    'route' => '[/:id]',
+//                                    'constraints' => array(
+//                                        'id' => '[a-zA-Z0-9_\-\:\|'
+//                                    )
+//                                )
+//                            ),
                             'paginator' => array(
                                 'type' => 'Query',
                                 'options' => array(

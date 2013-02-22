@@ -1,18 +1,15 @@
 <?php
 
-/**
- * @author ElyDeLaCruz
- */
-
 namespace Edm\Model;
 
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface;
+
 class Term implements InputFilterAwareInterface {
 
-    protected $inputFilter;
+    protected $inputFilter = null;
     public $term_id;
     public $term_group_alias;
     public $alias;
@@ -22,7 +19,9 @@ class Term implements InputFilterAwareInterface {
         $this->term_id = isset($data['term_id']) ? $data['term_id'] : null;
         $this->name = isset($data['name']) ? $data['name'] : null;
         $this->alias = isset($data['alias']) ? $data['alias'] : null;
-        $this->term_group_alias = isset($data['term_group_alias']) ? $data['term_group_alias'] : null;
+        $this->term_group_alias =
+                isset($data['term_group_alias']) ?
+                $data['term_group_alias'] : null;
     }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
@@ -31,13 +30,13 @@ class Term implements InputFilterAwareInterface {
 
     public function getInputFilter() {
 
-            if (!empty($this->inputFilter)) {
-                return $this->inputFilter;
-            }
+        if ($this->inputFilter !== null) {
+            return $this->inputFilter;
+        }
 
         $retVal =
                 $this->inputFilter =
-                    new InputFilter();
+                new InputFilter();
         $factory = new InputFactory();
 
         // Name
@@ -53,7 +52,7 @@ class Term implements InputFilterAwareInterface {
                             'options' => array(
                                 'min' => 1,
                                 'max' => 255
-                            ))
+                        ))
                     )
                 )));
 
@@ -70,7 +69,7 @@ class Term implements InputFilterAwareInterface {
                             'name' => 'Regex',
                             'options' => array(
                                 'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                            ),
+                        ),
                     )
                 )));
 
@@ -78,16 +77,28 @@ class Term implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(array(
                     'name' => 'term_group_alias',
                     'required' => false,
-                    'filters' => array('name' => 'StringToLower'),
-                    'validators' => array(
-                        array('name' => 'Regex',
-                            'options' => array(
-                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                            ),
-                    )
+//                    'filters' => array(
+//                        array(
+//                            'name' => 'StringToLower'),
+//                    ),
+//                    'validators' => array(
+//                        array(
+//                            'name' => 'Regex',
+//                            'options' => array(
+//                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
+//                        ),
+//                    )
                 )));
-        
-        return $this->inputFilter = $retVal;
+
+        $this->inputFilter = $retVal;
+
+        return $retVal;
+    }
+
+    public function toArray() {
+        return array('alias' => $this->alias,
+            'name' => $this->name,
+            'term_group_alias' => $this->term_group_alias);
     }
 
 }

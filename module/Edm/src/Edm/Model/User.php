@@ -1,41 +1,98 @@
 <?php
-/**
- * Our user model for application
- *
- * @author ElyDeLaCruz
- */
-class Model_User extends Edm_Db_AbstractTable
-{
-    protected $_name = 'users';
 
-    public function createUser(array $data)
-    {
-        $this->insert($data);
-        return $this->getAdapter()->lastInsertId();
+namespace Edm\Model;
+
+use Zend\InputFilter\Factory as InputFactory,
+    Zend\InputFilter\InputFilter,
+    Zend\InputFilter\InputFilterAwareInterface,
+    Zend\InputFilter\InputFilterInterface;
+
+class User implements InputFilterAwareInterface {
+
+    protected $inputFilter = null;
+    public $user_id;
+    public $term_group_alias;
+    public $alias;
+    public $name;
+
+    public function exchangeArray(array $data) {
+        $this->term_id = isset($data['term_id']) ? $data['term_id'] : null;
+        $this->name = isset($data['name']) ? $data['name'] : null;
+        $this->alias = isset($data['alias']) ? $data['alias'] : null;
+        $this->term_group_alias = 
+                isset($data['term_group_alias']) ? 
+                    $data['term_group_alias'] : null;
     }
 
-    public function updateUser($id, array $data) {
-        return $this->update($data,
-                $this->getWhereClauseFor($id, 'user_id'));
+    public function setInputFilter(InputFilterInterface $inputFilter) {
+        throw new \Exception('Not used');
     }
 
-    public function deleteUser($id) {
-        return $this->delete(
-                $this->getWhereClauseFor($id, 'user_id'));
-    }
+    public function getInputFilter() {
 
-    /**
-     * Updates the users lastLogin column
-     * @param integer $id
-     * @return boolean
-     */
-    public function updateLastLoginForId($id)
-    {
-        $now = Zend_Date::now()->getTimestamp();
-        return $this->update(array('lastLogin' => $now), 
-                $this->getWhereClauseFor($id, 'user_id'));
+        if ($this->inputFilter !== null) {
+            return $this->inputFilter;
+        }
+
+        $retVal =
+                $this->inputFilter =
+                new InputFilter();
+        $factory = new InputFactory();
+
+        // Name
+        $retVal->add($factory->createInput(array(
+                    'name' => 'name',
+                    'required' => true,
+                    'filters' => array(
+                        array('name' => 'StripTags'),
+                        array('name' => 'StringTrim')
+                    ),
+                    'validators' => array(
+                        array('name' => 'StringLength',
+                            'options' => array(
+                                'min' => 1,
+                                'max' => 255
+                        ))
+                    )
+                )));
+
+        // Alias
+        $retVal->add($factory->createInput(array(
+                    'name' => 'alias',
+                    'required' => true,
+                    'filters' => array(
+                        array(
+                            'name' => 'StringToLower'),
+                    ),
+                    'validators' => array(
+                        array(
+                            'name' => 'Regex',
+                            'options' => array(
+                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
+                        ),
+                    )
+                )));
+
+        // User Group Alias
+        $retVal->add($factory->createInput(array(
+                    'name' => 'term_group_alias',
+                    'required' => false,
+//                    'filters' => array(
+//                        array(
+//                            'name' => 'StringToLower'),
+//                    ),
+//                    'validators' => array(
+//                        array(
+//                            'name' => 'Regex',
+//                            'options' => array(
+//                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
+//                        ),
+//                    )
+                )));
+
+        $this->inputFilter = $retVal;
+        
+        return $retVal;
     }
 
 }
-
-

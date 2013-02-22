@@ -10,49 +10,49 @@
 
 namespace Edm\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController,
+use Edm\Controller\AbstractController,
+    Edm\Model\Term,
+    Edm\Form\TermForm,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect,
-    Zend\Db\Sql\Select,
-    Edm\Model\Term,
-    Edm\Form\TermForm;
+    Zend\Db\Sql\Select;
 
-class TermController extends AbstractActionController {
+class TermController extends AbstractController {
 
-    protected $termModel;
+    protected $termTable;
 
     public function indexAction() {
         // View
         $view = new JsonModel();
-        
+
         // Model
         $model = $this->getTermModel();
-        
+
         // Route match
         $routeMatch = $this->getEvent()->getRouteMatch();
-        
+
         // Page number
         $pageNumber = $routeMatch->getParam('page', 1);
-        
+
         // Items per page
         $itemCountPerPage = $routeMatch->getParam('itemsPerPage', 5);
-        
+
         // Select 
         $select = new Select();
         $select->from($model->getTable());
-        
+
         // Paginator
         $paginator = new Paginator(new DbSelect($select, $model->getAdapter()));
-        $paginator  ->setItemCountPerPage($itemCountPerPage)
-                    ->setCurrentPageNumber($pageNumber);
-        
+        $paginator->setItemCountPerPage($itemCountPerPage)
+                ->setCurrentPageNumber($pageNumber);
+
         // Set actual page (happens to fix exceeded page number set by user)
         $view->page = $paginator->getCurrentPageNumber();
         $view->itemsPerPage = $itemCountPerPage;
         $view->itemsTotal = $paginator->getTotalItemCount();
-        
+
         // Send results
         $view->results = $paginator;
         $view->setTerminal(true);
@@ -60,44 +60,70 @@ class TermController extends AbstractActionController {
     }
 
     public function createAction() {
-        $view = new ViewModel();
+        $view = $this->view =
+                new ViewModel();
         $view->setTerminal(true);
-        $view->form = new TermForm();
+        $fm = $this->initFlashMessenger();
+        
+        // Setup form
+        $form = new TermForm();
+        $form->setAttribute('action', '/edm-admin/term/create');
+        $view->form = $form;
 
         $request = $this->getRequest();
         if (!$request->isPost()) {
             return $view;
         }
 
+        // Processing request
         $term = new Term();
-        $view->form->setInputFilter($term->getInputFilter());
+        $form->setInputFilter($term->getInputFilter());
+        $form->setData($request->getPost());
 
+        // If form not valid return
         if (!$view->form->isValid()) {
+            $fm->setNamespace('error')->addMessage('<p>An error has occurred.</p>');
             return $view;
         }
 
+        // Put data into model
+        $termTable = $this->getTermModel();
         $term->exchangeArray($form->getData());
-        $this->getTermModel()->create($term);
-        $view->success = true;
-        $view->message = 'Term created successfuly!';
-        return $view;
-    }
 
-    public function fooAction() {
-        // This shows the :controller and :action parameters in default route
-        // are working when you browse to /module-specific-root/TermTaxonomy/foo
-        return array();
+
+        // Check if term already exists
+        $termExists = $termTable->getByAlias($form->getValue('alias'));
+        if (!empty($termExists)) {
+            $fm->setNamespace('error')->addMessage('<p>Term '
+                    . $term->name . ' already exists.'
+                    . ' <a href="#">Click here to edit this term.</a></p>');
+        }
+
+        // Put term in to db
+        $rslt = $termTable()->create($term->toArray());
+
+        if ($rslt) {
+            $fm->setNamespace('highlight')
+                    ->addMessage('<p>Term added successfully.</p>');
+        } else {
+            $fm->setNamespace('error')
+                    ->addMessage('<p>An error has occurred 2.</p>');
+        }
+
+        // Return message to view
+        return $view;
     }
 
     /**
      * Gets our Term model
-     * @return Edm\Model\TermModel
+     * @return Edm\Table\Term
      */
     public function getTermModel() {
-        if (empty($this->termModel)) {
-            $this->termModel = $this->getServiceLocator()->get('Edm\Model\TermTable');
+        if (empty($this->termTable)) {
+            $this->termTable = $this
+                            ->getServiceLocator()->get('Edm\Model\TermTable');
         }
-        return $this->termModel;
+        return $this->termTable;
     }
 
 }

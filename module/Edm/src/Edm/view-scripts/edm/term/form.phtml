@@ -1,7 +1,8 @@
 <?php
 $form = $this->form;
 echo <<<HTML
-    <form id="term-form" method="{$form->getAttribute('method')}" action="{$form->get('action')}">
+    <form id="term-form" method="{$form->getAttribute('method')}" 
+        action="{$form->getAttribute('action')}">
         <fieldset>
             <legend>Term Form</legend>
             {$this->edmFormElement($form->get('name'))}

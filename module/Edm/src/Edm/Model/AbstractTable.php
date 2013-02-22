@@ -10,6 +10,7 @@ abstract class AbstractTable extends TableGateway {
         $row = $rowSet->current();
         if (!$row) {
             $i = 0;
+            $msg = '';
             foreach ($by as $key => $val) {
                 $msg .= $i != count($by) ? ', ' : '';
                 $msg .= $key . ' => ' . $val;
