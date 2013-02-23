@@ -13,6 +13,7 @@ namespace Edm\Controller;
 use Edm\Controller\AbstractController,
     Edm\Model\Term,
     Edm\Form\TermForm,
+        
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -60,11 +61,13 @@ class TermController extends AbstractController {
     }
 
     public function createAction() {
-        $view = $this->view =
+        
+        $view = 
+            $this->view =
                 new ViewModel();
         $view->setTerminal(true);
         $fm = $this->initFlashMessenger();
-        
+    
         // Setup form
         $form = new TermForm();
         $form->setAttribute('action', '/edm-admin/term/create');
@@ -77,22 +80,21 @@ class TermController extends AbstractController {
 
         // Processing request
         $term = new Term();
-        $form->setInputFilter($term->getInputFilter());
-        $form->setData($request->getPost());
+        $view->form->setInputFilter($term->getInputFilter());
+        $view->form->setData($request->getPost());
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('<p>An error has occurred.</p>');
+            $fm->setNamespace('error')->addMessage('Form validation failed.');
             return $view;
         }
 
         // Put data into model
         $termTable = $this->getTermModel();
-        $term->exchangeArray($form->getData());
-
+        $term->exchangeArray($view->form->getData());
 
         // Check if term already exists
-        $termExists = $termTable->getByAlias($form->getValue('alias'));
+        $termExists = $termTable->getByAlias($term->alias);
         if (!empty($termExists)) {
             $fm->setNamespace('error')->addMessage('<p>Term '
                     . $term->name . ' already exists.'
@@ -100,23 +102,34 @@ class TermController extends AbstractController {
         }
 
         // Put term in to db
-        $rslt = $termTable()->create($term->toArray());
+        $rslt = $termTable->create($term->toArray());
 
+        // Send message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('<p>Term added successfully.</p>');
+                    ->addMessage('Term added "' . $term->name . '" successfully.');
         } else {
             $fm->setNamespace('error')
-                    ->addMessage('<p>An error has occurred 2.</p>');
+                    ->addMessage('Term addition failed.');
         }
 
         // Return message to view
         return $view;
     }
 
+    public function fooAction() {
+        $renderer = $this->getServiceLocator()->get('viewrenderer');
+        $subView = new ViewModel();
+        $subView->setTemplate('edm/partials/message.phtml');
+        $view = new JsonModel();
+        $view->subView = $renderer->render($subView);
+        $view->setTerminal(true);
+        return $view;
+    }
+    
     /**
      * Gets our Term model
-     * @return Edm\Table\Term
+     * @return Edm\Model\Term
      */
     public function getTermModel() {
         if (empty($this->termTable)) {

@@ -5,7 +5,8 @@
  * @author ElyDeLaCruz
  */
 namespace Edm\Controller;
-use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Mvc\Controller\AbstractActionController,
+        Zend\View\Model\JsonModel;
 
 
 class AbstractController extends AbstractActionController {
@@ -27,5 +28,12 @@ class AbstractController extends AbstractActionController {
                             ->setNamespace('error')->getMessages();
         }
         return $fm;
+    }
+    
+    public function flashMessagesToJsonAction () {
+        $view = $this->view = new JsonModel();
+        $view->setTerminal(true);
+        $this->initFlashMessenger();
+        return $view;
     }
 }

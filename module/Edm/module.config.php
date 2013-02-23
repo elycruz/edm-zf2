@@ -3,6 +3,8 @@
 // Defines
 defined('APPVAR_NAME_ALIAS_REGEX') ||
         define('APPVAR_NAME_ALIAS_REGEX', '/[\w\d]+/i');
+defined('APP_PATH') ||
+    define('APP_PATH', __DIR__ . '/../../');
 
 return array(
     'controllers' => array(
@@ -86,7 +88,8 @@ return array(
             'Edm' => __DIR__ . '/src/Edm/view-scripts',
         ),
         'template_map' => array(
-            'layout/layout' => __DIR__ . '/../../public/module-templates/edm-ajax-interface/index.phtml'
+            'layout/layout' => __DIR__ . '/../../public/module-templates/edm-ajax-interface/index.phtml',
+            'partials/message' => __DIR__ .'/src/Edm/view-scripts/edm/partials/message.phtml'
         )
     ),
 );
