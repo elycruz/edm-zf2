@@ -1,0 +1,9 @@
+[submodule "public/libraries/phpjs"]
+	path = public/libraries/phpjs
+	url = https://github.com/elycruz/phpjs.git
+[submodule "public/libraries/requirejs"]
+	path = public/libraries/requirejs
+	url = git://github.com/jrburke/requirejs.git
+[submodule "public/libraries/jquery"]
+	path = public/libraries/jquery
+	url = git://github.com/jquery/jquery.git
