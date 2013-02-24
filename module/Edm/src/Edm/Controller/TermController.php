@@ -13,7 +13,6 @@ namespace Edm\Controller;
 use Edm\Controller\AbstractController,
     Edm\Model\Term,
     Edm\Form\TermForm,
-        
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -24,21 +23,20 @@ class TermController extends AbstractController {
 
     protected $termTable;
 
-    public function indexAction() {
+    public function indexAction () {
         // View
-        $view = new JsonModel();
+        $view = 
+            $this->view = 
+                new JsonModel();
 
         // Model
         $model = $this->getTermModel();
 
-        // Route match
-        $routeMatch = $this->getEvent()->getRouteMatch();
-
         // Page number
-        $pageNumber = $routeMatch->getParam('page', 1);
+        $pageNumber = $this->getAndSetParam('page', 1);
 
         // Items per page
-        $itemCountPerPage = $routeMatch->getParam('itemsPerPage', 5);
+        $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
 
         // Select 
         $select = new Select();
@@ -50,8 +48,6 @@ class TermController extends AbstractController {
                 ->setCurrentPageNumber($pageNumber);
 
         // Set actual page (happens to fix exceeded page number set by user)
-        $view->page = $paginator->getCurrentPageNumber();
-        $view->itemsPerPage = $itemCountPerPage;
         $view->itemsTotal = $paginator->getTotalItemCount();
 
         // Send results
@@ -60,19 +56,21 @@ class TermController extends AbstractController {
         return $view;
     }
 
-    public function createAction() {
-        
-        $view = 
+    public function createAction () {
+        // Set up prelims and populate $this -> view for 
+        // init flash messenger
+        $view =
             $this->view =
                 new ViewModel();
         $view->setTerminal(true);
         $fm = $this->initFlashMessenger();
-    
+
         // Setup form
         $form = new TermForm();
         $form->setAttribute('action', '/edm-admin/term/create');
         $view->form = $form;
 
+        // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
             return $view;
@@ -94,23 +92,28 @@ class TermController extends AbstractController {
         $term->exchangeArray($view->form->getData());
 
         // Check if term already exists
-        $termExists = $termTable->getByAlias($term->alias);
+        $termExists = $termTable->getByAlias((string) $term->alias);
         if (!empty($termExists)) {
-            $fm->setNamespace('error')->addMessage('<p>Term '
-                    . $term->name . ' already exists.'
-                    . ' <a href="#">Click here to edit this term.</a></p>');
+            $fm->setNamespace('error')->addMessage('Term "' . $term->name 
+                    . '" with alias "' . $term->alias . '" already exists.');
+            return $view;
         }
 
         // Put term in to db
         $rslt = $termTable->create($term->toArray());
 
-        // Send message to user
+        // Send success message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term added "' . $term->name . '" successfully.');
-        } else {
+                    ->addMessage('Term "' . $term->name . '" with alias "'
+                            . $term->alias .'" added successfully.')
+                    ->addMessage($term->alias);
+        } 
+        // send failure message to user 
+        else {
             $fm->setNamespace('error')
-                    ->addMessage('Term addition failed.');
+                    ->addMessage('Term "' . $term->name . '" with alias "' 
+                            . $term->alias . '" failed to be added to database.');
         }
 
         // Return message to view
@@ -118,15 +121,29 @@ class TermController extends AbstractController {
     }
 
     public function fooAction() {
+        // Render
         $renderer = $this->getServiceLocator()->get('viewrenderer');
         $subView = new ViewModel();
         $subView->setTemplate('edm/partials/message.phtml');
         $view = new JsonModel();
         $view->subView = $renderer->render($subView);
+
+        // 
+        $termTable = $this->getTermModel();
+        $fm = $this->initFlashMessenger();
+        
+        // Check if term already exists
+        $termExists = $termTable->getByAlias('dd');
+        if (!empty($termExists)) {
+            $fm->setNamespace('error')->addMessage('Term "hello" already exists.');
+            $view->exists = true;
+        }
+        $this->initFlashMessenger();
+        $view->term = $termExists;
         $view->setTerminal(true);
         return $view;
     }
-    
+
     /**
      * Gets our Term model
      * @return Edm\Model\Term

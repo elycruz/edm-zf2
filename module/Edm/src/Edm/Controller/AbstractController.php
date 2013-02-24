@@ -17,13 +17,24 @@ class AbstractController extends AbstractActionController {
      */
     protected $view;
     
+    protected function getParam ($key, $default = null) {
+        // Route match
+        $routeMatch = $this->getEvent()->getRouteMatch();
+        return $routeMatch->getParam($key, $default);
+    }
+    
+    protected function getAndSetParam ($key, $default) {
+        return $this->view->$key = $this->getParam($key, $default);
+    }
+    
     protected function initFlashMessenger() {
         $fm = $this->flashMessenger();
         if ($fm->setNamespace('highlight')->hasMessages()) {
-            $this->view->messageNamespace = 'highlight';
+            $this->view->messagesNamespace = 'highlight';
             $this->view->messages = $fm->getMessages();
-        } else if ($fm->setNamespace('error')->hasMessages()) {
-            $this->view->messageNamespace = 'error';
+        } 
+        else if ($fm->setNamespace('error')->hasMessages()) {
+            $this->view->messagesNamespace = 'error';
             $this->view->messages = $fm
                             ->setNamespace('error')->getMessages();
         }
