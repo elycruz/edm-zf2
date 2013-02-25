@@ -15,6 +15,12 @@ class Term implements InputFilterAwareInterface {
     public $alias;
     public $name;
 
+    public function __construct ($data = null) {
+        if ($data) {
+            $this->exchangeArray($data);
+        }
+    }
+    
     public function exchangeArray(array $data) {
         $this->term_id = isset($data['term_id']) ? $data['term_id'] : null;
         $this->name = isset($data['name']) ? $data['name'] : null;

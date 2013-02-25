@@ -14,8 +14,16 @@ class TermTable extends AbstractTable {
                 $resultSetPrototype, $sql);
     }
     
-    public function create (array $data) {
+    public function createItem (array $data) {
         return $this->insert($data);
+    }
+    
+    public function updateItem ($alias, array $data) {
+        return $this->update($data, array('alias' => $alias));
+    }
+    
+    public function deleteItem ($alias) {
+        return $this->delete(array('alias' => $alias));
     }
     
     public function read () {
