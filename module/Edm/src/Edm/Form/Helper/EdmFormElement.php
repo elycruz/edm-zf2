@@ -3,6 +3,8 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ * @todo implement the errors info of the edm form element
+ * @todo add red asterisk for required items
  */
 
 namespace Edm\Form\Helper;
