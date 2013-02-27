@@ -16,9 +16,9 @@ implements DbDataHelperAccess, ServiceLocatorAwareInterface {
 
     public function getBy(array $by) {
         $row = $this->select($by)->current();
-        if (!empty($row)) {
-            $row = $this->getDbDataHelper()->reverseEscapeTuple((array) $row);
-        }
+//        if (!empty($row)) {
+//            $row = $this->getDbDataHelper()->reverseEscapeTuple((array) $row);
+//        }
         return $row;
 //        if (empty($row)) {
 //            $i = 0;
