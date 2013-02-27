@@ -34,14 +34,26 @@ class EdmFormElement extends AbstractHtmlElement {
         $output .= $this->htmlAttribs($this->defaultAttribs);
         $output .= '>';
         
+        // Required
+        $required = $element->getAttribute('required') ? 
+            '<span class="red">*</span>' : '';
+        
         // Label
         $label = $element->getLabel();
         if ($label) {
-            $output .= $view->formLabel($element) . '<br />' . PHP_EOL;
+            $output .= $required . $view->formLabel($element) . '<br />' . PHP_EOL;
         }
         
         // Form element
         $output .= $view->formElement($element) . PHP_EOL;
+        
+        // Messages
+        $messages = $element->getMessages();
+        if ($messages) {
+            $output .= '<div class="errors">';
+            $output .= $view->htmlList($messages);
+            $output .= '</div>';
+        }
         
         $output .= '</'. $wrapperElmName .'>';
         return $output;

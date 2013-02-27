@@ -262,14 +262,14 @@ class TermController extends AbstractController {
         $view = new JsonModel();
         $view->subView = $renderer->render($subView);
 
-        // 
         $termTable = $this->getTermModel();
         $fm = $this->initFlashMessenger();
         
         // Check if term already exists
         $termExists = $termTable->getByAlias('dd');
         if (!empty($termExists)) {
-            $fm->setNamespace('error')->addMessage('Term "hello" already exists.');
+            $fm->setNamespace('error')->addMessage('Term "'. $termExists->name 
+                    .'" already exists in database.');
             $view->exists = true;
         }
         $this->initFlashMessenger();
@@ -284,8 +284,9 @@ class TermController extends AbstractController {
      */
     public function getTermModel() {
         if (empty($this->termTable)) {
-            $this->termTable = $this
-                            ->getServiceLocator()->get('Edm\Model\TermTable');
+            $locator = $this->getServiceLocator();
+            $this->termTable = $this->getServiceLocator()->get('Edm\Model\TermTable');
+            $this->termTable->setServiceLocator($locator);
         }
         return $this->termTable;
     }

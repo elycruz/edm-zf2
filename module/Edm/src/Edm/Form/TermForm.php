@@ -3,6 +3,7 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ * @todo add searching cabpability
  */
 
 namespace Edm\Form;

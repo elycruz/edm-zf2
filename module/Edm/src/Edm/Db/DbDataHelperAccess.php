@@ -23,5 +23,5 @@ namespace Edm\Db;
  */
 interface DbDataHelperAccess {
     public function getDbDataHelper();
-    public function setDbDataHelper(Edm\Db\DbDataHelper $dbDataHelper);
+    public function setDbDataHelper(DbDataHelper $dbDataHelper);
 }
