@@ -54,7 +54,8 @@ class TermController extends AbstractController {
         $view->itemsTotal = $paginator->getTotalItemCount();
 
         // Send results
-        $view->results = $paginator;
+        $view->results = $this->getDbDataHelper()->reverseEscapeTuples(
+                    $paginator->getCurrentItems()->toArray());
         $view->setTerminal(true);
         return $view;
     }
@@ -170,9 +171,19 @@ class TermController extends AbstractController {
             $fm->setNamespace('error')->addMessage('Form validation failed.');
             return $view;
         }
+        
+        // Generate alias if empty
+        $alias = $form->getValue('alias');
+        if (empty($alias)) {
+            $term->alias = $this->getDbDataHelper()->getValidAlias($term->name);
+        }
+        
+        // Set data
+        $data = $view->form->getData();
+        $data['alias'] = $alias;
 
         // Put data into term object
-        $term->exchangeArray($view->form->getData());
+        $term->exchangeArray($data);
 
         // Update term in db
         $rslt = $termTable->updateItem($term->alias, $term->toArray());

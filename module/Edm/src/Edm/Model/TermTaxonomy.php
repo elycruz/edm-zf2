@@ -7,12 +7,18 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface;
 
-class Term implements InputFilterAwareInterface {
+class TermTaxonomy implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
-    public $term_group_alias;
-    public $alias;
-    public $name;
+    public $term_taxonomy_id;
+    public $term_alias;
+    public $taxonomy;
+    public $description;
+    public $accessGroup;
+    public $childCount;
+    public $assocItemCount;
+    public $listOrder;
+    public $parent_id;
 
     public function __construct ($data = null) {
         if ($data) {
@@ -21,11 +27,22 @@ class Term implements InputFilterAwareInterface {
     }
     
     public function exchangeArray(array $data) {
-        $this->name = isset($data['name']) ? $data['name'] : null;
-        $this->alias = isset($data['alias']) ? $data['alias'] : null;
-        $this->term_group_alias =
-                isset($data['term_group_alias']) ?
-                $data['term_group_alias'] : null;
+//        $this->name = isset($data['name']) ? $data['name'] : null;
+//    $this->term_taxonomy_id = isset($data['term_taxonomy_id']) ?
+//                $data['term_taxonomy_id'] : null;
+//    $this->term_alias = isset($data['term_alias']) ?
+//                $data['term_alias'] : null;
+//    $this->taxonomy = isset($data['taxonomy']) ?
+//                $data['taxonomy'] : null;
+//    $this->description = isset($data['description']) ?
+//                $data['description'] : null;
+//    $this->accessGroup = isset($data['accessGroup']) ?
+//                $data['accessGroup'] : null;
+//    $this->childCount = isset($data['description']) ?
+//                $data['childCount'] : null;;
+//    $this->assocItemCount = ;
+//    $this->listOrder = ;
+//    $this->parent_id = ;
     }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
@@ -77,7 +94,7 @@ class Term implements InputFilterAwareInterface {
                     )
                 )));
 
-        // Term Group Alias
+        // Term Taxonomy Group Alias
         $retVal->add($factory->createInput(array(
                     'name' => 'term_group_alias',
                     'required' => false,

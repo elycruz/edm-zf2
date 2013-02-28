@@ -12,6 +12,8 @@ namespace Edm;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Mvc\ModuleRouteListener,
+    Zend\Db\ResultSet\ResultSet,
+    Edm\Model\Term,
     Edm\Model\TermTable;
 
 class Module implements AutoloaderProviderInterface {
@@ -24,9 +26,9 @@ class Module implements AutoloaderProviderInterface {
             'factories' => array(
                 'Edm\Model\TermTable' => function($sm) {
                     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-//            $resultSetPrototype = new ResultSet();
-//            $resultSetPrototype->setArrayObjectPrototype(new Term());
-                    return new TermTable('terms', $dbAdapter);
+                    $resultSetProto = new ResultSet();
+                    $resultSetProto->setArrayObjectPrototype(new Term());
+                    return new TermTable('terms', $dbAdapter, null, $resultSetProto);
                 },
             ),
 //            'invokables' => array(),

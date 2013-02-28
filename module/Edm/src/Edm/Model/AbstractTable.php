@@ -5,6 +5,7 @@ namespace Edm\Model;
 use Zend\Db\TableGateway\TableGateway,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Zend\ServiceManager\ServiceLocatorInterface,
+    Edm\Db\DatabaseDataHelper,
     Edm\Db\DbDataHelperAccess,
     Edm\Db\DbDataHelper;
 
@@ -16,9 +17,10 @@ implements DbDataHelperAccess, ServiceLocatorAwareInterface {
 
     public function getBy(array $by) {
         $row = $this->select($by)->current();
-//        if (!empty($row)) {
-//            $row = $this->getDbDataHelper()->reverseEscapeTuple((array) $row);
-//        }
+        if (!empty($row)) {
+            $copy = $this->getDbDataHelper()->reverseEscapeTuple($row->toArray());
+            $row->exchangeArray($copy);
+        }
         return $row;
 //        if (empty($row)) {
 //            $i = 0;
@@ -39,8 +41,8 @@ implements DbDataHelperAccess, ServiceLocatorAwareInterface {
 
     public function getDbDataHelper() {
         if (empty($this->dbDataHelper)) {
-            $this->dbDataHelper =
-                    $this->getServiceLocator()->get('Edm\Db\DatabaseDataHelper');
+            $this->dbDataHelper = new DatabaseDataHelper();
+//                    $this->getServiceLocator()->get('Edm\Db\DatabaseDataHelper');
         }
         return $this->dbDataHelper;
     }

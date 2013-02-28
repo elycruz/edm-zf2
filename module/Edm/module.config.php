@@ -5,8 +5,13 @@ defined('APPVAR_NAME_ALIAS_REGEX') ||
         define('APPVAR_NAME_ALIAS_REGEX', '/[\w\d]+/i');
 defined('APP_PATH') ||
     define('APP_PATH', __DIR__ . '/../../');
-
+defined('CHROME_PHP') ||
+        define('CHROME_PHP', 
+                'C:\Users\ElyDeLaCruz\Downloads\Frontend\ChromePhp.php');
 return array(
+    'invokables' => array(
+        'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper'
+    ),
     'controllers' => array(
         'invokables' => array(
             'Edm\Controller\Index' => 'Edm\Controller\IndexController',

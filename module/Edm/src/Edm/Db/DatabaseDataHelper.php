@@ -138,7 +138,7 @@ implements DbDataHelper {
     public function getValidAlias($str) {
         if (strlen($str) < 255 && strlen($str) > 0) {
             $str = trim($str);
-            $str = preg_replace('/[^\-\w\d]/i', '-', $str);
+            $str = preg_replace('/[^\-\w\d_]/i', '-', $str);
             $str = strtolower($str);
             return $str;
         } else {

@@ -15,10 +15,12 @@ class TermTable extends AbstractTable {
     }
     
     public function createItem (array $data) {
+        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->insert($data);
     }
     
     public function updateItem ($alias, array $data) {
+        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->update($data, array('alias' => $alias));
     }
     
