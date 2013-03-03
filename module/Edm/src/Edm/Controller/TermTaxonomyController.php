@@ -14,14 +14,14 @@
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
-    Edm\Model\Term,
-    Edm\Form\TermForm,
+    Edm\Model\TermTaxonomy,
+    Edm\Form\TermTaxonomyForm,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect,
     Zend\Db\Sql\Select,
-        Zend\Debug\Debug;
+    Zend\Debug\Debug;
 
 class TermController extends AbstractController {
 

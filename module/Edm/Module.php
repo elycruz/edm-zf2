@@ -14,6 +14,7 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Mvc\ModuleRouteListener,
     Zend\Db\ResultSet\ResultSet,
     Edm\Model\Term,
+    Edm\Model\TermTaxonomy,
     Edm\Model\TermTable;
 
 class Module implements AutoloaderProviderInterface {
@@ -23,6 +24,9 @@ class Module implements AutoloaderProviderInterface {
         return array(
 //            'abstract_factories' => array(),
 //            'aliases' => array(),
+//            'invokables' => array(),
+//            'services' => array(),
+//            'shared' => array(),
             'factories' => array(
                 'Edm\Model\TermTable' => function($sm) {
                     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
@@ -30,10 +34,13 @@ class Module implements AutoloaderProviderInterface {
                     $resultSetProto->setArrayObjectPrototype(new Term());
                     return new TermTable('terms', $dbAdapter, null, $resultSetProto);
                 },
+                'Edm\Model\TermTaxonomyTable' => function($sm) {
+                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultSetProto = new ResultSet();
+                    $resultSetProto->setArrayObjectPrototype(new TermTaxonomy());
+                    return new TermTaxonomyTable('term_taxonomies', $dbAdapter, null, $resultSetProto);
+                },
             ),
-//            'invokables' => array(),
-//            'services' => array(),
-//            'shared' => array(),
         );
     }
 

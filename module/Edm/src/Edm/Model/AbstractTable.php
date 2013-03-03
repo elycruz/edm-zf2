@@ -14,7 +14,14 @@ implements DbDataHelperAccess, ServiceLocatorAwareInterface {
 
     public $dbDataHelper;
     public $serviceLocator;
+    
+    /**
+     * An array of valid keys for table
+     * @var array
+     */
+    public $validKeys;
 
+    
     public function getBy(array $by) {
         $row = $this->select($by)->current();
         if (!empty($row)) {

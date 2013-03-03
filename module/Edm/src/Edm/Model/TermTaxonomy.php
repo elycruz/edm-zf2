@@ -60,7 +60,7 @@ class TermTaxonomy implements InputFilterAwareInterface {
                 new InputFilter();
         $factory = new InputFactory();
 
-        // Name
+        // Term Name
         $retVal->add($factory->createInput(array(
                     'name' => 'name',
                     'required' => true,
@@ -77,9 +77,9 @@ class TermTaxonomy implements InputFilterAwareInterface {
                     )
                 )));
 
-        // Alias
+        // Term Alias
         $retVal->add($factory->createInput(array(
-                    'name' => 'alias',
+                    'name' => 'term_alias',
                     'required' => false,
                     'filters' => array(
                         array(

@@ -142,7 +142,7 @@ implements DbDataHelper {
             $str = strtolower($str);
             return $str;
         } else {
-            throw new Exception('Valid `Aliases` must be less than 255 ' .
+            throw new \Exception('Valid `Aliases` must be less than 255 ' .
                     'Characters in length.');
         }
     }

@@ -9,15 +9,15 @@ class Edm_Util_ArrayHelper
         /**
      * Utility function to check for a difference between two arrays.
      *
-     * @param  array $options      User specified options
-     * @param  array $validOptions Valid options
+     * @param  array $keys      User specified keys
+     * @param  array $validKeys Valid keys
      * @return void
      * @throws Zend_Service_Exception if difference is found
      * (e.g., unsupported query option)
      */
-    public static function compareKeys(array $options, array $validOptions)
+    public static function compareKeys(array $keys, array $validKeys)
     {
-        $difference = array_diff(array_keys($options), $validOptions);
+        $difference = array_diff(array_keys($keys), $validKeys);
         if ($difference) {
             throw new Zend_Service_Exception('The following parameters are '.
                     'invalid: ' . join(', ', $difference));
