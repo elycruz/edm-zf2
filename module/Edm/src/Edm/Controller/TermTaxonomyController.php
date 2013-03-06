@@ -15,6 +15,7 @@ namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
+    Edm\Model\TermTaxonomy,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -70,8 +71,8 @@ class TermTaxonomyController extends AbstractController {
         $fm = $this->initFlashMessenger();
 
         // Setup form
-        $form = new TermForm();
-        $form->setAttribute('action', '/edm-admin/term/create');
+        $form = new TermTaxonomyForm();
+        $form->setAttribute('action', '/edm-admin/term-taxonomy/create');
         $view->form = $form;
 
         // If not post bail
@@ -81,7 +82,7 @@ class TermTaxonomyController extends AbstractController {
         }
 
         // Processing request
-        $term = new Term();
+        $term = new TermTaxonomy();
         $view->form->setInputFilter($term->getInputFilter());
         $view->form->setData($request->getPost());
 
