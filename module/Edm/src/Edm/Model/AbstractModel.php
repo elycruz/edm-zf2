@@ -1,15 +1,25 @@
 <?php
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+namespace Edm\Model;
 
 /**
- * Description of AbstractModel
- *
  * @author ElyDeLaCruz
  */
 class AbstractModel {
-    //put your code here
+    
+    public function exchangeArray(array $data) {
+        foreach ($data as $key => $val) {
+            if (property_exists($this, $key)) {
+                $this->{$key} = $val;
+            }
+        }
+    }
+    
+    public function toArray () {
+        $retVal = array();
+        foreach($this->validKeys as $key) {
+            $retVal[$key] = $this->{$key};
+        }
+        return $retVal;
+    }
+    
 }

@@ -10,13 +10,14 @@ namespace Edm\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController,
  Zend\View\Model\JsonModel,
- Edm\Db\DatabaseDataHelper,
- Edm\Db\DbDataHelperAccess,
- Edm\Db\DbDataHelper;
+ Edm\Db\DbDataHelperAware,
+ Edm\TraitPartials\DbDataHelperAwareTrait;
 
 class AbstractController extends AbstractActionController 
-implements DbDataHelperAccess {
-
+implements DbDataHelperAware {
+    
+    use DbDataHelperAwareTrait;
+    
     /**
      *
      * @var mixed [ViewModel, JsonViewModel, etc.]
@@ -51,18 +52,6 @@ implements DbDataHelperAccess {
         $view->setTerminal(true);
         $this->initFlashMessenger();
         return $view;
-    }
-
-    public function setDbDataHelper(DbDataHelper $dbDataHelper) {
-        $this->dbDataHelper = $dbDataHelper;
-    }
-
-    public function getDbDataHelper() {
-        if (empty($this->dbDataHelper)) {
-            $this->dbDataHelper = new DatabaseDataHelper();
-//                    $this->getServiceLocator()->get('Edm\Db\DatabaseDataHelper');
-        }
-        return $this->dbDataHelper;
     }
 
 }

@@ -14,7 +14,6 @@
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
-    Edm\Model\TermTaxonomy,
     Edm\Form\TermTaxonomyForm,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
@@ -23,9 +22,9 @@ use Edm\Controller\AbstractController,
     Zend\Db\Sql\Select,
     Zend\Debug\Debug;
 
-class TermController extends AbstractController {
+class TermTaxonomyController extends AbstractController {
 
-    protected $termTable;
+    protected $termTaxTable;
 
     public function indexAction () {
         // View
@@ -34,7 +33,7 @@ class TermController extends AbstractController {
                 new JsonModel();
 
         // Model
-        $model = $this->getTermModel();
+        $model = $this->getTermTaxonomyModel();
 
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
@@ -291,16 +290,16 @@ class TermController extends AbstractController {
     }
 
     /**
-     * Gets our Term model
-     * @return Edm\Model\Term
+     * Gets our Term Taxonomy Table
+     * @return Edm\Db\Table\TermTaxonomyTable
      */
-    public function getTermModel() {
-        if (empty($this->termTable)) {
+    public function getTermTaxonomyModel() {
+        if (empty($this->termTaxTable)) {
             $locator = $this->getServiceLocator();
-            $this->termTable = $this->getServiceLocator()->get('Edm\Model\TermTable');
-            $this->termTable->setServiceLocator($locator);
+            $this->termTaxTable = $this->getServiceLocator()->get('Edm\Db\Table\TermTaxonomyTable');
+            $this->termTaxTable->setServiceLocator($locator);
         }
-        return $this->termTable;
+        return $this->termTaxTable;
     }
 
 }

@@ -5,14 +5,26 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface;
+    Zend\InputFilter\InputFilterInterface,
+    Edm\Model\AbstractModel,
+    Edm\TraitPartials\GetPublicVarsTrait;
 
-class Term implements InputFilterAwareInterface {
-
+class Term extends AbstractModel 
+implements InputFilterAwareInterface {
+    
+    use GetPublicVarsTrait;
+    
     protected $inputFilter = null;
+    
     public $term_group_alias;
     public $alias;
     public $name;
+    
+    public $validKeys = array(
+        'term_group_alias',
+        'alias',
+        'name'
+    );
 
     public function __construct ($data = null) {
         if ($data) {
@@ -20,16 +32,8 @@ class Term implements InputFilterAwareInterface {
         }
     }
     
-    public function exchangeArray(array $data) {
-        $this->name = isset($data['name']) ? $data['name'] : null;
-        $this->alias = isset($data['alias']) ? $data['alias'] : null;
-        $this->term_group_alias =
-                isset($data['term_group_alias']) ?
-                $data['term_group_alias'] : null;
-    }
-
     public function setInputFilter(InputFilterInterface $inputFilter) {
-        throw new \Exception('Not used');
+        $this->inputFilter = $inputFilter;
     }
 
     public function getInputFilter() {
@@ -97,12 +101,6 @@ class Term implements InputFilterAwareInterface {
         $this->inputFilter = $retVal;
 
         return $retVal;
-    }
-
-    public function toArray() {
-        return array('alias' => $this->alias,
-            'name' => $this->name,
-            'term_group_alias' => $this->term_group_alias);
     }
 
 }

@@ -5,9 +5,11 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface;
+    Zend\InputFilter\InputFilterInterface,
+    Edm\Model\AbstractModel;
 
-class TermTaxonomy implements InputFilterAwareInterface {
+class TermTaxonomy extends AbstractModel 
+implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
     public $term_taxonomy_id;
@@ -19,85 +21,61 @@ class TermTaxonomy implements InputFilterAwareInterface {
     public $assocItemCount;
     public $listOrder;
     public $parent_id;
+    
+    public $validKeys = array(
+        'term_taxonomy_id',
+        'term_alias',
+        'taxonomy',
+        'description',
+        'accessGroup',
+        'childCount',
+        'assocItemCount',
+        'listOrder',
+        'parent_id',
+    );
 
-    public function __construct ($data = null) {
+    public function __construct($data = null) {
         if ($data) {
             $this->exchangeArray($data);
         }
     }
-    
-    public function exchangeArray(array $data) {
-//        $this->name = isset($data['name']) ? $data['name'] : null;
-//    $this->term_taxonomy_id = isset($data['term_taxonomy_id']) ?
-//                $data['term_taxonomy_id'] : null;
-//    $this->term_alias = isset($data['term_alias']) ?
-//                $data['term_alias'] : null;
-//    $this->taxonomy = isset($data['taxonomy']) ?
-//                $data['taxonomy'] : null;
-//    $this->description = isset($data['description']) ?
-//                $data['description'] : null;
-//    $this->accessGroup = isset($data['accessGroup']) ?
-//                $data['accessGroup'] : null;
-//    $this->childCount = isset($data['description']) ?
-//                $data['childCount'] : null;;
-//    $this->assocItemCount = ;
-//    $this->listOrder = ;
-//    $this->parent_id = ;
-    }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
-        throw new \Exception('Not used');
+        $this->inputFilter = $inputFilter;
     }
 
     public function getInputFilter() {
 
-        if ($this->inputFilter !== null) {
-            return $this->inputFilter;
-        }
-
-        $retVal =
-                $this->inputFilter =
-                new InputFilter();
-        $factory = new InputFactory();
-
-        // Term Name
-        $retVal->add($factory->createInput(array(
-                    'name' => 'name',
-                    'required' => true,
-                    'filters' => array(
-                        array('name' => 'StripTags'),
-                        array('name' => 'StringTrim')
-                    ),
-                    'validators' => array(
-                        array('name' => 'StringLength',
-                            'options' => array(
-                                'min' => 1,
-                                'max' => 255
-                        ))
-                    )
-                )));
-
-        // Term Alias
-        $retVal->add($factory->createInput(array(
-                    'name' => 'term_alias',
-                    'required' => false,
-                    'filters' => array(
-                        array(
-                            'name' => 'StringToLower'),
-                    ),
-                    'validators' => array(
-                        array(
-                            'name' => 'Regex',
-                            'options' => array(
-                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                        ),
-                    )
-                )));
-
-        // Term Taxonomy Group Alias
-        $retVal->add($factory->createInput(array(
-                    'name' => 'term_group_alias',
-                    'required' => false,
+//        if ($this->inputFilter !== null) {
+//            return $this->inputFilter;
+//        }
+//
+//        $retVal =
+//                $this->inputFilter =
+//                new InputFilter();
+//        $factory = new InputFactory();
+//
+//        // Term Name
+//        $retVal->add($factory->createInput(array(
+//                    'name' => 'name',
+//                    'required' => true,
+//                    'filters' => array(
+//                        array('name' => 'StripTags'),
+//                        array('name' => 'StringTrim')
+//                    ),
+//                    'validators' => array(
+//                        array('name' => 'StringLength',
+//                            'options' => array(
+//                                'min' => 1,
+//                                'max' => 255
+//                        ))
+//                    )
+//                )));
+//
+//        // Term Alias
+//        $retVal->add($factory->createInput(array(
+//                    'name' => 'term_alias',
+//                    'required' => false,
 //                    'filters' => array(
 //                        array(
 //                            'name' => 'StringToLower'),
@@ -109,11 +87,28 @@ class TermTaxonomy implements InputFilterAwareInterface {
 //                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
 //                        ),
 //                    )
-                )));
-
-        $this->inputFilter = $retVal;
-
-        return $retVal;
+//                )));
+//
+//        // Term Taxonomy Group Alias
+//        $retVal->add($factory->createInput(array(
+//                    'name' => 'term_group_alias',
+//                    'required' => false,
+////                    'filters' => array(
+////                        array(
+////                            'name' => 'StringToLower'),
+////                    ),
+////                    'validators' => array(
+////                        array(
+////                            'name' => 'Regex',
+////                            'options' => array(
+////                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
+////                        ),
+////                    )
+//                )));
+//
+//        $this->inputFilter = $retVal;
+//
+//        return $retVal;
     }
 
     public function toArray() {

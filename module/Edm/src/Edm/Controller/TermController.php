@@ -193,8 +193,7 @@ class TermController extends AbstractController {
         if ($rslt) {
             $fm->setNamespace('highlight')
                     ->addMessage('Term "' . $term->name . '" with alias "'
-                            . $term->alias .'" updated successfully.')
-                    ->addMessage($term->alias);
+                            . $term->alias .'" updated successfully.');
         } 
         // send failure message to user 
         else {
@@ -292,12 +291,13 @@ class TermController extends AbstractController {
 
     /**
      * Gets our Term model
-     * @return Edm\Model\Term
+     * @return Edm\Db\Table\TermTable
      */
     public function getTermModel() {
         if (empty($this->termTable)) {
             $locator = $this->getServiceLocator();
-            $this->termTable = $this->getServiceLocator()->get('Edm\Model\TermTable');
+            $this->termTable = $this->getServiceLocator()
+                    ->get('Edm\Db\Table\TermTable');
             $this->termTable->setServiceLocator($locator);
         }
         return $this->termTable;
