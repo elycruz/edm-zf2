@@ -15,7 +15,6 @@ namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
-    Edm\Model\TermTaxonomy,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -81,9 +80,7 @@ class TermTaxonomyController extends AbstractController {
             return $view;
         }
 
-        // Processing request
-        $term = new TermTaxonomy();
-        $view->form->setInputFilter($term->getInputFilter());
+        //$view->form->setInputFilter($term->getInputFilter());
         $view->form->setData($request->getPost());
 
         // If form not valid return
@@ -93,11 +90,12 @@ class TermTaxonomyController extends AbstractController {
         }
 
         // Put data into model
+        $termTaxTable = $this->getTermTaxonomyModel();
         $termTable = $this->getTermModel();
-        $term->exchangeArray($view->form->getData());
+        $termTax = $view->form->getData();
 
         // Check if term already exists
-        $termExists = $termTable->getByAlias((string) $term->alias);
+        $termExists = $termTable->getByAlias((string) $termTax->term->alias);
         if (!empty($termExists)) {
             $fm->setNamespace('error')->addMessage('Term "' . $term->name 
                     . '" with alias "' . $term->alias . '" already exists.');
@@ -105,7 +103,7 @@ class TermTaxonomyController extends AbstractController {
         }
 
         // Put term in to db
-        $rslt = $termTable->createItem($term->toArray());
+        $rslt = $termTaxTable->createItem($term->toArray());
 
         // Send success message to user
         if ($rslt) {
@@ -138,11 +136,11 @@ class TermTaxonomyController extends AbstractController {
         $id = $this->getParam('id');
         
         // Put data into model
-        $termTable = $this->getTermModel();
+        $termTaxTable = $this->getTermTaxonomyModel();
         
         // Check if term already exists
         try {
-            $existingTerm = new Term((array) $termTable->getByAlias($id));
+            $existingTerm = new Term((array) $termTaxTable->getByAlias($id));
         }
         catch (\Exception $e) {
             $fm->setNamespace('error')->addMessage('Term ' 
@@ -187,7 +185,7 @@ class TermTaxonomyController extends AbstractController {
         $term->exchangeArray($data);
 
         // Update term in db
-        $rslt = $termTable->updateItem($term->alias, $term->toArray());
+        $rslt = $termTaxTable->updateItem($term->alias, $term->toArray());
 
         // Send success message to user
         if ($rslt) {
@@ -231,11 +229,11 @@ class TermTaxonomyController extends AbstractController {
         }
         
         // Get term table
-        $termTable = $this->getTermModel();
+        $termTaxTable = $this->getTermTaxonomyModel();
         
         try {
             // Check if term already exists
-            $term = new Term((array) $termTable->getByAlias($id));
+            $term = new Term((array) $termTaxTable->getByAlias($id));
         }
         catch (\Exception $e) {
             // If not send message and bail
@@ -246,7 +244,7 @@ class TermTaxonomyController extends AbstractController {
         }
 
         // Delete term in db
-        $rslt = $termTable->deleteItem($term->alias);
+        $rslt = $termTaxTable->deleteItem($term->alias);
 
         // Send success message to user
         if ($rslt) {
@@ -265,42 +263,31 @@ class TermTaxonomyController extends AbstractController {
         // Return message to view
         return $view;
     }
-    
-    public function fooAction() {
-        // Render
-        $renderer = $this->getServiceLocator()->get('viewrenderer');
-        $subView = new ViewModel();
-        $subView->setTemplate('edm/partials/message.phtml');
-        $view = new JsonModel();
-        $view->subView = $renderer->render($subView);
 
-        $termTable = $this->getTermModel();
-        $fm = $this->initFlashMessenger();
-        
-        // Check if term already exists
-        $termExists = $termTable->getByAlias('dd');
-        if (!empty($termExists)) {
-            $fm->setNamespace('error')->addMessage('Term "'. $termExists->name 
-                    .'" already exists in database.');
-            $view->exists = true;
-        }
-        $this->initFlashMessenger();
-        $view->term = $termExists;
-        $view->setTerminal(true);
-        return $view;
-    }
-
-    /**
-     * Gets our Term Taxonomy Table
-     * @return Edm\Db\Table\TermTaxonomyTable
-     */
     public function getTermTaxonomyModel() {
         if (empty($this->termTaxTable)) {
             $locator = $this->getServiceLocator();
-            $this->termTaxTable = $this->getServiceLocator()->get('Edm\Db\Table\TermTaxonomyTable');
+            $this->termTaxTable = $locator->get('Edm\Db\Table\TermTaxonomyTable');
             $this->termTaxTable->setServiceLocator($locator);
         }
         return $this->termTaxTable;
+    }
+    
+    public function getTermModel () {
+        if (empty($this->termTable)) {
+            $locator = $this->getServiceLocator();
+            $this->termTable = $locator->get('Edm\Db\Table\TermTable');
+            $this->termTable->setServiceLocator($locator);
+        }
+        return $this->termTable;
+    }
+    
+    protected function createTerm ($term) {
+        
+    }
+    
+    protected function updateTerm ($term) {
+        
     }
 
 }

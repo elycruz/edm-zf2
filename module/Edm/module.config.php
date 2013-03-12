@@ -5,19 +5,15 @@ defined('APPVAR_NAME_ALIAS_REGEX') ||
         define('APPVAR_NAME_ALIAS_REGEX', '/[\w\d]+/i');
 defined('APP_PATH') ||
     define('APP_PATH', __DIR__ . '/../../');
-//defined('CHROME_PHP') ||
-//        define('CHROME_PHP', 
-//                'C:\Users\ElyDeLaCruz\Downloads\Frontend\ChromePhp.php');
+
 return array(
     'invokables' => array(
         'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
-//        'Edm\Model\TermTable'       => 'Edm\Model\TermTable',
-//        'Edm\Model\Term'            => 'Edm\Model\Term'
     ),
     'controllers' => array(
         'invokables' => array(
-            'Edm\Controller\Index' => 'Edm\Controller\IndexController',
-            'Edm\Controller\Term' => 'Edm\Controller\TermController',
+            'Edm\Controller\Index'  => 'Edm\Controller\IndexController',
+            'Edm\Controller\Term'   => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
         ),
     ),

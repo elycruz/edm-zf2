@@ -2,8 +2,9 @@
 
 namespace Edm\Model;
 
-use Zend\InputFilter\Factory as InputFactory,
-    Zend\InputFilter\InputFilter,
+use 
+//    Zend\InputFilter\Factory as InputFactory,
+//    Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\AbstractModel;
@@ -12,6 +13,7 @@ class TermTaxonomy extends AbstractModel
 implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
+
     public $term_taxonomy_id;
     public $term_alias;
     public $taxonomy;
@@ -109,12 +111,6 @@ implements InputFilterAwareInterface {
 //        $this->inputFilter = $retVal;
 //
 //        return $retVal;
-    }
-
-    public function toArray() {
-        return array('alias' => $this->alias,
-            'name' => $this->name,
-            'term_group_alias' => $this->term_group_alias);
     }
 
 }

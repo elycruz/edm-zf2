@@ -8,20 +8,34 @@
 namespace Edm\Form;
 
 use Zend\Form\Fieldset,
-Edm\Model\Term;
+Edm\Model\TermTaxonomy;
 
 /**
  * Description of TermFieldset
  *
  * @author ElyDeLaCruz
  */
-class TermFieldset extends Fieldset {
+class TermTaxonomyFieldset extends Fieldset {
 
     public function __construct($name = null, $options = array()) {
         
-        $term = new Term();
+        $term = new TermTaxonomy();
         $this->setObject($term);
         
+// Taxonomy
+        $this->add(array(
+            'options' => array(
+                'label' => 'Taxonomy'
+            ),
+            'name' => 'taxonomy',
+            'attributes' => array(
+                'id' => 'taxonomy',
+                'required' => true,
+                'placeholder' => 'Taxonomy',
+                'type' => 'text'
+            )
+        ));
+
         // Name
         $this->add(array(
             'options' => array(
@@ -62,8 +76,35 @@ class TermFieldset extends Fieldset {
                 'type' => 'text'
             )
         ));
+
+        // Description
+        $this->add(array(
+            'options' => array(
+                'label' => 'Description'
+            ),
+            'name' => 'description',
+            'type' => 'Zend\Form\Element\TextArea',
+            'attributes' => array(
+                'id' => 'description',
+                'cols' => 72,
+                'rows' => 5,
+            )
+        ));
         
-        parent::__construct($name, $options);
+        // Access Group
+        $this->add(array(
+            'options' => array(
+                'label' => 'Access Group'
+            ),
+            'name' => 'accessGroup',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'id' => 'accessGroup',
+                'value_options' => array(
+                    'value' => 'Label'
+                )
+            )
+        ));
     }
 
 }

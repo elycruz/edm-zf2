@@ -8,9 +8,6 @@
 
 namespace Edm\Form;
 
-use Edm\Form\Form,
-    Zend\Form\Fieldset;
-
 /**
  * Description of TermForm
  *

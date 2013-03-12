@@ -1,0 +1,26 @@
+<?php
+$form = $this->form;
+//            {$this->edmFormElement($form->get('term_name'))}
+//            {$this->edmFormElement($form->get('term_alias'))}
+//            {$this->edmFormElement($form->get('term_group_alias'))}
+echo <<<HTML
+    <form id="{$form->getName()}" 
+        method="{$form->getAttribute('method')}" 
+        action="{$form->getAttribute('action')}">
+        <fieldset>
+            {$this->edmFormElement($form->get('taxonomy'))}
+            {$this->edmFormElement($form->get('parent_id'))}
+        </fieldset>
+        <fieldset>
+            {$this->edmFormElement($form->get('description'))}
+            {$this->edmFormElement($form->get('accessGroup'))}
+        </fieldset>
+        <fieldset class="controls">
+            <div class="form-item">
+            {$this->formElement($form->get('submit'))}
+            {$this->formElement($form->get('reset'))}
+            </div>
+        </fieldset>
+    </form>
+HTML;
+
