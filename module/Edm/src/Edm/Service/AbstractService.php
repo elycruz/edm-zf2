@@ -3,11 +3,13 @@
 namespace Edm\Service;
 
 use Zend\ServiceManager\ServiceLocatorAwareInterface,
-    Edm\Db\DbDataHelperAccess,
+    Edm\Db\DbAware,
+    Edm\Db\DbDataHelperAware,
+    Edm\TraitPartials\DbAwareTrait,
     Edm\TraitPartials\ServiceLocatorAwareTrait,
-    Edm\TraitPartials\DbDataHelperAccessTrait;
+    Edm\TraitPartials\DbDataHelperAwareTrait;
 
 abstract class AbstractService implements ServiceLocatorAwareInterface,
- DbDataHelperAccess {
-    use ServiceLocatorAwareTrait, DbDataHelperAccessTrait;
+ DbDataHelperAware, DbAware {
+    use ServiceLocatorAwareTrait, DbDataHelperAwareTrait, DbAwareTrait;
 }

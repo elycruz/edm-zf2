@@ -15,6 +15,8 @@ namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
+    Edm\Service\TermTaxonomyAware,
+    Edm\TraitPartials\TermTaxonomyAwareTrait,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -22,9 +24,13 @@ use Edm\Controller\AbstractController,
     Zend\Db\Sql\Select,
     Zend\Debug\Debug;
 
-class TermTaxonomyController extends AbstractController {
+class TermTaxonomyController extends AbstractController 
+implements TermTaxonomyAware {
 
+    use TermTaxonomyAwareTrait;
+    
     protected $termTaxTable;
+    protected $termTable;
 
     public function indexAction() {
         // View
@@ -286,5 +292,11 @@ class TermTaxonomyController extends AbstractController {
         }
         return $this->termTable;
     }
-
+    
+    public function fooAction () {
+        $termTaxService = $this->getTermTaxService();
+        $rslt = $termTaxService->getByAlias('tag', 'taxonomy');
+        var_dump($rslt);
+        exit();
+    }
 }

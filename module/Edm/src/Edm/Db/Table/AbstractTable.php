@@ -4,7 +4,6 @@ namespace Edm\Db\Table;
 
 use Zend\Db\TableGateway\TableGateway,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
-//    Zend\ServiceManager\ServiceLocatorInterface,
     Edm\Db\DbDataHelperAware,
     Edm\TraitPartials\ServiceLocatorAwareTrait,
     Edm\TraitPartials\DbDataHelperAwareTrait;

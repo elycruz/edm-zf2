@@ -4,7 +4,7 @@ namespace Edm\Db;
 
 use Zend\Db\Adapter\Adapter as DbAdapter;
 
-interface DbAccess {
+interface DbAware {
     public function setDb(DbAdapter $db);
     public function getDb();
 }

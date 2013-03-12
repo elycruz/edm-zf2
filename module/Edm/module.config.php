@@ -4,11 +4,14 @@
 defined('APPVAR_NAME_ALIAS_REGEX') ||
         define('APPVAR_NAME_ALIAS_REGEX', '/[\w\d]+/i');
 defined('APP_PATH') ||
-    define('APP_PATH', __DIR__ . '/../../');
+    define('APP_PATH', realpath(__DIR__ . '/../../'));
 
 return array(
-    'invokables' => array(
-        'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
+    'service_manager' => array(
+        'invokables' => array(
+            'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Service\TermTaxonomyService' => 'Edm\Service\TermTaxonomyService',
+        )
     ),
     'controllers' => array(
         'invokables' => array(
