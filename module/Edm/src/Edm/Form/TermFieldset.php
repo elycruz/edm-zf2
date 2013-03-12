@@ -8,7 +8,7 @@
 namespace Edm\Form;
 
 use Zend\Form\Fieldset,
-Edm\Model\Term;
+    Edm\Model\Term;
 
 /**
  * Description of TermFieldset
@@ -17,11 +17,15 @@ Edm\Model\Term;
  */
 class TermFieldset extends Fieldset {
 
-    public function __construct($name = null, $options = array()) {
-        
+    public function __construct($name = 'term', $options = array()) {
+
+        // Parent construct
+        parent::__construct($name, $options);
+
+        // Term object
         $term = new Term();
         $this->setObject($term);
-        
+
         // Name
         $this->add(array(
             'options' => array(
@@ -62,8 +66,6 @@ class TermFieldset extends Fieldset {
                 'type' => 'text'
             )
         ));
-        
-        parent::__construct($name, $options);
     }
 
 }

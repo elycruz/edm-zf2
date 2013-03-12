@@ -1,24 +1,31 @@
 <?php
 $form = $this->form;
-//            {$this->edmFormElement($form->get('term_name'))}
-//            {$this->edmFormElement($form->get('term_alias'))}
-//            {$this->edmFormElement($form->get('term_group_alias'))}
+
+$term = $form->get('term');
+$termTax = $form->get('term-taxonomy');
+$submitAndReset = $form->get('submit-and-reset');
+
 echo <<<HTML
     <form id="{$form->getName()}" 
         method="{$form->getAttribute('method')}" 
         action="{$form->getAttribute('action')}">
         <fieldset>
-            {$this->edmFormElement($form->get('taxonomy'))}
-            {$this->edmFormElement($form->get('parent_id'))}
+            <legend>Term</legend>
+            {$this->edmFormElement($term->get('name'))}
+            {$this->edmFormElement($term->get('alias'))}
+            {$this->edmFormElement($term->get('term_group_alias'))}
         </fieldset>
         <fieldset>
-            {$this->edmFormElement($form->get('description'))}
-            {$this->edmFormElement($form->get('accessGroup'))}
+            <legend>Taxonomy</legend>
+            {$this->edmFormElement($termTax->get('taxonomy'))}
+            {$this->edmFormElement($termTax->get('parent_id'))}
+            {$this->edmFormElement($termTax->get('description'))}
+            {$this->edmFormElement($termTax->get('accessGroup'))}
         </fieldset>
         <fieldset class="controls">
             <div class="form-item">
-            {$this->formElement($form->get('submit'))}
-            {$this->formElement($form->get('reset'))}
+            {$this->formElement($submitAndReset->get('submit'))}
+            {$this->formElement($submitAndReset->get('reset'))}
             </div>
         </fieldset>
     </form>

@@ -27,26 +27,16 @@ class Module implements AutoloaderProviderInterface {
 //            'abstract_factories' => array(),
 //            'aliases' => array(),
             'invokables' => array(
-                'Edm\Db\Table\TermTable'   => 'Edm\Db\Table\TermTable',
-                'Edm\Db\Table\TermTaxonomyTable'   => 'Edm\Db\Table\TermTaxonomyTable',
-                'Edm\Model\Term'        => 'Edm\Model\Term'
+                'Edm\Db\Table\TermTable' => 'Edm\Db\Table\TermTable',
+                'Edm\Db\Table\TermTaxonomyTable' => 'Edm\Db\Table\TermTaxonomyTable',
+                'Edm\Model\Term' => 'Edm\Model\Term',
+                'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy'
             ),
-//            'services' => array(),
-//            'shared' => array(),
-//            'factories' => array(
-//                'Edm\Model\TermTable' => function($sm) {
-//                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-//                    $resultSetProto = new ResultSet();
-//                    $resultSetProto->setArrayObjectPrototype(new Term());
-//                    return new TermTable('terms', $adapter, null, $resultSetProto);
-//                },
-//                'Edm\Model\TermTaxonomyTable' => function($sm) {
-////                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-//                    $resultSetProto = new ResultSet();
-//                    $resultSetProto->setArrayObjectPrototype(new TermTaxonomy());
-//                    return new TermTaxonomyTable('term_taxonomies', $dbAdapter, null, $resultSetProto);
-//                },
+//            'services' => array(
+//                
 //            ),
+//            'shared' => array(),
+//            'factories' => array(),
         );
     }
 

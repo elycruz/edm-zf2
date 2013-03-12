@@ -8,23 +8,13 @@ class Edm_Service_Internal_TermTaxonomyService extends
 Edm_Service_Internal_AbstractCrudService 
 {
     protected $termModel;
-    protected $termTaxonomy;
+    protected $termTaxModel;
     
     // @todo implement these and get rid of hardcoded values
     protected $termModel_alias = 'term';
     protected $termTaxModel_alias = 'termTax';
     
-    // @todo eliminate these and call model->getName() instead?
-    // @todo check performance hits on this
-    protected $_term_modelName = 'terms';
-    protected $_termTaxonomy_modelName = 'term_taxonomies';
-
-    public function __construct() {
-        $this->termModel = Edm_Db_Table_ModelBroker::getModel('term');
-        $this->termTaxModel = Edm_Db_Table_ModelBroker::getModel('term-taxonomies');
-//        $this->_termTaxonomy_modelName = $this->termTaxModel->getName();
-//        $this->_term_modelName = $this->termModel->getName();
-    }
+    public function __construct() {}
 
     /**
      * Gets a term taxonomy by id

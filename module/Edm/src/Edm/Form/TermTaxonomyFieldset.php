@@ -8,7 +8,7 @@
 namespace Edm\Form;
 
 use Zend\Form\Fieldset,
-Edm\Model\TermTaxonomy;
+    Edm\Model\TermTaxonomy;
 
 /**
  * Description of TermFieldset
@@ -17,62 +17,39 @@ Edm\Model\TermTaxonomy;
  */
 class TermTaxonomyFieldset extends Fieldset {
 
-    public function __construct($name = null, $options = array()) {
-        
-        $term = new TermTaxonomy();
-        $this->setObject($term);
-        
-// Taxonomy
+    public function __construct($name = 'term-taxonomy', $options = array()) {
+
+        parent::__construct($name, $options);
+
+        // Term Taxonomy Object
+        $termTax = new TermTaxonomy();
+        $this->setObject($termTax);
+
+        // Taxonomy
         $this->add(array(
-            'options' => array(
-                'label' => 'Taxonomy'
-            ),
             'name' => 'taxonomy',
+            'type' => 'Zend\Form\Element\Select',
+            'options' => array(
+                'label' => 'Taxonomy',
+                'value_options' => array(
+                    'null' => '-- Select a Taxonomy --'
+                )
+            ),
             'attributes' => array(
                 'id' => 'taxonomy',
-                'required' => true,
-                'placeholder' => 'Taxonomy',
-                'type' => 'text'
+                'required' => true
             )
         ));
 
-        // Name
+        // Parent Id
         $this->add(array(
             'options' => array(
-                'label' => 'Name'
+                'label' => 'Parent'
             ),
-            'name' => 'name',
+            'name' => 'parent_id',
             'attributes' => array(
-                'id' => 'name',
-                'required' => true,
-                'placeholder' => 'Name',
-                'type' => 'text'
-            )
-        ));
-
-        // Alias
-        $this->add(array(
-            'options' => array(
-                'label' => 'Alias'
-            ),
-            'name' => 'alias',
-            'attributes' => array(
-                'id' => 'alias',
-                'required' => true,
-                'placeholder' => 'Alias',
-                'type' => 'text'
-            )
-        ));
-
-        // Term Group Alias
-        $this->add(array(
-            'options' => array(
-                'label' => 'Term Group Alias'
-            ),
-            'name' => 'term_group_alias',
-            'attributes' => array(
-                'id' => 'term_group_alias',
-                'placeholder' => 'Term Group Alias',
+                'id' => 'parent_id',
+                'placeholder' => 'Parent',
                 'type' => 'text'
             )
         ));
@@ -86,23 +63,25 @@ class TermTaxonomyFieldset extends Fieldset {
             'type' => 'Zend\Form\Element\TextArea',
             'attributes' => array(
                 'id' => 'description',
+                'placeholder' => 'Description',
                 'cols' => 72,
                 'rows' => 5,
             )
         ));
-        
+
         // Access Group
         $this->add(array(
-            'options' => array(
-                'label' => 'Access Group'
-            ),
             'name' => 'accessGroup',
             'type' => 'Zend\Form\Element\Select',
+            'options' => array(
+                'label' => 'Access Group',
+                'value_options' => array(
+                    'null' => '-- Select an Access Group --'
+                )
+            ),
             'attributes' => array(
                 'id' => 'accessGroup',
-                'value_options' => array(
-                    'value' => 'Label'
-                )
+                'required' => true,
             )
         ));
     }

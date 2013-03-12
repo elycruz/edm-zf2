@@ -16,7 +16,8 @@ use Zend\Form\Fieldset;
  */
 class SubmitAndResetFieldset extends Fieldset {
 
-    public function __construct($name = null, $options = array()) {
+    public function __construct($name = 'submit-and-reset', $options = array()) {
+        parent::__construct($name, $options);
         $this->add(array(
             'name' => 'reset',
             'attributes' => array(
@@ -33,7 +34,6 @@ class SubmitAndResetFieldset extends Fieldset {
                 'class' => 'btn big-btn'
             )
         ));
-        parent::__construct($name, $options);
     }
 
 }

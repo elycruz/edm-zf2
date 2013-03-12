@@ -2,18 +2,15 @@
 
 namespace Edm\Model;
 
-use 
-//    Zend\InputFilter\Factory as InputFactory,
-//    Zend\InputFilter\InputFilter,
+use Zend\InputFilter\Factory as InputFactory,
+    Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\AbstractModel;
 
-class TermTaxonomy extends AbstractModel 
-implements InputFilterAwareInterface {
+class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
-
     public $term_taxonomy_id;
     public $term_alias;
     public $taxonomy;
@@ -23,7 +20,6 @@ implements InputFilterAwareInterface {
     public $assocItemCount;
     public $listOrder;
     public $parent_id;
-    
     public $validKeys = array(
         'term_taxonomy_id',
         'term_alias',
@@ -48,69 +44,66 @@ implements InputFilterAwareInterface {
 
     public function getInputFilter() {
 
-//        if ($this->inputFilter !== null) {
-//            return $this->inputFilter;
-//        }
-//
-//        $retVal =
-//                $this->inputFilter =
-//                new InputFilter();
-//        $factory = new InputFactory();
-//
-//        // Term Name
-//        $retVal->add($factory->createInput(array(
-//                    'name' => 'name',
-//                    'required' => true,
-//                    'filters' => array(
-//                        array('name' => 'StripTags'),
-//                        array('name' => 'StringTrim')
-//                    ),
-//                    'validators' => array(
-//                        array('name' => 'StringLength',
-//                            'options' => array(
-//                                'min' => 1,
-//                                'max' => 255
-//                        ))
-//                    )
-//                )));
-//
-//        // Term Alias
-//        $retVal->add($factory->createInput(array(
-//                    'name' => 'term_alias',
-//                    'required' => false,
-//                    'filters' => array(
-//                        array(
-//                            'name' => 'StringToLower'),
-//                    ),
-//                    'validators' => array(
-//                        array(
-//                            'name' => 'Regex',
-//                            'options' => array(
-//                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-//                        ),
-//                    )
-//                )));
-//
-//        // Term Taxonomy Group Alias
-//        $retVal->add($factory->createInput(array(
-//                    'name' => 'term_group_alias',
-//                    'required' => false,
-////                    'filters' => array(
-////                        array(
-////                            'name' => 'StringToLower'),
-////                    ),
-////                    'validators' => array(
-////                        array(
-////                            'name' => 'Regex',
-////                            'options' => array(
-////                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-////                        ),
-////                    )
-//                )));
-//
-//        $this->inputFilter = $retVal;
-//
-//        return $retVal;
+        if ($this->inputFilter !== null) {
+            return $this->inputFilter;
+        }
+
+        $inputFilter = new InputFilter();
+        $factory = new InputFactory();
+
+        // Taxonomy
+        $inputFilter->add($factory->createInput(array(
+                    'name' => 'taxonomy',
+                    'required' => true,
+                    'filters' => array(
+                        array('name' => 'StripTags'),
+                        array('name' => 'StringTrim')
+                    ),
+                    'validators' => array(
+                        array('name' => 'StringLength',
+                            'options' => array(
+                                'min' => 1,
+                                'max' => 55
+                            ))
+                    )
+        )));
+
+        // Description
+        $inputFilter->add($factory->createInput(array(
+                    'name' => 'description',
+                    'required' => true,
+                    'filters' => array(
+                        array('name' => 'StringTrim')
+                    )
+        )));
+
+        // Parent Id
+        $inputFilter->add($factory->createInput(array(
+                    'name' => 'parent_id',
+                    'required' => false,
+                    'validators' => array(
+                        array(
+                            'name' => 'Regex',
+                            'options' => array(
+                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
+                        ),
+                    )
+        )));
+
+        // Access Group
+        $inputFilter->add($factory->createInput(array(
+                    'name' => 'accessGroup',
+                    'required' => false,
+                    'validators' => array(
+                        array(
+                            'name' => 'Regex',
+                            'options' => array(
+                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
+                        ),
+                    )
+        )));
+
+        return $this->inputFilter = $inputFilter;
     }
 
 }
