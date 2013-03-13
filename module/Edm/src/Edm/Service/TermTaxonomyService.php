@@ -13,13 +13,12 @@ class TermTaxonomyService extends AbstractService {
 
     protected $termModel;
     protected $termTaxModel;
+    
     // @todo implement these and get rid of hardcoded values
     protected $termModel_alias = 'term';
     protected $termTaxModel_alias = 'termTax';
 
-    public function __construct() {
-        
-    }
+    public function __construct() {}
 
     /**
      * Gets a term taxonomy by id
@@ -46,7 +45,7 @@ class TermTaxonomyService extends AbstractService {
     }
 
     public function getDescendantsByAlias($alias, $taxonomy = 'taxonomy', $options = null) {
-
+        
         // Expect stdClass as options else convert
         if (!empty($options) && is_array($options)) {
             $options = (object) $options;
@@ -54,11 +53,14 @@ class TermTaxonomyService extends AbstractService {
 
         // Get options
         if (empty($options)) {
-            $options = new stdClass();
+            $options = new \stdClass();
         }
 
+        // Sql 
+        $sql = new Sql($this->getDb()); 
+        
         // Select
-        $select = $this->getSelect();
+        $select = $this->getSelect($sql);
 
         // Create results array
         $rslts = array();
@@ -66,10 +68,17 @@ class TermTaxonomyService extends AbstractService {
         // Get db data helper
         $dbDataHelper = $this->getDbDataHelper();
 
+        // Top tuple
+        $topTuple = $this->getByAlias($alias, $taxonomy);
+        
+        // If tuple not found return null;
+        if (empty($topTuple)) {
+            return null;
+        }
+        
         // Get top tuple
         if (empty($options->topTuple)) {
-            $topTuple = (object) $dbDataHelper->reverseEscapeTupleFromDb(
-                            $this->getByAlias($alias, $taxonomy));
+            $topTuple = (object) $dbDataHelper->reverseEscapeTuple($topTuple);
         } else {
             if (is_array($options->topTuple)) {
                 $options->topTuple = (object) $options->topTuple;
@@ -78,20 +87,18 @@ class TermTaxonomyService extends AbstractService {
         }
 
         // Top level tuple's children
-        $topChildren = $select->where('termTax.taxonomy=' .
+        $topChildren = $sql->prepareStatementForSqlObject($select->where('termTax.taxonomy='.
                         $topTuple->term_taxonomy_id)
-                ->order('term_name DESC')
-                ->query(Zend_Db::FETCH_ASSOC)
-                ->fetchAll();
+                        ->order('term_name DESC'))->execute();
 
         // If no results bail
         if (!is_array($topChildren)) {
+//            echo ''
             return null;
         }
 
         // Escape top children
-        $topChildren = $this->escapeTuplesAs_objOrAssoc(
-                $topChildren, $fetchMode);
+        $topChildren = $this->escapeTuplesAs_objOrAssoc($topChildren, true);
 
         if (!empty($options->attachChildren)) {
             $topTuple->descendants = $topChildren;
@@ -110,7 +117,7 @@ class TermTaxonomyService extends AbstractService {
         $topTuple = array_pop($topTuples);
 
         // If top tuple not std class make
-        if (!($topTuple instanceOf stdClass)) {
+        if (!($topTuple instanceOf \stdClass)) {
             $topTuple = (object) $topTuple;
         }
 
@@ -142,7 +149,7 @@ class TermTaxonomyService extends AbstractService {
                 $newSubChildren = array();
                 foreach ($subChildren as $child) {
                     $child = $this->dbDataHelper
-                            ->reverseEscapeTupleFromDb($child);
+                            ->reverseEscapeTuple($child);
 
                     // Set top tuple
                     $options->topTuple = $child;
@@ -184,7 +191,10 @@ class TermTaxonomyService extends AbstractService {
      * @param bool $taxonomizeResult default false
      * @return <type>
      */
-    public function getTermTaxonomiesByAlias($alias, $parent_id = null, $sortBy = 'name', $sort = null, $where = null, $taxonomizeResult = false) {
+    public function getTermTaxonomiesByAlias($alias, $parent_id = null, 
+            $sortBy = 'name', $sort = null, 
+            $where = null, $taxonomizeResult = false) {
+        
         // This is a Temporary fix
         // @todo fix this functions default values
         $parent_id = !empty($parent_id) ? $parent_id : 0;
@@ -248,7 +258,8 @@ class TermTaxonomyService extends AbstractService {
         // @todo implement return values only for current role level
         return $select
                 ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
-                ->join(array('term' => $this->getTermTable()->table), 'term.alias=termTax.term_alias', array(
+                ->join(array('term' => $this->getTermTable()->table), 
+                        'term.alias=termTax.term_alias', array(
                     'term_name' => 'name',
                     'term_group_alias'));
     }
@@ -256,10 +267,10 @@ class TermTaxonomyService extends AbstractService {
     /**
      * Returns an escaped set of tuples as a set of objects or arrays
      * @param array $tuples
-     * @param int $fetchMode
+     * @param boolean $fetchMode
      * @return array 
      */
-    public function escapeTuplesAs_objOrAssoc(array $tuples, $fetchMode) {
+    public function escapeTuplesAs_objOrAssoc(array $tuples, $fetchMode = false) {
         $dbDataHelper = $this->getDbDataHelper();
 
         // Bail if tuples is an emtpy array
@@ -267,15 +278,15 @@ class TermTaxonomyService extends AbstractService {
             return $tuples;
         }
 
-        if ($fetchMode === Zend_Db::FETCH_ASSOC) {
+        if ($fetchMode === true) {
             // Clean top children
             $tuples = $dbDataHelper
-                    ->reverseEscapeTuplesFromDb($tuples);
+                    ->reverseEscapeTuples($tuples);
         } else {
             $newTuples = array();
             foreach ($tuples as $child) {
                 $newTuples[] = (object) $dbDataHelper
-                                ->reverseEscapeTupleFromDb($child);
+                                ->reverseEscapeTuple($child);
             }
             $tuples = $newTuples;
         }

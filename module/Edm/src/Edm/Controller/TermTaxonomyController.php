@@ -296,7 +296,8 @@ implements TermTaxonomyAware {
     public function fooAction () {
         $termTaxService = $this->getTermTaxService();
         $rslt = $termTaxService->getByAlias('tag', 'taxonomy');
-        var_dump($rslt);
+        $rslt2 = $termTaxService->getDescendantsByAlias('access-group', 'taxonomy');
+        var_dump($rslt, $rslt2, $this->getTermModel()->select()->toArray());
         exit();
     }
 }
