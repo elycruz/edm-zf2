@@ -4,14 +4,15 @@ namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
+    Edm\Model\Term,
     Edm\Service\TermTaxonomyAware,
     Edm\TraitPartials\TermTaxonomyAwareTrait,
     Edm\Service\AbstractService,
-    Zend\View\Model\ViewModel,
+
+        Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
-    Zend\Paginator\Adapter\DbSelect,
-    Zend\Debug\Debug;
+    Zend\Paginator\Adapter\DbSelect;
 
 class TermTaxonomyController extends AbstractController implements TermTaxonomyAware {
 
@@ -65,7 +66,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $fm = $this->initFlashMessenger();
 
         // Setup form
-        $form = new TermTaxonomyForm();
+        $form = new TermTaxonomyForm(array('termTaxService' => $this->getTermTaxService()));
         $form->setAttribute('action', '/edm-admin/term-taxonomy/create');
         $view->form = $form;
 

@@ -15,6 +15,9 @@ use Edm\Db\DatabaseDataHelper,
  * @author ElyDeLaCruz
  */
 trait DbDataHelperAwareTrait {
+    
+    public $dbDataHelper;
+    
     public function setDbDataHelper(DbDataHelper $dbDataHelper) {
         $this->dbDataHelper = $dbDataHelper;
     }

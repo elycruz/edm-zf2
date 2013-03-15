@@ -14,9 +14,6 @@ implements DbDataHelperAware, ServiceLocatorAwareInterface {
     use DbDataHelperAwareTrait,
     ServiceLocatorAwareTrait;
     
-    public $dbDataHelper;
-    public $serviceLocator;
-    
     public function getBy(array $by) {
         $row = $this->select($by)->current();
         if (!empty($row)) {

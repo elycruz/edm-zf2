@@ -4,6 +4,9 @@ namespace Edm\TraitPartials;;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 trait ServiceLocatorAwareTrait {
+    
+    public $serviceLocator;
+    
     /**
      * Set serviceManager instance
      * @param  ServiceLocatorInterface $serviceLocator
