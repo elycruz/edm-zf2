@@ -19,6 +19,10 @@ trait DbAwareTrait {
         $this->db = $db;
     }
     
+    /**
+     * Get database adapter
+     * @return Zend\Db\Adapter\Adapter
+     */
     public function getDb() {
         if (empty($this->db)) {
             $this->db = GlobalAdapterFeature::getStaticAdapter();

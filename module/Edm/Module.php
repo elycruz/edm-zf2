@@ -22,23 +22,16 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface,
 
 class Module implements AutoloaderProviderInterface {
 
-    public function getServiceConfig() {
-        return array(
+//    public function getServiceConfig() {
+//        return array(
 //            'abstract_factories' => array(),
 //            'aliases' => array(),
-            'invokables' => array(
-                'Edm\Db\Table\TermTable' => 'Edm\Db\Table\TermTable',
-                'Edm\Db\Table\TermTaxonomyTable' => 'Edm\Db\Table\TermTaxonomyTable',
-                'Edm\Model\Term' => 'Edm\Model\Term',
-                'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy'
-            ),
-//            'services' => array(
-//                
-//            ),
+//            'invokables' => array(),
+//            'services' => array(),
 //            'shared' => array(),
 //            'factories' => array(),
-        );
-    }
+//        );
+//    }
 
     public function getAutoloaderConfig() {
         return array(

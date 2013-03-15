@@ -1,34 +1,22 @@
 <?php
 
-/**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/Edm for the canonical source repository
- * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- */
-/**
- * @todo Implement DatabaseDataHelper
- */
-
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
     Edm\Service\TermTaxonomyAware,
     Edm\TraitPartials\TermTaxonomyAwareTrait,
+    Edm\Service\AbstractService,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect,
-    Zend\Db\Sql\Select,
     Zend\Debug\Debug;
 
-class TermTaxonomyController extends AbstractController 
-implements TermTaxonomyAware {
+class TermTaxonomyController extends AbstractController implements TermTaxonomyAware {
 
     use TermTaxonomyAwareTrait;
-    
+
     protected $termTaxTable;
     protected $termTable;
 
@@ -48,8 +36,9 @@ implements TermTaxonomyAware {
         $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
 
         // Select 
-        $select = new Select();
-        $select->from($model->getTable());
+//        $select = new Select();
+//        $select->from($model->getTable());
+        $select = $this->getTermTaxService()->getSelect();
 
         // Paginator
         $paginator = new Paginator(new DbSelect($select, $model->getAdapter()));
@@ -100,13 +89,13 @@ implements TermTaxonomyAware {
         $termTaxTable = $this->getTermTaxonomyModel();
         $termTable = $this->getTermModel();
         $data = (object) $view->form->getData();
-        
+
         // Check if term already exists
         $term = $termTable->getByAlias((string) $data->term['alias']);
         if (empty($term)) {
             $rslt = $termTable->createItem($data->term);
             if (empty($rslt)) {
-                $fm->setNamespace('error')->addMessage('Failed to create term "' 
+                $fm->setNamespace('error')->addMessage('Failed to create term "'
                         . $term->name . '".');
                 return $view;
             }
@@ -115,10 +104,9 @@ implements TermTaxonomyAware {
 
         // Put term in to db
         $rslt = $termTaxTable->createItem(
-            array_merge(
-                    array('term_alias' => $data->term->alias), 
-                    $data->{'term-taxonomy'}
-                ));
+                array_merge(
+                        array('term_alias' => $data->term->alias), $data->{'term-taxonomy'}
+        ));
 
         // Send success message to user
         if ($rslt) {
@@ -292,12 +280,17 @@ implements TermTaxonomyAware {
         }
         return $this->termTable;
     }
-    
-    public function fooAction () {
+
+    public function fooAction() {
         $termTaxService = $this->getTermTaxService();
-        $rslt = $termTaxService->getByAlias('tag', 'taxonomy');
-        $rslt2 = $termTaxService->getDescendantsByAlias('access-group', 'taxonomy');
-        var_dump($rslt, $rslt2, $this->getTermModel()->select()->toArray());
-        exit();
+//        $rslt1 = $termTaxService->getByAlias('post-category', 'taxonomy');
+//        $rslt2 = $termTaxService->getByTaxonomy('taxonomy');
+        $rslt2 = $termTaxService->getByTaxonomy('taxonomy', array(
+            'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
+            'nestedResults' => true,
+            'order' => 'term_name ASC'));
+        var_dump($rslt2);
     }
+
 }
+

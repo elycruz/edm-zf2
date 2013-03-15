@@ -9,8 +9,12 @@ defined('APP_PATH') ||
 return array(
     'service_manager' => array(
         'invokables' => array(
-            'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Service\TermTaxonomyService' => 'Edm\Service\TermTaxonomyService',
+            'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
+            'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
+            'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
+            'Edm\Model\Term'                    => 'Edm\Model\Term',
+            'Edm\Model\TermTaxonomy'            => 'Edm\Model\TermTaxonomy'
         )
     ),
     'controllers' => array(

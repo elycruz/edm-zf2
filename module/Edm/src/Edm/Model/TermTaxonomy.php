@@ -11,16 +11,8 @@ use Zend\InputFilter\Factory as InputFactory,
 class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
-    public $term_taxonomy_id;
-    public $term_alias;
-    public $taxonomy;
-    public $description;
-    public $accessGroup;
-    public $childCount;
-    public $assocItemCount;
-    public $listOrder;
-    public $parent_id;
-    public $validKeys = array(
+    
+    protected $validKeys = array(
         'term_taxonomy_id',
         'term_alias',
         'taxonomy',
@@ -30,10 +22,20 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         'assocItemCount',
         'listOrder',
         'parent_id',
+        
+        // Joined keys
+        'term_name',
+        'term_group_alias',
+        'taxonomy_name',
+        'parent_name',
+        'parent_alias',
+        
+        // Custom keys
+        'descendants'
     );
 
     public function __construct($data = null) {
-        if ($data) {
+        if (is_array($data)) {
             $this->exchangeArray($data);
         }
     }

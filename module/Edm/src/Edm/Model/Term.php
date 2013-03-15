@@ -6,28 +6,24 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel,
-    Edm\TraitPartials\GetPublicVarsTrait;
+    Edm\Model\AbstractModel;
 
 class Term extends AbstractModel 
 implements InputFilterAwareInterface {
     
-    use GetPublicVarsTrait;
-    
     protected $inputFilter = null;
-    
-    public $term_group_alias;
-    public $alias;
-    public $name;
     
     public $validKeys = array(
         'term_group_alias',
         'alias',
-        'name'
+        'name',
+        
+        // External
+        'term_group_name',
     );
 
     public function __construct ($data = null) {
-        if ($data) {
+        if (is_array($data)) {
             $this->exchangeArray($data);
         }
     }
