@@ -153,10 +153,10 @@ class TermController extends AbstractController {
                     . 'doesn\t exist in database.');
             return $view;
         }
-
+        
         // Setup form
         $form = new TermForm();
-        $form->setAttribute('action', '/edm-admin/term/update?id=' . $id);
+        $form->setAttribute('action', '/edm-admin/term/update/id/' . $id);
         $form->setData($existingTerm->toArray());
         $view->form = $form;
 

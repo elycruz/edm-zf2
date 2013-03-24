@@ -25,7 +25,6 @@ implements DbDataHelperAware {
     protected $view;
 
     protected function getParam($key, $default = null) {
-        // Route match
         $routeMatch = $this->getEvent()->getRouteMatch();
         return $routeMatch->getParam($key, $default);
     }

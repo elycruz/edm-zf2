@@ -4,23 +4,23 @@
 defined('APPVAR_NAME_ALIAS_REGEX') ||
         define('APPVAR_NAME_ALIAS_REGEX', '/[\w\d]+/i');
 defined('APP_PATH') ||
-    define('APP_PATH', realpath(__DIR__ . '/../../'));
+        define('APP_PATH', realpath(__DIR__ . '/../../'));
 
 return array(
     'service_manager' => array(
         'invokables' => array(
-            'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
-            'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
-            'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
-            'Edm\Model\Term'                    => 'Edm\Model\Term',
-            'Edm\Model\TermTaxonomy'            => 'Edm\Model\TermTaxonomy'
+            'Edm\Service\TermTaxonomyService' => 'Edm\Service\TermTaxonomyService',
+            'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Db\Table\TermTable' => 'Edm\Db\Table\TermTable',
+            'Edm\Db\Table\TermTaxonomyTable' => 'Edm\Db\Table\TermTaxonomyTable',
+            'Edm\Model\Term' => 'Edm\Model\Term',
+            'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy'
         )
     ),
     'controllers' => array(
         'invokables' => array(
-            'Edm\Controller\Index'  => 'Edm\Controller\IndexController',
-            'Edm\Controller\Term'   => 'Edm\Controller\TermController',
+            'Edm\Controller\Index' => 'Edm\Controller\IndexController',
+            'Edm\Controller\Term' => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
         ),
     ),
@@ -52,34 +52,41 @@ return array(
                     // specific routes.
                     'default' => array(
                         'type' => 'Segment',
+                        'may_terminate' => true,
                         'options' => array(
                             'route' => '/[:controller[/:action]]',
                             'constraints' => array(
                                 'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
                                 'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                             ),
-                            'defaults' => array(
-                            ),
                         ),
                         'child_routes' => array(
                             'updateOrDelete' => array(
-                                'type' => 'Query',
+                                'type' => 'Segment',
+                                'may_terminate' => true,
                                 'options' => array(
+                                    'route' => '[/id/:id]',
                                     'constraints' => array(
                                         'id' => '[a-zA-Z0-9_\-\:\|]'
-                                    )
+                                    ),
                                 )
                             ),
                             'paginator' => array(
-                                'type' => 'Query',
+                                'type' => 'Segment',
+                                'may_terminate' => true,
                                 'options' => array(
+                                    'route' => 
+                                        '[/page/:page]' .
+                                        '[/itemsPerPage/:itemsPerPage]' .
+                                        '[/sort/:sort][/sortBy/:sortBy]' .
+                                        '[/filter/:filter][/filterBy/:filterBy]',
                                     'constraints' => array(
-                                        'page' => '\d*',
-                                        'itemsPerPage' => '\d*',
-                                        'sort' => '[a-zA-Z0-1]*',
-                                        'sortBy' => '[a-zA-Z\d_\-]*',
-                                        'filter' => '[a-zA-Z\d_\-]*',
-                                        'filterBy' => '[a-zA-Z0-9\d_\-]*'
+                                        'page'          => '\d*',
+                                        'sort'          => '[a-zA-Z0-1]*',
+                                        'sortBy'        => '[a-zA-Z\d_\-]*',
+                                        'filter'        => '[a-zA-Z\d_\-]*',
+                                        'filterBy'      => '[a-zA-Z0-9\d_\-]*',
+                                        'itemsPerPage'  => '\d*',
                                     ),
                                     'defaults' => array(
                                         'page' => 1,
@@ -88,6 +95,7 @@ return array(
                                 ),
                             ),
                         ),
+                        
                     ),
                 ),
             ),
@@ -99,7 +107,7 @@ return array(
         ),
         'template_map' => array(
             'layout/layout' => __DIR__ . '/../../public/module-templates/edm-ko-ui/index.phtml',
-            'partials/message' => __DIR__ .'/src/Edm/view-scripts/edm/partials/message.phtml'
+            'partials/message' => __DIR__ . '/src/Edm/view-scripts/edm/partials/message.phtml'
         )
     ),
 );
