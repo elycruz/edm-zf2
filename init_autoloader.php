@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework (http://framework.zend.com/)
  *
@@ -6,7 +7,6 @@
  * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
-
 error_reporting(E_ALL);
 
 /**
@@ -17,21 +17,29 @@ error_reporting(E_ALL);
  * the use of composer completely optional. This setup should work fine for
  * most users, however, feel free to configure autoloading however you'd like.
  */
-
 // Composer autoloading
 if (file_exists('vendor/autoload.php')) {
     $loader = include 'vendor/autoload.php';
 }
 
+// Resolve Zend Framework path by host name
 $zf2Path = false;
-
-if (getenv('ZF2_PATH')) {           // Support for ZF2_PATH environment variable or git submodule
-    $zf2Path = getenv('ZF2_PATH');
-} elseif (get_cfg_var('zf2_path')) { // Support for zf2_path directive value
-    $zf2Path = get_cfg_var('zf2_path');
-} elseif (is_dir('vendor/ZF2/library')) {
-    $zf2Path = 'vendor/ZF2/library';
+$host = $_SERVER['HTTP_HOST'];
+if (preg_match('/edm\.elycruz\.com/', $host) == 1) {
+    $zf2Path = '/home/admin/downloads/ZendFramework-minimal-2.1.4/library';
+} 
+else if (preg_match('/edmzf2/', $host) == 1) {
+    // Support for ZF2_PATH environment variable or git submodule
+    if (getenv('ZF2_PATH')) {
+        $zf2Path = getenv('ZF2_PATH');
+        // Support for zf2_path directive value
+    } elseif (get_cfg_var('zf2_path')) {
+        $zf2Path = get_cfg_var('zf2_path');
+    } elseif (is_dir('vendor/ZF2/library')) {
+        $zf2Path = 'vendor/ZF2/library';
+    }
 }
+
 
 if ($zf2Path) {
     if (isset($loader)) {

@@ -140,7 +140,7 @@ class TermController extends AbstractController {
         $fm = $this->initFlashMessenger();
 
         // Id
-        $id = $this->getParam('id');
+        $id = $this->getParam('itemId');
 
         // Put data into model
         $termTable = $this->getTermModel();
@@ -220,12 +220,22 @@ class TermController extends AbstractController {
                 $this->view =
                 new ViewModel();
         $view->setTerminal(true);
-
+        
         // init flash messenger
         $fm = $this->initFlashMessenger();
 
+        // No deletion for demo
+        $fm->setNamespace('error')->addMessage('Deleting terms is not ' .
+                'allowed in this demo.');
+        
+        // init flash messenger
+        $fm = $this->initFlashMessenger();
+        
+        // Bail
+        return $view;
+
         // Id
-        $id = $this->getParam('id');
+        $id = $this->getParam('itemId');
 
         // Request
         $request = $this->getRequest();

@@ -19,7 +19,7 @@ implements InputFilterAwareInterface {
         'name',
         
         // External
-        'term_group_name',
+//        'term_group_name',
     );
 
     public function __construct ($data = null) {

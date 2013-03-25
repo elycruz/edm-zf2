@@ -52,7 +52,7 @@ return array(
                     // specific routes.
                     'default' => array(
                         'type' => 'Segment',
-                        'may_terminate' => true,
+//                        'may_terminate' => true,
                         'options' => array(
                             'route' => '/[:controller[/:action]]',
                             'constraints' => array(
@@ -63,17 +63,17 @@ return array(
                         'child_routes' => array(
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
-                                'may_terminate' => true,
+//                                'may_terminate' => true,
                                 'options' => array(
-                                    'route' => '[/id/:id]',
+                                    'route' => '[/id/:itemId]',
                                     'constraints' => array(
-                                        'id' => '[a-zA-Z0-9_\-\:\|]'
+                                        'id' => '[a-zA-Z0-9_\-]'
                                     ),
                                 )
                             ),
                             'paginator' => array(
                                 'type' => 'Segment',
-                                'may_terminate' => true,
+//                                'may_terminate' => true,
                                 'options' => array(
                                     'route' => 
                                         '[/page/:page]' .
