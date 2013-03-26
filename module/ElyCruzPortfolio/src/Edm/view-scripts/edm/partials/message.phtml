@@ -1,0 +1,7 @@
+<h1>Message</h1>
+<?php
+if (!empty($this->messages) && count($this->messages) > 0) {
+    echo '<div class="message">';
+    echo $this->htmlList($this->messages);
+    echo '</div>';
+}
