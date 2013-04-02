@@ -68,22 +68,7 @@ class TermTaxonomyFieldset extends Fieldset {
                 'rows' => 5,
             )
         ));
-
-        // Access Group
-        $this->add(array(
-            'name' => 'accessGroup',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Access Group',
-                'value_options' => array(
-                    'null' => '-- Select an Access Group --'
-                )
-            ),
-            'attributes' => array(
-                'id' => 'accessGroup',
-                'required' => true,
-            )
-        ));
+        
     }
 
 }

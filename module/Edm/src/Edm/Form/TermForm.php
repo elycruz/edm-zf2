@@ -29,6 +29,7 @@ class TermForm extends EdmForm {
                 'id' => 'name',
                 'required' => true,
                 'placeholder' => 'Name',
+                'autofocus' => true,
                 'type' => 'text'
             )
         ));

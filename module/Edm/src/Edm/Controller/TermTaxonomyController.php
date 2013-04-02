@@ -8,11 +8,11 @@ use Edm\Controller\AbstractController,
     Edm\Service\TermTaxonomyAware,
     Edm\TraitPartials\TermTaxonomyAwareTrait,
     Edm\Service\AbstractService,
-
-        Zend\View\Model\ViewModel,
+    Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
-    Zend\Paginator\Adapter\DbSelect;
+    Zend\Paginator\Adapter\DbSelect,
+    Zend\Db\Sql\Select;
 
 class TermTaxonomyController extends AbstractController implements TermTaxonomyAware {
 
@@ -38,9 +38,9 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
 
         // Select 
 //        $select = new Select();
-//        $select->from($model->getTable());
         $select = $this->getTermTaxService()->getSelect();
-
+//        $select->from($model->getTable());
+//        var_dump($select->getSqlString()); exit();  
         // Paginator
         $paginator = new Paginator(new DbSelect($select, $model->getAdapter()));
         $paginator->setItemCountPerPage($itemCountPerPage)
@@ -62,11 +62,15 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $view =
                 $this->view =
                 new ViewModel();
+
+        // Let view be terminal in this action
         $view->setTerminal(true);
         $fm = $this->initFlashMessenger();
 
         // Setup form
-        $form = new TermTaxonomyForm(array('termTaxService' => $this->getTermTaxService()));
+        $form = new TermTaxonomyForm('term-taxonomy-form', array(
+            'serviceLocator' => $this->getServiceLocator()
+        ));
         $form->setAttribute('action', '/edm-admin/term-taxonomy/create');
         $view->form = $form;
 
@@ -83,6 +87,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         if (!$view->form->isValid()) {
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
+//                    'data: ' . var_dump($form->getData()));
             return $view;
         }
 
@@ -90,7 +95,6 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $termTaxTable = $this->getTermTaxonomyModel();
         $termTable = $this->getTermModel();
         $data = (object) $view->form->getData();
-
         // Check if term already exists
         $term = $termTable->getByAlias((string) $data->term['alias']);
         if (empty($term)) {
@@ -104,9 +108,13 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         }
 
         // Put term in to db
-        $rslt = $termTaxTable->createItem(
-                array_merge(
-                        array('term_alias' => $data->term->alias), $data->{'term-taxonomy'}
+        $desc = $data->{'term-taxonomy'}['description'];
+        $data->{'term-taxonomy'}['description'] = $desc ? $desc : '';
+
+        $rslt = $termTaxTable->createItem(array(
+            'term_alias' => $term->alias,
+            'taxonomy' => 'taxonomy',
+            'description' => $desc
         ));
 
         // Send success message to user
@@ -283,14 +291,19 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
     }
 
     public function fooAction() {
+        $view = new JsonModel();
         $termTaxService = $this->getTermTaxService();
-//        $rslt1 = $termTaxService->getByAlias('post-category', 'taxonomy');
-//        $rslt2 = $termTaxService->getByTaxonomy('taxonomy');
-        $rslt2 = $termTaxService->getByTaxonomy('taxonomy', array(
+//        $rslt = $termTaxService->getByAlias('taxonomy');
+//        $rslt = $termTaxService->getByTaxonomy('taxonomy');
+        $rslt = $termTaxService->getByTaxonomy('taxonomy', array(
             'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
             'nestedResults' => true,
-            'order' => 'term_name ASC'));
-        var_dump($rslt2);
+            'order' => 'term_name ASC',
+//            'where' => array('term_alias' => 'testing-9')
+        ));
+
+        $view->result = $rslt;
+        return $view;
     }
 
 }

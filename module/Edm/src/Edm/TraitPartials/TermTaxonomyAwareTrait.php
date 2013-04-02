@@ -17,8 +17,7 @@ trait TermTaxonomyAwareTrait {
 
     public function getTermTaxService() {
         if (empty($this->termTaxService)) {
-            $this->termTaxService = $this->getServiceLocator()
-                    ->get('Edm\Service\TermTaxonomyService');
+            $this->termTaxService = $this->serviceLocator->get('Edm\Service\TermTaxonomyService');
         }
         return $this->termTaxService;
     }

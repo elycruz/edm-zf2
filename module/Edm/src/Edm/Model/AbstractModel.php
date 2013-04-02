@@ -52,7 +52,10 @@ class AbstractModel {
      * @param string $name
      */
     public function __get($name) {
-        $this->{$name};
+        if (!isset($this->{$name})) {
+            $this->{$name} = null;
+        }
+        return $this->{$name};
     }
 
     /**

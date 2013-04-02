@@ -136,6 +136,7 @@ class TermController extends AbstractController {
         $view =
                 $this->view =
                 new ViewModel();
+        
         $view->setTerminal(true);
         $fm = $this->initFlashMessenger();
 
@@ -147,10 +148,10 @@ class TermController extends AbstractController {
 
         // Check if term already exists
         try {
-            $existingTerm = new Term((array) $termTable->getByAlias($id));
+            $existingTerm = $termTable->getByAlias($id);
         } catch (\Exception $e) {
             $fm->setNamespace('error')->addMessage('Term '
-                    . 'doesn\t exist in database.');
+                    . 'doesn\'t exist in database.');
             return $view;
         }
         
@@ -252,7 +253,7 @@ class TermController extends AbstractController {
 
         try {
             // Check if term already exists
-            $term = new Term((array) $termTable->getByAlias($id));
+            $term = $termTable->getByAlias($id);
         } catch (\Exception $e) {
             // If not send message and bail
             $fm->setNamespace('error')->addMessage('Term alias "' .

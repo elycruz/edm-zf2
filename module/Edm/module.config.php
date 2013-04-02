@@ -2,7 +2,7 @@
 
 // Defines
 defined('APPVAR_NAME_ALIAS_REGEX') ||
-        define('APPVAR_NAME_ALIAS_REGEX', '/[\w\d]+/i');
+        define('APPVAR_NAME_ALIAS_REGEX', '/[a-z\-_\.\d]+/i');
 defined('APP_PATH') ||
         define('APP_PATH', realpath(__DIR__ . '/../../'));
 
@@ -14,7 +14,8 @@ return array(
             'Edm\Db\Table\TermTable' => 'Edm\Db\Table\TermTable',
             'Edm\Db\Table\TermTaxonomyTable' => 'Edm\Db\Table\TermTaxonomyTable',
             'Edm\Model\Term' => 'Edm\Model\Term',
-            'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy'
+            'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy',
+            'Edm\Form\TermTaxonomyForm' => 'Edm\Form\TermTaxonomyForm'
         )
     ),
     'controllers' => array(

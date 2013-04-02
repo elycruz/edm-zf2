@@ -17,7 +17,6 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         'term_alias',
         'taxonomy',
         'description',
-        'accessGroup',
         'childCount',
         'assocItemCount',
         'listOrder',
@@ -31,7 +30,7 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         'parent_alias',
         
         // Custom keys
-        'descendants'
+        'children'
     );
 
     public function __construct($data = null) {
@@ -73,7 +72,7 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         // Description
         $inputFilter->add($factory->createInput(array(
                     'name' => 'description',
-                    'required' => true,
+                    'required' => false,
                     'filters' => array(
                         array('name' => 'StringTrim')
                     )
@@ -82,19 +81,6 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         // Parent Id
         $inputFilter->add($factory->createInput(array(
                     'name' => 'parent_id',
-                    'required' => false,
-                    'validators' => array(
-                        array(
-                            'name' => 'Regex',
-                            'options' => array(
-                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                        ),
-                    )
-        )));
-
-        // Access Group
-        $inputFilter->add($factory->createInput(array(
-                    'name' => 'accessGroup',
                     'required' => false,
                     'validators' => array(
                         array(

@@ -53,22 +53,22 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
      */
     public function seedOptionsForSelect(stdClass $options) {
         // Sql
-        $sql = $options->sql ? $options->sql : $this->getSql();
+        $sql = !empty($options->sql) ? $options->sql : $this->getSql();
 
         // Select
-        if ($options->select) {
+        if (isset($options->select)) {
             $select = $options->select;
         } else {
             $select = $this->getSelect($sql);
         }
 
         // Where
-        if ($options->where) {
+        if (isset($options->where)) {
             $select->where($options->where);
         }
 
         // Order
-        if ($options->order) {
+        if (isset($options->order)) {
             $select->order($options->order);
         }
         

@@ -68,7 +68,8 @@ class TermTaxonomyService extends AbstractService {
         // Get results
         $rslt = $this->resultSet->initialize(
             $options->sql->prepareStatementForSqlObject(
-                $options->select->where($this->termTaxModel_alias .'.taxonomy="' . $taxonomy . '"')
+                $options->select->where($this->termTaxModel_alias .
+                        '.taxonomy="' . $taxonomy . '"')
             )->execute());
         
         return $this->fetchFromResult($rslt, $options->fetchMode);
@@ -230,6 +231,7 @@ class TermTaxonomyService extends AbstractService {
                     'term.alias='. $this->termTaxModel_alias .'.term_alias', array(
                 'term_name' => 'name',
                 'term_group_alias'));
+        
     }
 
     /**
