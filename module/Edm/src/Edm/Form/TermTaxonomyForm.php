@@ -5,7 +5,7 @@ namespace Edm\Form;
 use Edm\Form\TermFieldset,
     Edm\Form\TermTaxonomyFieldset,
     Edm\Service\TermTaxonomyService,
-        Edm\Service\AbstractService;
+    Edm\Service\AbstractService;
 
 /**
  * Description of TermForm
@@ -13,19 +13,19 @@ use Edm\Form\TermFieldset,
  * @author ElyDeLaCruz
  */
 class TermTaxonomyForm extends EdmForm {
-    
+
     public $termTaxService;
 
     public function __construct($name = 'term-taxonomy-form', array $options = null) {
-        
+
         // Set service locator if injected manually
-        if (isset($options) &&isset($options['serviceLocator'])) {
+        if (isset($options) && isset($options['serviceLocator'])) {
             $this->setServiceLocator($options['serviceLocator']);
         }
-        
+
         // Call parent constructor
         parent::__construct($name);
-        
+
         // Set method
         $this->setAttribute('method', 'post');
 
@@ -34,12 +34,15 @@ class TermTaxonomyForm extends EdmForm {
         $termTaxFieldset = new TermTaxonomyFieldset('term-taxonomy');
         $submitAndReset = new SubmitAndResetFieldset('submit-and-reset');
 
-        $termTaxFieldset->get('taxonomy')->setOptions(array(
-            'value_options' => $this->getTaxonomyOptions('taxonomy') 
-        ));
-        
-//        var_dump($this->getTaxonomyOptions('taxonomy'));
+        // Set value options for taxonomy
+        $termTaxFieldset->get('taxonomy')->setValueOptions(
+                $this->getTaxonomyOptions('taxonomy'));
 
+        // Set value options for parent_id
+        $termTaxFieldset->get('parent_id')->setValueOptions(
+                $this->getParentIdOptions());
+                
+        // Set value options for parent_id
         // Term Feildset
         $this->add($termFieldset);
 
@@ -55,13 +58,12 @@ class TermTaxonomyForm extends EdmForm {
      * @param string $taxonomy
      * @return array
      */
-    public function getTaxonomyOptions($taxonomy) {
+    protected function getTaxonomyOptions($taxonomy) {
         $output = array();
         $rslt = $this->getTermTaxService()->getByTaxonomy('taxonomy', array(
             'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
             'nestedResults' => true,
-            'order' => 'term_name ASC',
-//            'where' => array('term_alias' => 'testing-9')
+            'order' => 'term_name ASC'
         ));
         $output['null'] = '-- Select a Taxonomy --';
         $output['taxonomy'] = 'Taxonomy';
@@ -71,11 +73,25 @@ class TermTaxonomyForm extends EdmForm {
         return $output;
     }
 
+    protected function getParentIdOptions() {
+        $output = array();
+        $rslt = $this->getTermTaxService()->read(array(
+            'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
+            'order' => 'term_name ASC'
+        ));
+        $output['null'] = '-- Select a Parent (optional) --';
+        foreach ($rslt as $item) {
+            $output[$item['term_taxonomy_id']] = $item['term_name'];
+        }
+        return $output;
+        
+    }
+
     public function getTermTaxService() {
         if (empty($this->termTaxService)) {
-            $this->termTaxService = 
+            $this->termTaxService =
                     $this->serviceLocator
-                        ->get('Edm\Service\TermTaxonomyService');
+                    ->get('Edm\Service\TermTaxonomyService');
         }
         return $this->termTaxService;
     }

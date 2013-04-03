@@ -9,14 +9,11 @@ use Edm\Service\AbstractService,
 
 /**
  * @author ElyDeLaCruz
- * @todo find a way to make this class work with roles
  */
 class TermTaxonomyService extends AbstractService {
 
     protected $termModel;
     protected $termTaxModel;
-    
-    // @todo implement these and get rid of hardcoded values
     protected $termModel_alias = 'term';
     protected $termTaxModel_alias = 'termTax';
     protected $resultSet;
@@ -70,6 +67,24 @@ class TermTaxonomyService extends AbstractService {
             $options->sql->prepareStatementForSqlObject(
                 $options->select->where($this->termTaxModel_alias .
                         '.taxonomy="' . $taxonomy . '"')
+            )->execute());
+        
+        return $this->fetchFromResult($rslt, $options->fetchMode);
+    }
+    
+    /**
+     * Read term taxonomies
+     * @param mixed $options
+     */
+    public function read ($options = null) {
+        // Normalize/get options object and seed it with default select params
+        $options = $this->seedOptionsForSelect(
+                $this->normalizeMethodOptions($options));
+        
+        // Get results
+        $rslt = $this->resultSet->initialize(
+            $options->sql->prepareStatementForSqlObject(
+                $options->select
             )->execute());
         
         return $this->fetchFromResult($rslt, $options->fetchMode);

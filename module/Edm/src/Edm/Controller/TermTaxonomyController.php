@@ -37,10 +37,28 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
 
         // Select 
-//        $select = new Select();
         $select = $this->getTermTaxService()->getSelect();
-//        $select->from($model->getTable());
-//        var_dump($select->getSqlString()); exit();  
+        
+        // Where part of query
+        $where = null;
+        
+        // Taxonomy
+        $taxonomy = $this->getAndSetParam('taxonomy', '*');
+        if (!empty($taxonomy) && $taxonomy != '*') {
+            $where = 'taxonomy="'. $taxonomy .'"';
+        }
+
+        // Parent Id
+        $parent_id = $this->getAndSetParam('parent_id', null);
+        if (!empty($parent_id)) {
+            $where .= isset($parent_id) ? ' AND ' : '';
+            $where .= 'parent_id="'. $parent_id .'"';
+        }
+        
+        // Where
+        if (isset($where)) {
+            $select->where($where);
+        }
         // Paginator
         $paginator = new Paginator(new DbSelect($select, $model->getAdapter()));
         $paginator->setItemCountPerPage($itemCountPerPage)
@@ -74,6 +92,8 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $form->setAttribute('action', '/edm-admin/term-taxonomy/create');
         $view->form = $form;
 
+        $termTable = $this->getTermModel();
+        
         // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -87,33 +107,36 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         if (!$view->form->isValid()) {
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
-//                    'data: ' . var_dump($form->getData()));
             return $view;
         }
-
         // Put data into model
         $termTaxTable = $this->getTermTaxonomyModel();
-        $termTable = $this->getTermModel();
         $data = (object) $view->form->getData();
+        $termTaxData = (object) $data->{'term-taxonomy'};
+        $termData = (object) $data->term;
+        
         // Check if term already exists
-        $term = $termTable->getByAlias((string) $data->term['alias']);
+        $term = $termTable->getByAlias((string) $termData->alias);
         if (empty($term)) {
             $rslt = $termTable->createItem($data->term);
             if (empty($rslt)) {
                 $fm->setNamespace('error')->addMessage('Failed to create term "'
-                        . $term->name . '".');
+                        . $termData->name . '".');
                 return $view;
             }
-            $term = $termTable->getByAlias((string) $data->term['alias']);
+            $term = $termTable->getByAlias((string) $termData->alias);
         }
 
-        // Put term in to db
-        $desc = $data->{'term-taxonomy'}['description'];
-        $data->{'term-taxonomy'}['description'] = $desc ? $desc : '';
+        // Normalize description
+        $desc = $termTaxData->description;
+        $termTaxData->description = $desc ? $desc : '';
 
+        // Create term taxonomy
         $rslt = $termTaxTable->createItem(array(
             'term_alias' => $term->alias,
-            'taxonomy' => 'taxonomy',
+            'taxonomy' => $termTaxData->taxonomy,
+            'parent_id' => $termTaxData->parent_id,
+            'listOrder' => 0,
             'description' => $desc
         ));
 
@@ -144,7 +167,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $fm = $this->initFlashMessenger();
 
         // Id
-        $id = $this->getParam('id');
+        $id = $this->getParam('itemId');
 
         // Put data into model
         $termTaxTable = $this->getTermTaxonomyModel();
@@ -160,7 +183,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
 
         // Setup form
         $form = new TermForm();
-        $form->setAttribute('action', '/edm-admin/term/update?id=' . $id);
+        $form->setAttribute('action', '/edm-admin/term/update/id/' . $id);
         $form->setData($existingTerm->toArray());
         $view->form = $form;
 

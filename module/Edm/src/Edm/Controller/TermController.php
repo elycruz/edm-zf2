@@ -225,15 +225,15 @@ class TermController extends AbstractController {
         // init flash messenger
         $fm = $this->initFlashMessenger();
 
-        // No deletion for demo
-        $fm->setNamespace('error')->addMessage('Deleting terms is not ' .
-                'allowed in this demo.');
-        
-        // init flash messenger
-        $fm = $this->initFlashMessenger();
-        
-        // Bail
-        return $view;
+//        // No deletion for demo
+//        $fm->setNamespace('error')->addMessage('Deleting terms is not ' .
+//                'allowed in this demo.');
+//        
+//        // init flash messenger
+//        $fm = $this->initFlashMessenger();
+//        
+//        // Bail
+//        return $view;
 
         // Id
         $id = $this->getParam('itemId');
@@ -244,7 +244,7 @@ class TermController extends AbstractController {
         // If request is not a get or id is empty return
         if (empty($id) || !$request->isGet()) {
             $fm->setNamespace('error')->addMessage('No `id` was set for ' .
-                    'deletion in the query string.');
+                    'deletion in the query string.  Value received: ' . $id);
             return $view;
         }
 

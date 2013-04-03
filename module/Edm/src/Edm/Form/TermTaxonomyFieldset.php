@@ -43,14 +43,14 @@ class TermTaxonomyFieldset extends Fieldset {
 
         // Parent Id
         $this->add(array(
-            'options' => array(
-                'label' => 'Parent'
-            ),
             'name' => 'parent_id',
+            'type' => 'Zend\Form\Element\Select',
+            'options' => array(
+                'label' => 'Parent',
+                'placeholder' => 'Parent'
+            ),
             'attributes' => array(
-                'id' => 'parent_id',
-                'placeholder' => 'Parent',
-                'type' => 'text'
+                'id' => 'parent_id'
             )
         ));
 
