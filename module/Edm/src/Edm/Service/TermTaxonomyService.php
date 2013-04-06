@@ -93,6 +93,28 @@ class TermTaxonomyService extends AbstractService {
         return $this->fetchFromResult($rslt, $options->fetchMode);
     }
     
+    /**
+     * Sets a term taxonomy's list order value
+     * @param int $id
+     * @param numeric $listOrder
+     * @return mixed boolean | ?
+     * @throws \Exception
+     */
+    public function setListOrderForId ($id, $listOrder) {
+        if (!is_numeric($listOrder)) {
+            throw new \Exception ('List order must be numeric value ' .
+                    'received: ' . $listOrder);
+        }
+        if (!is_numeric($id)) {
+            throw new \Exception ('Id must be numeric value ' .
+                    'received: ' . $id);
+        }
+        
+        return $this->getTermTaxonomyTable()->updateItem($id, array(
+            'listOrder' => $listOrder
+        ));
+    }
+    
     public function getDescendantsByAlias($alias, $taxonomy = 'taxonomy', $options = null) {
         // Normalize options
         $options = $this->normalizeMethodOptions($options);

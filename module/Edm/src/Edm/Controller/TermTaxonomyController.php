@@ -2,13 +2,13 @@
 
 /**
  * @todo modify term taxonomy service to include term term taxonomy
+ * @todo Unable to update term taxonomies name error is sent in flash message
  */
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
     Edm\Model\TermTaxonomy,
-    Edm\Model\Term,
     Edm\Service\TermTaxonomyAware,
     Edm\TraitPartials\TermTaxonomyAwareTrait,
     Edm\Service\AbstractService,
@@ -339,6 +339,54 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         return $view;
     }
 
+    public function setListOrderAction () {
+        $view =
+            $this->view =
+                new JsonModel();
+
+        // Let view be terminal in this action
+        $view->setTerminal(true);
+        
+        // Get id of item to update
+        $id = $this->getParam('itemId');
+        $listOrder = $this->getParam('listOrder');
+        
+        // Get term tax
+        $termTaxService = $this->getTermTaxService();
+        $termTax = new TermTaxonomy ($termTaxService->getById($id));
+        $fm = $this->initFlashMessenger();
+        
+        // Set error message if term tax not found
+        if (empty($termTax)) {
+            $fm->setNamespace('error')
+                    ->addMessage('Term Taxonomy id "' . $id
+                            . '" not found in database.  '.
+                            'List order change failed.');
+            return $view;
+        }
+
+        // Update listorder
+        $rslt = $termTaxService->setListOrderForId($id, $listOrder);
+        
+        // Send success message to user
+        if (!empty($rslt)) {
+            $fm->setNamespace('highlight')
+                    ->addMessage('Term Taxonomy "' 
+                            . $termTax->term_name . ' > ' . $termTax->taxonomy 
+                            . '" updated successfully.');
+        }
+        // send failure message to user 
+        else {
+            $fm->setNamespace('error')
+                    ->addMessage('Term Taxonomy "' 
+                            . $termTax->term_name . ' > ' . $termTax->taxonomy 
+                            . '" failed to be updated.');
+        }
+
+        // Return message to view
+        return $view;
+    }
+    
     public function getTermTaxonomyModel() {
         if (empty($this->termTaxTable)) {
             $locator = $this->getServiceLocator();

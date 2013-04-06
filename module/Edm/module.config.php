@@ -9,20 +9,20 @@ defined('APP_PATH') ||
 return array(
     'service_manager' => array(
         'invokables' => array(
-            'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
-            'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
-            'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
-            'Edm\Model\Term'                    => 'Edm\Model\Term',
-            'Edm\Model\TermTaxonomy'            => 'Edm\Model\TermTaxonomy',
-            'Edm\Form\TermTaxonomyForm'         => 'Edm\Form\TermTaxonomyForm'
+            'Edm\Service\TermTaxonomyService' => 'Edm\Service\TermTaxonomyService',
+            'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Db\Table\TermTable' => 'Edm\Db\Table\TermTable',
+            'Edm\Db\Table\TermTaxonomyTable' => 'Edm\Db\Table\TermTaxonomyTable',
+            'Edm\Model\Term' => 'Edm\Model\Term',
+            'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy',
+            'Edm\Form\TermTaxonomyForm' => 'Edm\Form\TermTaxonomyForm'
         )
     ),
     'controllers' => array(
         'invokables' => array(
-            'Edm\Controller\Index'          => 'Edm\Controller\IndexController',
-            'Edm\Controller\Term'           => 'Edm\Controller\TermController',
-            'Edm\Controller\TermTaxonomy'   => 'Edm\Controller\TermTaxonomyController',
+            'Edm\Controller\Index' => 'Edm\Controller\IndexController',
+            'Edm\Controller\Term' => 'Edm\Controller\TermController',
+            'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
         ),
     ),
     'view_helpers' => array(
@@ -72,25 +72,36 @@ return array(
                                     ),
                                 )
                             ),
+                            'updateListOrder' => array(
+                                'type' => 'Segment',
+                                'options' => array(
+                                    'route' => '[/id/:itemId]' .
+                                    '[/listOrder/:listOrder]',
+                                    'constraints' => array(
+                                        'itemId' => '[a-zA-Z\d\_\-]*',
+                                        'listOrder' => '[\d]*'
+                                    ),
+                                )
+                            ),
                             'paginator' => array(
                                 'type' => 'Segment',
 //                                'may_terminate' => true,
                                 'options' => array(
-                                    'route' => 
-                                        '[/page/:page]' .
-                                        '[/itemsPerPage/:itemsPerPage]' .
-                                        '[/sort/:sort][/sortBy/:sortBy]' .
-                                        '[/taxonomy/:taxonomy][/parent_id/:parent_id]',
-                                        '[/filter/:filter][/filterBy/:filterBy]',
+                                    'route' =>
+                                    '[/page/:page]' .
+                                    '[/itemsPerPage/:itemsPerPage]' .
+                                    '[/sort/:sort][/sortBy/:sortBy]' .
+                                    '[/taxonomy/:taxonomy][/parent_id/:parent_id]',
+                                    '[/filter/:filter][/filterBy/:filterBy]',
                                     'constraints' => array(
-                                        'page'          => '\d*',
-                                        'sort'          => '[a-zA-Z0-1]*',
-                                        'sortBy'        => '[a-zA-Z\d_\-]*',
-                                        'filter'        => '[a-zA-Z\d_\-]*',
-                                        'filterBy'      => '[a-zA-Z0-9\d_\-]*',
-                                        'taxonomy'      => '[a-zA-Z0-9\d_\-\*]*',
-                                        'parent_id'     => '[a-zA-Z0-9_\-]*',
-                                        'itemsPerPage'  => '\d*',
+                                        'page' => '\d*',
+                                        'sort' => '[a-zA-Z0-1]*',
+                                        'sortBy' => '[a-zA-Z\d_\-]*',
+                                        'filter' => '[a-zA-Z\d_\-]*',
+                                        'filterBy' => '[a-zA-Z0-9\d_\-]*',
+                                        'taxonomy' => '[a-zA-Z0-9\d_\-\*]*',
+                                        'parent_id' => '[a-zA-Z0-9_\-]*',
+                                        'itemsPerPage' => '\d*',
                                     ),
                                     'defaults' => array(
                                         'page' => 1,
@@ -99,7 +110,6 @@ return array(
                                 ),
                             ),
                         ),
-                        
                     ),
                 ),
             ),
