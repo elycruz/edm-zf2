@@ -178,20 +178,12 @@ class TermController extends AbstractController {
             return $view;
         }
 
-        // Generate alias if empty
-//        $alias = $view->form->getValue('alias');
-//        if (empty($alias)) {
-//            $term->alias = $this->getDbDataHelper()->getValidAlias($term->name);
-//        }
-//        
         // Set data
         $data = $view->form->getData();
-//        $data['alias'] = $alias;
-        // Put data into term object
         $term->exchangeArray($data);
 
         // Update term in db
-        $rslt = $termTable->updateItem($term->alias, $term->toArray());
+        $rslt = $termTable->updateItem($id, $term->toArray());
 
         // Send success message to user
         if ($rslt) {

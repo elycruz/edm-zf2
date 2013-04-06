@@ -68,7 +68,7 @@ return array(
                                 'options' => array(
                                     'route' => '[/id/:itemId]',
                                     'constraints' => array(
-                                        'itemId' => '[a-zA-Z0-9\_\-]'
+                                        'itemId' => '[a-zA-Z\d\_\-]*'
                                     ),
                                 )
                             ),
@@ -89,7 +89,7 @@ return array(
                                         'filter'        => '[a-zA-Z\d_\-]*',
                                         'filterBy'      => '[a-zA-Z0-9\d_\-]*',
                                         'taxonomy'      => '[a-zA-Z0-9\d_\-\*]*',
-                                        'parent_id'     => '[a-zA-Z0-9_\-]',
+                                        'parent_id'     => '[a-zA-Z0-9_\-]*',
                                         'itemsPerPage'  => '\d*',
                                     ),
                                     'defaults' => array(

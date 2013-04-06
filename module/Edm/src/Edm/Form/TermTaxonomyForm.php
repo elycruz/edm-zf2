@@ -65,7 +65,7 @@ class TermTaxonomyForm extends EdmForm {
             'nestedResults' => true,
             'order' => 'term_name ASC'
         ));
-        $output['null'] = '-- Select a Taxonomy --';
+        $output['taxonomy'] = '-- Select a Taxonomy --';
         $output['taxonomy'] = 'Taxonomy';
         foreach ($rslt as $item) {
             $output[$item['term_alias']] = $item['term_name'];
@@ -79,7 +79,7 @@ class TermTaxonomyForm extends EdmForm {
             'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
             'order' => 'term_name ASC'
         ));
-        $output['null'] = '-- Select a Parent (optional) --';
+        $output['0'] = '-- Select a Parent (optional) --';
         foreach ($rslt as $item) {
             $output[$item['term_taxonomy_id']] = $item['term_name'];
         }

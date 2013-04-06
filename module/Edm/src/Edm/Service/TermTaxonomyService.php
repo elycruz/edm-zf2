@@ -12,10 +12,12 @@ use Edm\Service\AbstractService,
  */
 class TermTaxonomyService extends AbstractService {
 
-    protected $termModel;
-    protected $termTaxModel;
-    protected $termModel_alias = 'term';
-    protected $termTaxModel_alias = 'termTax';
+    public $termTaxProxyTableName = 'term_taxonomies_proxy';
+    
+    protected $termTable;
+    protected $termTaxTable;
+    protected $termTable_alias = 'term';
+    protected $termTaxTable_alias = 'termTax';
     protected $resultSet;
 
     public function __construct() {
@@ -30,8 +32,9 @@ class TermTaxonomyService extends AbstractService {
      * @return mixed array | boolean
      */
     public function getById($term_taxonomy_id) {
-        $sql = $this->sql;
-        $select = $this->getSelect($sql)->where($this->termTaxModel_alias .'.taxonomy="' . $term_taxonomy_id . '"');
+        $sql = $this->getSql();
+        $select = $this->getSelect($sql)->where($this->termTaxTable_alias 
+                .'.term_taxonomy_id="' . $term_taxonomy_id . '"');
         return $sql->prepareStatementForSqlObject($select)->execute()->current();
     }
 
@@ -44,8 +47,8 @@ class TermTaxonomyService extends AbstractService {
      */
     public function getByAlias($alias, $taxonomy = 'taxonomy', $options = null) {
         $sql = $this->getSql();
-        $select = $this->getSelect($sql)->where($this->termTaxModel_alias .'.taxonomy="' . $taxonomy .
-                '" AND '. $this->termTaxModel_alias .'.term_alias="' . $alias . '"');
+        $select = $this->getSelect($sql)->where($this->termTaxTable_alias .'.taxonomy="' . $taxonomy .
+                '" AND '. $this->termTaxTable_alias .'.term_alias="' . $alias . '"');
         return $this->resultSet->initialize(
                 $sql->prepareStatementForSqlObject($select)->execute()
             )->current();
@@ -65,7 +68,7 @@ class TermTaxonomyService extends AbstractService {
         // Get results
         $rslt = $this->resultSet->initialize(
             $options->sql->prepareStatementForSqlObject(
-                $options->select->where($this->termTaxModel_alias .
+                $options->select->where($this->termTaxTable_alias .
                         '.taxonomy="' . $taxonomy . '"')
             )->execute());
         
@@ -128,7 +131,7 @@ class TermTaxonomyService extends AbstractService {
         $topChildren = $this->resultSet;
         $topChildren->initialize(
                 $sql->prepareStatementForSqlObject(
-                        $select->where($this->termTaxModel_alias .'.taxonomy="' . $alias . '"')
+                        $select->where($this->termTaxTable_alias .'.taxonomy="' . $alias . '"')
                                 ->order('term_name DESC'))->execute());
 
         // If no top children
@@ -184,7 +187,7 @@ class TermTaxonomyService extends AbstractService {
             // Get children
             $subChildren = $this->resultSet->initialize($sql->prepareStatementForSqlObject(
                             $this->getSelect($sql)
-                                    ->where($this->termTaxModel_alias .'.parent_id=' . $topChild['term_taxonomy_id'])
+                                    ->where($this->termTaxTable_alias .'.parent_id=' . $topChild['term_taxonomy_id'])
                                     ->order('term_name DESC'))->execute());
 
             // If error throw an exception
@@ -243,22 +246,30 @@ class TermTaxonomyService extends AbstractService {
         return $select
             ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
             ->join(array('term' => $this->getTermTable()->table), 
-                    'term.alias='. $this->termTaxModel_alias .'.term_alias', array(
+                    'term.alias='. $this->termTaxTable_alias .'.term_alias', array(
                 'term_name' => 'name',
                 'term_group_alias'));
         
     }
 
+    public function getTermTaxonomyProxyTable () {
+        if (empty($this->termTaxProxyTable)) {
+//            $table = $this->termTaxProxyTable = new TableGateway(
+//                    $this->termTaxProxyTableName);
+        }
+        return $this->termTaxProxyTable;
+    }
+    
     /**
      * Term Taxonomy Table
      * @return Edm\Db\Table\TermTaxonomyTable
      */
     public function getTermTaxonomyTable() {
-        if (empty($this->termTaxModel)) {
-            $this->termTaxModel = $this->getServiceLocator()
+        if (empty($this->termTaxTable)) {
+            $this->termTaxTable = $this->getServiceLocator()
                     ->get('Edm\Db\Table\TermTaxonomyTable');
         }
-        return $this->termTaxModel;
+        return $this->termTaxTable;
     }
 
     /**
@@ -266,11 +277,11 @@ class TermTaxonomyService extends AbstractService {
      * @return Edm\Db\Table\TermTable
      */
     public function getTermTable() {
-        if (empty($this->termModel)) {
-            $this->termModel = $this->getServiceLocator()
+        if (empty($this->termTable)) {
+            $this->termTable = $this->getServiceLocator()
                     ->get('Edm\Db\Table\TermTable');
         }
-        return $this->termModel;
+        return $this->termTable;
     }
 
 }

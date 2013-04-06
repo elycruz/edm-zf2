@@ -1,9 +1,13 @@
 <?php
 
+/**
+ * @todo modify term taxonomy service to include term term taxonomy
+ */
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
+    Edm\Model\TermTaxonomy,
     Edm\Model\Term,
     Edm\Service\TermTaxonomyAware,
     Edm\TraitPartials\TermTaxonomyAwareTrait,
@@ -11,8 +15,7 @@ use Edm\Controller\AbstractController,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
-    Zend\Paginator\Adapter\DbSelect,
-    Zend\Db\Sql\Select;
+    Zend\Paginator\Adapter\DbSelect;
 
 class TermTaxonomyController extends AbstractController implements TermTaxonomyAware {
 
@@ -38,23 +41,23 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
 
         // Select 
         $select = $this->getTermTaxService()->getSelect();
-        
+
         // Where part of query
         $where = null;
-        
+
         // Taxonomy
         $taxonomy = $this->getAndSetParam('taxonomy', '*');
         if (!empty($taxonomy) && $taxonomy != '*') {
-            $where = 'taxonomy="'. $taxonomy .'"';
+            $where = 'taxonomy="' . $taxonomy . '"';
         }
 
         // Parent Id
         $parent_id = $this->getAndSetParam('parent_id', null);
         if (!empty($parent_id)) {
             $where .= isset($parent_id) ? ' AND ' : '';
-            $where .= 'parent_id="'. $parent_id .'"';
+            $where .= 'parent_id="' . $parent_id . '"';
         }
-        
+
         // Where
         if (isset($where)) {
             $select->where($where);
@@ -92,8 +95,6 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $form->setAttribute('action', '/edm-admin/term-taxonomy/create');
         $view->form = $form;
 
-        $termTable = $this->getTermModel();
-        
         // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -109,48 +110,66 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
                     '  Please try again.');
             return $view;
         }
-        // Put data into model
+
+        // Get Term Taxonomy service
         $termTaxTable = $this->getTermTaxonomyModel();
+        $termTaxService = $this->getTermTaxService();
+
+        // Get data
         $data = (object) $view->form->getData();
         $termTaxData = (object) $data->{'term-taxonomy'};
         $termData = (object) $data->term;
+
+        // Check if term taxonomy already exists
+        $termTaxCheck = $termTaxService->getByAlias(
+                $termData->alias, $termTaxData->taxonomy);
+        if (!empty($termTaxCheck)) {
+            $fm->setNamespace('error')->addMessage('Term Taxonomy "" already ' .
+                    'exists in the database.  Click here to edit it.');
+            return $view;
+        }
+
+        // Database data helper
+        $dbDataHelper = $this->getDbDataHelper();
         
-        // Check if term already exists
-        $term = $termTable->getByAlias((string) $termData->alias);
+        // Get Term from data 
+        $term = $this->getTermFromData($dbDataHelper
+                ->escapeTuple($data->term));
+        
+        // If failed to fetch term
         if (empty($term)) {
-            $rslt = $termTable->createItem($data->term);
-            if (empty($rslt)) {
-                $fm->setNamespace('error')->addMessage('Failed to create term "'
-                        . $termData->name . '".');
-                return $view;
-            }
-            $term = $termTable->getByAlias((string) $termData->alias);
+            $fm->setNamespace('error')->addMessage('Failed to create term '. 
+                    'needed for Term Taxonomy creation.');
+            return $view;
         }
 
         // Normalize description
         $desc = $termTaxData->description;
         $termTaxData->description = $desc ? $desc : '';
 
+        // Normalize parent id
+        $parent_id = !empty($termTaxData->parent_id) ? 
+                $termTaxData->parent_id : 0;
+        
         // Create term taxonomy
         $rslt = $termTaxTable->createItem(array(
             'term_alias' => $term->alias,
             'taxonomy' => $termTaxData->taxonomy,
-            'parent_id' => $termTaxData->parent_id,
-            'listOrder' => 0,
+            'parent_id' => $parent_id,
             'description' => $desc
         ));
 
         // Send success message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term Taxonomy "' . $term->name . '" with alias "'
-                            . $term->alias . '" added successfully.');
+                    ->addMessage('Term Taxonomy "' . $term->name . ' -> '
+                            . $termTaxData->taxonomy . '" added successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Term Taxonomy "' . $term->name . '" with alias "'
-                            . $term->alias . '" failed to be added to database.');
+                    ->addMessage('Term Taxonomy "' . $term->name . ' -> '
+                            . $termTaxData->taxonomy . '" failed to be added.');
         }
 
         // Return message to view
@@ -171,21 +190,37 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
 
         // Put data into model
         $termTaxTable = $this->getTermTaxonomyModel();
+        $termTaxService = $this->getTermTaxService();
+
+        // Setup form
+        $form = new TermTaxonomyForm('term-taxonomy-form', array(
+            'serviceLocator' => $this->getServiceLocator()
+        ));
+        $form->setAttribute('action', '/edm-admin/term-taxonomy/update/id/' . $id);
+        $view->form = $form;
 
         // Check if term already exists
         try {
-            $existingTerm = new Term((array) $termTaxTable->getByAlias($id));
+            $existingTermTax = new TermTaxonomy((array) $termTaxService->getById($id));
         } catch (\Exception $e) {
-            $fm->setNamespace('error')->addMessage('Term '
-                    . 'doesn\t exist in database.');
+            $fm->setNamespace('error')->addMessage('Term Taxonomy with id "'
+                    . $id . '" doesn\'t exist in database.');
             return $view;
         }
 
-        // Setup form
-        $form = new TermForm();
-        $form->setAttribute('action', '/edm-admin/term/update/id/' . $id);
-        $form->setData($existingTerm->toArray());
-        $view->form = $form;
+        // Set data
+        $form->setData(array(
+            'term-taxonomy' => array(
+                'taxonomy' => $existingTermTax->taxonomy,
+                'parent_id' => $existingTermTax->parent_id,
+                'description' => $existingTermTax->description
+            ),
+            'term' => array(
+                'name' => $existingTermTax->term_name,
+                'alias' => $existingTermTax->term_alias,
+                'term_group_alias' => $existingTermTax->term_group_alias
+            )
+        ));
 
         // If not post bail
         $request = $this->getRequest();
@@ -194,43 +229,53 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         }
 
         // Processing request
-        $term = new Term();
-        $view->form->setInputFilter($term->getInputFilter());
         $view->form->setData($request->getPost());
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.');
+            $fm->setNamespace('error')->addMessage('Form validation failed.  ' .
+                    'Please review values and try again.');
             return $view;
         }
 
-        // Generate alias if empty
-//        $alias = $view->form->getValue('alias');
-//        if (empty($alias)) {
-//            $term->alias = $this->getDbDataHelper()->getValidAlias($term->name);
-//        }
-//        
         // Set data
         $data = $view->form->getData();
-//        $data['alias'] = $alias;
-        // Put data into term object
-        $term->exchangeArray($data);
+        
+        // Allocoate updates
+        $term = $this->getTermFromData($data['term']); //->exchangeArray($data);
+        $termTax = (object) $data['term-taxonomy'];
 
+        // Normalize description
+        $desc = $termTax->description;
+        $termTax->description = $desc ? $desc : '';
+
+        // Normalize parent id
+        $parent_id = !empty($termTax->parent_id) ? 
+                $termTax->parent_id : 0;
+        
+        $data = array(
+            'term_alias' => $term->alias,
+            'taxonomy' => $termTax->taxonomy,
+            'parent_id' => $parent_id,
+            'description' => $termTax->description
+        );
+        
         // Update term in db
-        $rslt = $termTaxTable->updateItem($term->alias, $term->toArray());
-
+        $rslt = $termTaxTable->updateItem($id, $data);
+        
         // Send success message to user
-        if ($rslt) {
+        if (!empty($rslt)) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term "' . $term->name . '" with alias "'
-                            . $term->alias . '" updated successfully.')
-                    ->addMessage($term->alias);
+                    ->addMessage('Term Taxonomy "' 
+                            . $term->name . ' > ' . $termTax->taxonomy 
+                            . '" updated successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Term "' . $term->name . '" with alias "'
-                            . $term->alias . '" failed to be updated.');
+                    ->addMessage('Term Taxonomy "' 
+                            . $term->name . ' > ' . $termTax->taxonomy 
+                            . '" failed to be updated.');
         }
 
         // Return message to view
@@ -241,20 +286,17 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         // Set up prelims and populate $this -> view for 
         $view =
                 $this->view =
-                new ViewModel();
+                new JsonModel();
         $view->setTerminal(true);
 
         // init flash messenger
         $fm = $this->initFlashMessenger();
 
         // Id
-        $id = $this->getParam('id');
-
-        // Request
-        $request = $this->getRequest();
+        $id = $this->getParam('itemId');
 
         // If request is not a get or id is empty return
-        if (empty($id) || !$request->isGet()) {
+        if (empty($id)) {
             $fm->setNamespace('error')->addMessage('No `id` was set for ' .
                     'deletion in the query string.');
             return $view;
@@ -265,30 +307,32 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
 
         try {
             // Check if term already exists
-            $term = new Term((array) $termTaxTable->getByAlias($id));
-        } catch (\Exception $e) {
+            $term = new TermTaxonomy($this->getTermTaxService()->getById($id));
+        } 
+        catch (\Exception $e) {
             // If not send message and bail
-            $fm->setNamespace('error')->addMessage('Term alias "' .
-                    $id . '" doesn\t exist in database.');
+            $fm->setNamespace('error')->addMessage('Term Taxonomy Id "' .
+                    $id . '" doesn\'t exist in database.');
             $view->error = $e;
             return $view;
         }
 
         // Delete term in db
-        $rslt = $termTaxTable->deleteItem($term->alias);
+        $rslt = $termTaxTable->deleteItem($term->term_taxonomy_id);
 
         // Send success message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term deleted successfully. '
-                            . 'Term name: "' . $term->name . '"'
-                            . 'Term alias: "' . $term->alias . '"');
+                    ->addMessage('Term Taxonomy "' 
+                            . $term->term_name . ' > ' . $term->term_alias 
+                            . '" deleted successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Term "' . $term->name . '" with alias "'
-                            . $term->alias . '" failed to be deleted.');
+                    ->addMessage('Term Taxonomy "' 
+                            . $term->term_name . ' > ' . $term->term_alias 
+                            . '" failed to be deleted.');
         }
 
         // Return message to view
@@ -329,5 +373,36 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         return $view;
     }
 
+    /**
+     * Get term from data and create it if it doesn't exists
+     * @param mixed [array, object] $termData gets cast as (object) 
+     * @return mixed Edm\Model\Term | array
+     */
+    public function getTermFromData($termData) {
+        // Convert from array if necessary
+        if (is_array($termData)) {
+            $termData = (object) $termData;
+        }
+        
+        // Get term table
+        $termTable = $this->getTermModel();
+        
+        // Check if term already exists
+        $term = $termTable->getByAlias((string) $termData->alias);
+        
+        // Create term if empty
+        if (empty($term)) {
+            $rslt = $termTable->createItem((array) $termData);
+            if (empty($rslt)) {
+                return false;
+            }
+            $term = $termTable->getByAlias((string) $termData->alias);
+        }
+        // Update term
+        else if (!empty($term->name) && !empty($term->term_group_alias)) {
+            $termTable->updateItem($term->alias, $term->toArray());
+        }
+        return $term;
+    }
 }
 

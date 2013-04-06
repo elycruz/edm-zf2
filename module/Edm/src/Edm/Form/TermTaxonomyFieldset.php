@@ -32,7 +32,7 @@ class TermTaxonomyFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Taxonomy',
                 'value_options' => array(
-                    'null' => '-- Select a Taxonomy --'
+                    'taxonomy' => '-- Select a Taxonomy --'
                 )
             ),
             'attributes' => array(

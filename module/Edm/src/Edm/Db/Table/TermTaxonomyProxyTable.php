@@ -3,29 +3,27 @@
 namespace Edm\Db\Table;
 
 use Edm\Db\Table\AbstractTable,
+    Edm\Model\TermTaxonomyProxy,
+    Zend\Db\ResultSet\ResultSet,
 //    Zend\Db\Adapter\Adapter,
 //    Zend\Db\ResultSet\ResultSetInterface,
-//    Zend\Db\Sql\Sql
-    Edm\Model\TermTaxonomy,
-    Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
-    Zend\Db\TableGateway\Feature\GlobalAdapterFeature;;
+    Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
+//    Zend\Db\Sql\Sql;
 
-class TermTaxonomyTable extends AbstractTable {
+class TermTaxonomyProxyTable extends AbstractTable {
 
-    
     public function __construct() {
-        $this->table = 'term_taxonomies';
+        $this->table = 'terms';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
-        $resultSetProto->setArrayObjectPrototype(new TermTaxonomy());
+        $resultSetProto->setArrayObjectPrototype(new TermTaxonomyProxy());
         $this->resultSetPrototype = $resultSetProto;
         $this->initialize();
     }
 
     public function createItem(array $data) {
-        if (!empty($data['parent_id'])) 
         $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->insert($data);
     }
@@ -46,5 +44,5 @@ class TermTaxonomyTable extends AbstractTable {
     public function getById($id) {
         return $this->getBy(array('term_taxonomy_id' => $id));
     }
-    
+
 }
