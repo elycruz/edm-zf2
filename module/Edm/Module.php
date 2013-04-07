@@ -14,12 +14,6 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface,
     Zend\Mvc\ModuleRouteListener,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
-//    Zend\Db\ResultSet\ResultSet,
-//    Edm\Model\Term,
-//    Edm\Model\TermTaxonomy,
-//    Edm\Model\TermTaxonomyTable,
-//    Edm\Model\TermTable;
-
 class Module implements AutoloaderProviderInterface {
 
 //    public function getServiceConfig() {

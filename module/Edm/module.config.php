@@ -9,13 +9,13 @@ defined('APP_PATH') ||
 return array(
     'service_manager' => array(
         'invokables' => array(
-            'Edm\Service\TermTaxonomyService' => 'Edm\Service\TermTaxonomyService',
-            'Edm\Db\DatabaseDataHelper' => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Db\Table\TermTable' => 'Edm\Db\Table\TermTable',
-            'Edm\Db\Table\TermTaxonomyTable' => 'Edm\Db\Table\TermTaxonomyTable',
-            'Edm\Model\Term' => 'Edm\Model\Term',
-            'Edm\Model\TermTaxonomy' => 'Edm\Model\TermTaxonomy',
-            'Edm\Form\TermTaxonomyForm' => 'Edm\Form\TermTaxonomyForm'
+            'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
+            'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
+            'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
+            'Edm\Service\UserService'           => 'Edm\Service\UserService',
+            'Edm\Service\UserTable'             => 'Edm\Service\UserTable',
+            'Edm\Service\ContactTable'          => 'Edm\Service\ContactTable',
         )
     ),
     'controllers' => array(
@@ -23,6 +23,7 @@ return array(
             'Edm\Controller\Index' => 'Edm\Controller\IndexController',
             'Edm\Controller\Term' => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
+            'Edm\Controller\User' => 'Edm\Controller\UserController',
         ),
     ),
     'view_helpers' => array(
@@ -53,7 +54,6 @@ return array(
                     // specific routes.
                     'default' => array(
                         'type' => 'Segment',
-//                        'may_terminate' => true,
                         'options' => array(
                             'route' => '/[:controller[/:action]]',
                             'constraints' => array(
@@ -64,7 +64,6 @@ return array(
                         'child_routes' => array(
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
-//                                'may_terminate' => true,
                                 'options' => array(
                                     'route' => '[/id/:itemId]',
                                     'constraints' => array(
@@ -85,7 +84,6 @@ return array(
                             ),
                             'paginator' => array(
                                 'type' => 'Segment',
-//                                'may_terminate' => true,
                                 'options' => array(
                                     'route' =>
                                     '[/page/:page]' .
@@ -120,8 +118,7 @@ return array(
             'Edm' => __DIR__ . '/src/Edm/view-scripts',
         ),
         'template_map' => array(
-            'layout/layout' => __DIR__ . '/../../public/module-templates/edm-ko-ui/index.phtml',
-            'partials/message' => __DIR__ . '/src/Edm/view-scripts/edm/partials/message.phtml'
+            'layout/layout' => __DIR__ . '/../../public/module-templates/edm-ko-ui/index.phtml'
         )
     ),
 );
