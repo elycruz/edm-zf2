@@ -26,12 +26,12 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
 
     public function indexAction() {
         // View
-        $view =
+        $view = 
                 $this->view =
                 new JsonModel();
 
         // Model
-        $model = $this->getTermTaxonomyModel();
+        $model = $this->getUserTable();
 
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
@@ -112,7 +112,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         }
 
         // Get Term Taxonomy service
-        $termTaxTable = $this->getTermTaxonomyModel();
+        $termTaxTable = $this->getUserTable();
         $termTaxService = $this->getTermTaxService();
 
         // Get data
@@ -189,7 +189,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         $id = $this->getParam('itemId');
 
         // Put data into model
-        $termTaxTable = $this->getTermTaxonomyModel();
+        $termTaxTable = $this->getUserTable();
         $termTaxService = $this->getTermTaxService();
 
         // Setup form
@@ -303,7 +303,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         }
 
         // Get term table
-        $termTaxTable = $this->getTermTaxonomyModel();
+        $termTaxTable = $this->getUserTable();
 
         try {
             // Check if term already exists
@@ -387,14 +387,6 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         return $view;
     }
     
-    public function getTermTaxonomyModel() {
-        if (empty($this->termTaxTable)) {
-            $locator = $this->getServiceLocator();
-            $this->termTaxTable = $locator->get('Edm\Db\Table\TermTaxonomyTable');
-            $this->termTaxTable->setServiceLocator($locator);
-        }
-        return $this->termTaxTable;
-    }
 
     public function getTermModel() {
         if (empty($this->termTable)) {

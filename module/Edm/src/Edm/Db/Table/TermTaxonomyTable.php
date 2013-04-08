@@ -3,9 +3,6 @@
 namespace Edm\Db\Table;
 
 use Edm\Db\Table\AbstractTable,
-//    Zend\Db\Adapter\Adapter,
-//    Zend\Db\ResultSet\ResultSetInterface,
-//    Zend\Db\Sql\Sql
     Edm\Model\TermTaxonomy,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,

@@ -13,6 +13,7 @@ return array(
             'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
             'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
             'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
+            'Edm\Db\Table\TermTaxonomyProxyTable'    => 'Edm\Db\Table\TermTaxonomyProxyTable',
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
             'Edm\Service\UserTable'             => 'Edm\Service\UserTable',
             'Edm\Service\ContactTable'          => 'Edm\Service\ContactTable',

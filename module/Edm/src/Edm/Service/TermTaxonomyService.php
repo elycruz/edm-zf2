@@ -16,6 +16,7 @@ class TermTaxonomyService extends AbstractService {
     
     protected $termTable;
     protected $termTaxTable;
+    protected $termTaxProxyTable;
     protected $termTable_alias = 'term';
     protected $termTaxTable_alias = 'termTax';
     protected $resultSet;
@@ -114,143 +115,6 @@ class TermTaxonomyService extends AbstractService {
             'listOrder' => $listOrder
         ));
     }
-    
-    public function getDescendantsByAlias($alias, $taxonomy = 'taxonomy', $options = null) {
-        // Normalize options
-        $options = $this->normalizeMethodOptions($options);
-
-        // Sql 
-        $sql = new Sql($this->getDb());
-
-        // Select
-        $select = $this->getSelect($sql);
-
-        // Create results array
-        $rslts = array();
-
-        // Get db data helper
-        $dbDataHelper = $this->getDbDataHelper();
-
-        // Top tuple
-        $topTuple = $this->getByAlias($alias, $taxonomy);
-
-        // If tuple not found return null;
-        if (empty($topTuple)) {
-            return null;
-        }
-
-        // Get top tuple
-        if (empty($options->topTuple)) {
-            $topTuple = (object) $dbDataHelper->reverseEscapeTuple($topTuple);
-        } else {
-            if (is_array($options->topTuple)) {
-                $options->topTuple = (object) $options->topTuple;
-            }
-            $topTuple = $options->topTuple;
-        }
-
-        // Top level tuple's children
-        $topChildren = $this->resultSet;
-        $topChildren->initialize(
-                $sql->prepareStatementForSqlObject(
-                        $select->where($this->termTaxTable_alias .'.taxonomy="' . $alias . '"')
-                                ->order('term_name DESC'))->execute());
-
-        // If no top children
-        if ($topChildren->count() == 0) {
-            return null;
-        }
-
-        // If attach children
-        if (!empty($options->attachChildren)) {
-            $topTuple->descendants = $dbDataHelper
-                    ->reverseEscapeTuples($topChildren->toArray());
-            $topTuple = (object) $topTuple;
-            return $topTuple;
-        }
-
-        // Add top tuple to top of results 
-        $rslts[] = (object) $topTuple;
-        return array_replace($rslts, $topChildren->toArray());
-    }
-
-    public function getDescendantsByAliasRecursive($alias, $taxonomy = 'taxonomy', $options = null) {
-
-        // Normalize method options
-        $options = $this->normalizeMethodOptions($options);
-
-        // Get top tuples
-        $topTuples = $this->getDescendantsByAlias($alias, $taxonomy, $options);
-
-        // Return null if no descendants
-        if (!is_array($topTuples) || count($topTuples) == 0) {
-            return null;
-        }
-
-        // Get top tuple
-        $topTuple = array_pop($topTuples);
-
-        // If top tuple not std class make
-        if (!($topTuple instanceOf \stdClass)) {
-            $topTuple = (object) $topTuple;
-        }
-
-        // Get top tuples from descendants if necessary
-        if (!empty($topTuple->descendants)) {
-            $topTuples = $topTuple->descendants;
-        }
-
-        // New Sub CHildren
-        $newTopChildren = array();
-
-        foreach ($topTuples as $topChild) {
-            $sql = new Sql($this->getDb());
-
-            // Get children
-            $subChildren = $this->resultSet->initialize($sql->prepareStatementForSqlObject(
-                            $this->getSelect($sql)
-                                    ->where($this->termTaxTable_alias .'.parent_id=' . $topChild['term_taxonomy_id'])
-                                    ->order('term_name DESC'))->execute());
-
-            // If error throw an exception
-            if ($subChildren->count() == 0) {
-                throw new Exception('An error occurred while trying to call ' .
-                __FUNCTION__ . ' of the ' . __CLASS__ . ' class.' .
-                'Error received:  Failed to retrieve sub children.');
-            }
-
-            // Clean sub children and add sub sub children 
-            while ($subChildren->valid()) {
-                $child = $subChildren->current();
-                $child->setData(
-                        $this->dbDataHelper
-                            ->reverseEscapeTuple($child->toArray()));
-
-                // Set top tuple
-                $options->topTuple = $child;
-                $subSub =
-                        $this->getDescendantsByAliasRecursive(
-                        $child->term_alias, $child->taxonomy, $options);
-
-                $child->descendants = $subSub;
-                $child->altered = true;
-                $subChildren->next();
-            }
-            
-            var_dump($subChildren->toArray());
-            exit();
-            
-            // If attach children
-            if ($options->attachChildren) {
-                $topChild->descendants = $subChildren;
-                $newTopChildren[] = $topChild;
-            } else {
-                $newTopChildren[] = $topChild;
-                $newTopChildren = array_replace($newTopChildren, $subChildren);
-            }
-        }
-        
-    }
 
     /**
      * Returns our pre-prepared select statement 
@@ -266,18 +130,169 @@ class TermTaxonomyService extends AbstractService {
         $select = $sql->select();
         // @todo implement return values only for current role level
         return $select
+                
             ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
+                
             ->join(array('term' => $this->getTermTable()->table), 
-                    'term.alias='. $this->termTaxTable_alias .'.term_alias', array(
-                'term_name' => 'name',
-                'term_group_alias'));
+                    'term.alias='. $this->termTaxTable_alias .'.term_alias',
+                    array('term_name' => 'name', 'term_group_alias'))
+                
+            ->join(array('termTaxProxy' => $this->getTermTaxonomyProxyTable()->table),
+                'termTaxProxy.term_taxonomy_id=termTax.term_taxonomy_id', 
+                    array('childCount', 'assocItemCount'));
         
     }
 
+    public function createItem (array $data) {
+        // Throw error if term or term-taxonomy not set
+        if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
+            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
+                    'parameter "$data" to contain a "term" and ' .
+                    '"term-taxonomy" keys.');
+        }
+        
+        // Clean data 
+        $dbDataHelper = $this->getDbDataHelper();
+        $term = $dbDataHelper->escapeTuple($data['term']);
+        $termTax = $dbDataHelper->escapeTuple($data['term-taxonomy']);
+        
+        // Normalize description
+        $desc = $termTax['description'];
+        $termTaxData['description'] = $desc ? $desc : '';
+
+        // Normalize parent id
+        $termTaxData['parent_id'] = !empty($termTaxData['parent_id']) ? 
+               $termTaxData['parent_id'] : 0;
+        
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        
+        // Try db insertions
+        try {
+            // Process Term and rollback if failure
+            $termRslt = $this->getTermFromData($term);
+            
+            // Set term tax term alias just in case
+            $termTax['term_alias'] = $termRslt->alias;
+            
+            // Process Term Taxonomy 
+            $termTaxRslt = $this->getTermTaxonomyTable()
+                    ->createItem($termTax);
+            
+            // Commit changes
+            $conn->commit();
+            
+            // Return success message
+            return $termTaxRslt;
+        }
+        catch (\Exception $e) {      
+            // Rollback changes
+            $conn->rollback();
+            return $e;
+        }
+    }
+    
+    public function updateItem ($id, $data) {
+        // Throw error if term or term-taxonomy not set
+        if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
+            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
+                    'parameter "$data" to contain a "term" and ' .
+                    '"term-taxonomy" keys.');
+        }
+        
+        // Clean data 
+        $dbDataHelper = $this->getDbDataHelper();
+        $term = $dbDataHelper->escapeTuple($data['term']);
+        $termTax = $dbDataHelper->escapeTuple($data['term-taxonomy']);
+        
+        // Normalize description
+        $desc = $termTax['description'];
+        $termTaxData['description'] = $desc ? $desc : '';
+
+        // Normalize parent id
+        $termTaxData['parent_id'] = !empty($termTaxData['parent_id']) ? 
+               $termTaxData['parent_id'] : 0;
+        
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        
+        // Try db updates
+        try {
+            // Process Term and rollback if failure
+            $termRslt = $this->getTermFromData($term);
+            
+            // Set term tax term alias just in case
+            $termTax['term_alias'] = $termRslt->alias;
+            
+            // Process Term Taxonomy 
+            $termTaxRslt = $this->getTermTaxonomyTable()
+                    ->updateItem($id, $termTax);
+            
+            // Commit changes
+            $conn->commit();
+            
+            // Return success message
+            return $termTaxRslt;
+        }
+        catch (\Exception $e) {      
+            // Rollback changes
+            $conn->rollback();
+            return $e;
+        }
+    }
+    
+    public function deleteItem ($where) {
+        
+    }
+    
+    /**
+     * Get term from data and create it if it doesn't exists
+     * @param mixed [array, object] $termData gets cast as (object) 
+     * @return mixed Edm\Model\Term | array
+     */
+    public function getTermFromData($termData) {
+        // Convert from array if necessary
+        if (is_array($termData)) {
+            $termData = (object) $this->getDbDataHelper()
+                    ->escapeTuple($termData);
+        }
+        
+        // Get term table
+        $termTable = $this->getTermTable();
+        
+        // Check if term already exists
+        $term = $termTable->getByAlias((string) $termData->alias);
+        
+        // Create term if empty
+        if (empty($term)) {
+            $rslt = $termTable->createItem((array) $termData);
+            if (empty($rslt)) {
+                return false;
+            }
+            $term = $termTable->getByAlias((string) $termData->alias);
+        }
+        // Update term
+        else if (!empty($term->name) && !empty($term->alias)) {
+            $termTable->updateItem($term->alias, $term->toArray());
+        }
+        return $term;
+    }
+    
+    /**
+     * Term Taxonomy Proxy Table (keeps child and 
+     * associated item count via trigger)
+     * @return Edm\Db\Table\TermTaxonomyProxyTable
+     */
     public function getTermTaxonomyProxyTable () {
         if (empty($this->termTaxProxyTable)) {
-//            $table = $this->termTaxProxyTable = new TableGateway(
-//                    $this->termTaxProxyTableName);
+                $this->termTaxProxyTable = $this->getServiceLocator()
+                    ->get('Edm\Db\Table\TermTaxonomyProxyTable');
         }
         return $this->termTaxProxyTable;
     }

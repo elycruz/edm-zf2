@@ -5,16 +5,13 @@ namespace Edm\Db\Table;
 use Edm\Db\Table\AbstractTable,
     Edm\Model\TermTaxonomyProxy,
     Zend\Db\ResultSet\ResultSet,
-//    Zend\Db\Adapter\Adapter,
-//    Zend\Db\ResultSet\ResultSetInterface,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
-//    Zend\Db\Sql\Sql;
 
 class TermTaxonomyProxyTable extends AbstractTable {
 
     public function __construct() {
-        $this->table = 'terms';
+        $this->table = 'term_taxonomies_proxy';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
@@ -35,10 +32,6 @@ class TermTaxonomyProxyTable extends AbstractTable {
 
     public function deleteItem($id) {
         return $this->delete(array('term_taxonomy_id' => $id));
-    }
-
-    public function read() {
-        return $this->select();
     }
 
     public function getById($id) {
