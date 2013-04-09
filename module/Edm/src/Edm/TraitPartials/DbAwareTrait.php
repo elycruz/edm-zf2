@@ -13,6 +13,7 @@ use Zend\Db\Adapter\Adapter as DbAdapter,
  * @author ElyDeLaCruz
  */
 trait DbAwareTrait {
+    
     protected $db;
     
     public function setDb(DbAdapter $db) {

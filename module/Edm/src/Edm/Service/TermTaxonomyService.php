@@ -12,13 +12,11 @@ use Edm\Service\AbstractService,
  */
 class TermTaxonomyService extends AbstractService {
 
-    public $termTaxProxyTableName = 'term_taxonomies_proxy';
-    
     protected $termTable;
     protected $termTaxTable;
-    protected $termTaxProxyTable;
     protected $termTable_alias = 'term';
     protected $termTaxTable_alias = 'termTax';
+    protected $termTaxProxyTableName = 'term_taxonomies_proxy';
     protected $resultSet;
 
     public function __construct() {
@@ -128,16 +126,18 @@ class TermTaxonomyService extends AbstractService {
     public function getSelect($sql = null) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
-        // @todo implement return values only for current role level
+        // @todo implement return values only for current role level?
         return $select
-                
+            // Term Taxonomy
             ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
-                
+            
+            // Term
             ->join(array('term' => $this->getTermTable()->table), 
                     'term.alias='. $this->termTaxTable_alias .'.term_alias',
                     array('term_name' => 'name', 'term_group_alias'))
-                
-            ->join(array('termTaxProxy' => $this->getTermTaxonomyProxyTable()->table),
+            
+            // Count table
+            ->join(array('termTaxProxy' => $this->termTaxProxyTableName),
                 'termTaxProxy.term_taxonomy_id=termTax.term_taxonomy_id', 
                     array('childCount', 'assocItemCount'));
         
@@ -247,8 +247,37 @@ class TermTaxonomyService extends AbstractService {
         }
     }
     
-    public function deleteItem ($where) {
+    public function deleteItem ($id) {
+        // Throw error if term or term-taxonomy not set
+        if (!is_numeric($id)) {
+            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' expects ' .
+                    'id to be numeric.');
+        }
         
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        
+        // Try db updates
+        try {
+            
+            // Process Term Taxonomy 
+            $termTaxRslt = $this->getTermTaxonomyTable()
+                    ->deleteItem($id);
+            
+            // Commit changes
+            $conn->commit();
+            
+            // Return success message
+            return $termTaxRslt;
+        }
+        catch (\Exception $e) {      
+            // Rollback changes
+            $conn->rollback();
+            return $e;
+        }
     }
     
     /**
@@ -285,26 +314,15 @@ class TermTaxonomyService extends AbstractService {
     }
     
     /**
-     * Term Taxonomy Proxy Table (keeps child and 
-     * associated item count via trigger)
-     * @return Edm\Db\Table\TermTaxonomyProxyTable
-     */
-    public function getTermTaxonomyProxyTable () {
-        if (empty($this->termTaxProxyTable)) {
-                $this->termTaxProxyTable = $this->getServiceLocator()
-                    ->get('Edm\Db\Table\TermTaxonomyProxyTable');
-        }
-        return $this->termTaxProxyTable;
-    }
-    
-    /**
      * Term Taxonomy Table
      * @return Edm\Db\Table\TermTaxonomyTable
      */
     public function getTermTaxonomyTable() {
         if (empty($this->termTaxTable)) {
+            $locator = $this->getServiceLocator();
             $this->termTaxTable = $this->getServiceLocator()
                     ->get('Edm\Db\Table\TermTaxonomyTable');
+            $this->termTaxTable->setServiceLocator($locator);
         }
         return $this->termTaxTable;
     }
@@ -315,8 +333,10 @@ class TermTaxonomyService extends AbstractService {
      */
     public function getTermTable() {
         if (empty($this->termTable)) {
+                $locator = $this->getServiceLocator();
             $this->termTable = $this->getServiceLocator()
                     ->get('Edm\Db\Table\TermTable');
+            $this->termTable->setServiceLocator($locator);
         }
         return $this->termTable;
     }

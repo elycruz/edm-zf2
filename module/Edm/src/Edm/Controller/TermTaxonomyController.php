@@ -17,12 +17,10 @@ use Edm\Controller\AbstractController,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect;
 
-class TermTaxonomyController extends AbstractController implements TermTaxonomyAware {
+class TermTaxonomyController extends AbstractController 
+implements TermTaxonomyAware {
 
     use TermTaxonomyAwareTrait;
-
-    protected $termTaxTable;
-    protected $termTable;
 
     public function indexAction() {
         // View
@@ -30,17 +28,17 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
                 $this->view =
                 new JsonModel();
 
-        // Model
-        $model = $this->getTermTaxonomyModel();
-
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
 
         // Items per page
         $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
+        
+        // Term tax service
+        $termTaxService = $this->getTermTaxService();
 
         // Select 
-        $select = $this->getTermTaxService()->getSelect();
+        $select = $termTaxService->getSelect();
 
         // Where part of query
         $where = null;
@@ -62,8 +60,11 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         if (isset($where)) {
             $select->where($where);
         }
-        // Paginator
-        $paginator = new Paginator(new DbSelect($select, $model->getAdapter()));
+        
+        // Paginator $termTaxService->getDb()
+        $paginator = new Paginator(
+                new DbSelect($select, 
+                    $termTaxService->getTermTaxonomyTable()->getAdapter()));
         $paginator->setItemCountPerPage($itemCountPerPage)
                 ->setCurrentPageNumber($pageNumber);
 
@@ -143,6 +144,20 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
                     ->addMessage('Term Taxonomy "' . $termData->name . ' -> '
                             . $termTaxData->taxonomy . '" failed to be added.');
         }
+        
+        // Make form blank
+        $view->form->setData(array(
+            'term-taxonomy' => array(
+                'taxonomy' => '',
+                'parent_id' => '',
+                'description' => ''
+            ),
+            'term' => array(
+                'name' => '',
+                'alias' => '',
+                'term_group_alias' => ''
+            )
+        ));
 
         // Return message to view
         return $view;
@@ -232,6 +247,20 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
                             . $term->name . ' > ' . $termTax->taxonomy 
                             . '" failed to be updated.');
         }
+
+        // Make form blank
+        $view->form->setData(array(
+            'term-taxonomy' => array(
+                'taxonomy' => '',
+                'parent_id' => '',
+                'description' => ''
+            ),
+            'term' => array(
+                'name' => '',
+                'alias' => '',
+                'term_group_alias' => ''
+            )
+        ));
 
         // Return message to view
         return $view;
@@ -339,24 +368,6 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         return $view;
     }
     
-    public function getTermTaxonomyModel() {
-        if (empty($this->termTaxTable)) {
-            $locator = $this->getServiceLocator();
-            $this->termTaxTable = $locator->get('Edm\Db\Table\TermTaxonomyTable');
-            $this->termTaxTable->setServiceLocator($locator);
-        }
-        return $this->termTaxTable;
-    }
-
-    public function getTermModel() {
-        if (empty($this->termTable)) {
-            $locator = $this->getServiceLocator();
-            $this->termTable = $locator->get('Edm\Db\Table\TermTable');
-            $this->termTable->setServiceLocator($locator);
-        }
-        return $this->termTable;
-    }
-
     public function fooAction() {
         $view = new JsonModel();
         $termTaxService = $this->getTermTaxService();
@@ -373,36 +384,5 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyA
         return $view;
     }
 
-    /**
-     * Get term from data and create it if it doesn't exists
-     * @param mixed [array, object] $termData gets cast as (object) 
-     * @return mixed Edm\Model\Term | array
-     */
-    public function getTermFromData($termData) {
-        // Convert from array if necessary
-        if (is_array($termData)) {
-            $termData = (object) $termData;
-        }
-        
-        // Get term table
-        $termTable = $this->getTermModel();
-        
-        // Check if term already exists
-        $term = $termTable->getByAlias((string) $termData->alias);
-        
-        // Create term if empty
-        if (empty($term)) {
-            $rslt = $termTable->createItem((array) $termData);
-            if (empty($rslt)) {
-                return false;
-            }
-            $term = $termTable->getByAlias((string) $termData->alias);
-        }
-        // Update term
-        else if (!empty($term->name) && !empty($term->term_group_alias)) {
-            $termTable->updateItem($term->alias, $term->toArray());
-        }
-        return $term;
-    }
 }
 
