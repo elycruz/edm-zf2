@@ -8,12 +8,21 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\AbstractModel;
 
-class Term extends AbstractModel 
+class User extends AbstractModel 
 implements InputFilterAwareInterface {
     
+    /**
+     * Input filter
+     * @var Zend\InputFilter\InputFilter
+     */
     protected $inputFilter = null;
     
+    /**
+     * Valid keys for model
+     * @var array
+     */
     public $validKeys = array(
+        'user_id',
         'screenName',
         'password',
         'role',
@@ -41,46 +50,37 @@ implements InputFilterAwareInterface {
     }
 
     public function getInputFilter() {
-
+        
+        // Return input filter if exists
         if ($this->inputFilter !== null) {
             return $this->inputFilter;
         }
 
+        // Return value (input filter)
         $retVal =
-                $this->inputFilter =
+            $this->inputFilter =
                 new InputFilter();
+        
+        // Input factory
         $factory = new InputFactory();
 
-        // First Name
+        // Screen Name
         $retVal->add($factory->createInput(array(
-                    'name' => 'firstName',
+                    'name' => 'screenName',
                     'required' => true,
-                    'filters' => array(
-                        array('name' => 'StripTags'),
-                        array('name' => 'StringTrim')
-                    ),
                     'validators' => array(
-                        array('name' => 'StringLength',
-                            'options' => array(
-                                'min' => 1,
-                                'max' => 55
-                        ))
+                        array('name' => 'Alnum')
                     )
                 )));
 
-        // Last Name
+        // Password
         $retVal->add($factory->createInput(array(
-                    'name' => 'lastName',
+                    'name' => 'password',
                     'required' => true,
-                    'filters' => array(
-                        array('name' => 'StripTags'),
-                        array('name' => 'StringTrim')
-                    ),
                     'validators' => array(
-                        array('name' => 'StringLength',
+                        array('name' => 'Regex',
                             'options' => array(
-                                'min' => 1,
-                                'max' => 55
+                                'pattern' => ''
                         ))
                     )
                 )));
@@ -102,7 +102,28 @@ implements InputFilterAwareInterface {
                     )
                 )));
 
-
+        // Access Group
+        
+        // Status
+        
+        // Last Login
+        
+        // Activation Key
+        
+        // Registered Date
+        
+        // Registered By Id
+        
+        // Last Updated 
+        
+        // Last Updated By Id
+        
+        // Checked In Date
+        
+        // Checked Out Date
+        
+        // Checked Out By Id
+        
         $this->inputFilter = $retVal;
 
         return $retVal;

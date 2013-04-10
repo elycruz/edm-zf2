@@ -17,9 +17,6 @@ implements InputFilterAwareInterface {
         'term_group_alias',
         'alias',
         'name',
-        
-        // External
-//        'term_group_name',
     );
 
     public function __construct ($data = null) {

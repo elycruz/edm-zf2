@@ -8,25 +8,37 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\AbstractModel;
 
-class Term extends AbstractModel 
-implements InputFilterAwareInterface {
-    
+class Term extends AbstractModel implements InputFilterAwareInterface {
+
+    /**
+     * Input Filter
+     * @var Zend\InputFilter\Filter
+     */
     protected $inputFilter = null;
     
+    /**
+     * Valid keys for model
+     * @var array
+     */
     public $validKeys = array(
+        'contact_id',
+        'parent_id',
+        'name',
         'firstName',
         'middleName',
         'lastName',
         'email',
-        'altEmail'
+        'altEmail',
+        'type',
+        'userParams'
     );
 
-    public function __construct ($data = null) {
+    public function __construct($data = null) {
         if (is_array($data)) {
             $this->exchangeArray($data);
         }
     }
-    
+
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;
     }
@@ -42,6 +54,26 @@ implements InputFilterAwareInterface {
                 new InputFilter();
         $factory = new InputFactory();
 
+        // Contact Id
+         
+        // Parent Id
+         
+        // Name
+         
+        // First Name
+         
+        // Middle Name
+         
+        // Last Name
+         
+        // Email
+         
+        // Alternate Email
+         
+        // Type
+         
+        // User Params
+         
         // Name
         $retVal->add($factory->createInput(array(
                     'name' => 'name',
@@ -55,9 +87,9 @@ implements InputFilterAwareInterface {
                             'options' => array(
                                 'min' => 1,
                                 'max' => 255
-                        ))
+                            ))
                     )
-                )));
+        )));
 
         // Alias
         $retVal->add($factory->createInput(array(
@@ -74,7 +106,7 @@ implements InputFilterAwareInterface {
                                 'pattern' => APPVAR_NAME_ALIAS_REGEX)
                         ),
                     )
-                )));
+        )));
 
         $this->inputFilter = $retVal;
 

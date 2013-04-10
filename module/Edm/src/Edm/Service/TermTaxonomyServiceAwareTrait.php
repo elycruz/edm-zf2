@@ -5,13 +5,13 @@
  * and open the template in the editor.
  */
 
-namespace Edm\TraitPartials;
+namespace Edm\Service;
 
 /**
  * Assumes service locator aware interface
  * @author ElyDeLaCruz
  */
-trait TermTaxonomyAwareTrait {
+trait TermTaxonomyServiceAwareTrait {
 
     public $termTaxService;
 

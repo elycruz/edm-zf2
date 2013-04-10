@@ -3,9 +3,6 @@
 namespace Edm\Db\Table;
 
 use Edm\Db\Table\AbstractTable,
-//    Zend\Db\Adapter\Adapter,
-//    Zend\Db\ResultSet\ResultSetInterface,
-//    Zend\Db\Sql\Sql
     Edm\Model\User,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
@@ -25,12 +22,10 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function createItem(array $data) {
-        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->insert($data);
     }
 
     public function updateItem($id, array $data) {
-        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->update($data, array('term_taxonomy_id' => $id));
     }
 

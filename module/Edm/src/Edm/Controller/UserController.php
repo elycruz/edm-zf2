@@ -9,17 +9,17 @@ namespace Edm\Controller;
 use Edm\Controller\AbstractController,
     Edm\Form\TermTaxonomyForm,
     Edm\Model\TermTaxonomy,
-    Edm\Service\TermTaxonomyAware,
-    Edm\TraitPartials\TermTaxonomyAwareTrait,
+    Edm\Service\TermTaxonomyServiceAware,
+    Edm\Service\TermTaxonomyServiceAwareTrait,
     Edm\Service\AbstractService,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect;
 
-class TermTaxonomyController extends AbstractController implements TermTaxonomyAware {
+class TermTaxonomyController extends AbstractController implements TermTaxonomyServiceAware {
 
-    use TermTaxonomyAwareTrait;
+    use TermTaxonomyServiceAwareTrait;
 
     protected $termTaxTable;
     protected $termTable;

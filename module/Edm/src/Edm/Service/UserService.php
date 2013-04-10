@@ -3,253 +3,82 @@
 namespace Edm\Service;
 
 use Edm\Service\AbstractService,
-    Edm\Model\TermTaxonomy,
+    Edm\Service\TermTaxonomyServiceAware,
+    Edm\Service\TermTaxonomyServiceAwareTrait,
+    Edm\Model\User,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql;
 
 /**
  * @author ElyDeLaCruz
  */
-class TermTaxonomyService extends AbstractService {
-
-    public $termTaxProxyTableName = 'term_taxonomies_proxy';
+class UserService extends AbstractService implements 
+        TermTaxonomyServiceAware {
     
-    protected $termTable;
-    protected $termTaxTable;
-    protected $termTable_alias = 'term';
-    protected $termTaxTable_alias = 'termTax';
+    use TermTaxonomyServiceAwareTrait;
+
+    protected $userTable;
+    protected $termTaxService;
+    protected $contactService;
     protected $resultSet;
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
-        $this->resultSet->setArrayObjectPrototype(new TermTaxonomy());
+        $this->resultSet->setArrayObjectPrototype(new User());
     }
 
     /**
-     * Gets a term taxonomy by id
-     * @param integer $term_taxonomy_id
+     * Gets a user by id
+     * @param integer $id
      * @return mixed array | boolean
      */
-    public function getById($term_taxonomy_id) {
+    public function getById($id) {
         $sql = $this->getSql();
-        $select = $this->getSelect($sql)->where($this->termTaxTable_alias 
-                .'.term_taxonomy_id="' . $term_taxonomy_id . '"');
+        $select = $this->getSelect($sql)->where(array('user.user_id' => $id));
         return $sql->prepareStatementForSqlObject($select)->execute()->current();
     }
 
     /**
-     * Gets a Term Taxonomy by alias and taxonomy
-     * @param string $taxonomy default 'taxonomy'
-     * @param string $alias the taxonomies alias
-     * @param mixed $options
+     * Gets a user by screen name
+     * @param string $screenName
      * @return mixed array | boolean
      */
-    public function getByAlias($alias, $taxonomy = 'taxonomy', $options = null) {
+    public function getByScreenName($screenName) {
         $sql = $this->getSql();
-        $select = $this->getSelect($sql)->where($this->termTaxTable_alias .'.taxonomy="' . $taxonomy .
-                '" AND '. $this->termTaxTable_alias .'.term_alias="' . $alias . '"');
+        $select = $this->getSelect($sql)->where(
+                array('user.screenName' => $screenName));
         return $this->resultSet->initialize(
-                $sql->prepareStatementForSqlObject($select)->execute()
-            )->current();
+                        $sql->prepareStatementForSqlObject($select)->execute()
+                )->current();
     }
     
-    /**
-     * Get by Taxonomy
-     * @param string $taxonomy
-     * @param mixed $options
-     * @return array
-     */
-    public function getByTaxonomy ($taxonomy, $options = null) {
-        // Normalize/get options object and seed it with default select params
-        $options = $this->seedOptionsForSelect(
-                $this->normalizeMethodOptions($options));
+    public function getByEmail ($email) {
+        $sql = $this->getSql();
+        $select = $this->getSelect($sql)->where(
+                array('contact.email' => $email));
+        return $this->resultSet->initialize(
+                        $sql->prepareStatementForSqlObject($select)->execute()
+                )->current();
         
-        // Get results
-        $rslt = $this->resultSet->initialize(
-            $options->sql->prepareStatementForSqlObject(
-                $options->select->where($this->termTaxTable_alias .
-                        '.taxonomy="' . $taxonomy . '"')
-            )->execute());
-        
-        return $this->fetchFromResult($rslt, $options->fetchMode);
     }
-    
+
     /**
      * Read term taxonomies
      * @param mixed $options
      */
-    public function read ($options = null) {
+    public function read($options = null) {
         // Normalize/get options object and seed it with default select params
         $options = $this->seedOptionsForSelect(
                 $this->normalizeMethodOptions($options));
-        
+
         // Get results
         $rslt = $this->resultSet->initialize(
-            $options->sql->prepareStatementForSqlObject(
-                $options->select
-            )->execute());
-        
+                $options->sql->prepareStatementForSqlObject(
+                        $options->select
+                )->execute());
+
         return $this->fetchFromResult($rslt, $options->fetchMode);
-    }
-    
-    /**
-     * Sets a term taxonomy's list order value
-     * @param int $id
-     * @param numeric $listOrder
-     * @return mixed boolean | ?
-     * @throws \Exception
-     */
-    public function setListOrderForId ($id, $listOrder) {
-        if (!is_numeric($listOrder)) {
-            throw new \Exception ('List order must be numeric value ' .
-                    'received: ' . $listOrder);
-        }
-        if (!is_numeric($id)) {
-            throw new \Exception ('Id must be numeric value ' .
-                    'received: ' . $id);
-        }
-        
-        return $this->getTermTaxonomyTable()->updateItem($id, array(
-            'listOrder' => $listOrder
-        ));
-    }
-    
-    public function getDescendantsByAlias($alias, $taxonomy = 'taxonomy', $options = null) {
-        // Normalize options
-        $options = $this->normalizeMethodOptions($options);
-
-        // Sql 
-        $sql = new Sql($this->getDb());
-
-        // Select
-        $select = $this->getSelect($sql);
-
-        // Create results array
-        $rslts = array();
-
-        // Get db data helper
-        $dbDataHelper = $this->getDbDataHelper();
-
-        // Top tuple
-        $topTuple = $this->getByAlias($alias, $taxonomy);
-
-        // If tuple not found return null;
-        if (empty($topTuple)) {
-            return null;
-        }
-
-        // Get top tuple
-        if (empty($options->topTuple)) {
-            $topTuple = (object) $dbDataHelper->reverseEscapeTuple($topTuple);
-        } else {
-            if (is_array($options->topTuple)) {
-                $options->topTuple = (object) $options->topTuple;
-            }
-            $topTuple = $options->topTuple;
-        }
-
-        // Top level tuple's children
-        $topChildren = $this->resultSet;
-        $topChildren->initialize(
-                $sql->prepareStatementForSqlObject(
-                        $select->where($this->termTaxTable_alias .'.taxonomy="' . $alias . '"')
-                                ->order('term_name DESC'))->execute());
-
-        // If no top children
-        if ($topChildren->count() == 0) {
-            return null;
-        }
-
-        // If attach children
-        if (!empty($options->attachChildren)) {
-            $topTuple->descendants = $dbDataHelper
-                    ->reverseEscapeTuples($topChildren->toArray());
-            $topTuple = (object) $topTuple;
-            return $topTuple;
-        }
-
-        // Add top tuple to top of results 
-        $rslts[] = (object) $topTuple;
-        return array_replace($rslts, $topChildren->toArray());
-    }
-
-    public function getDescendantsByAliasRecursive($alias, $taxonomy = 'taxonomy', $options = null) {
-
-        // Normalize method options
-        $options = $this->normalizeMethodOptions($options);
-
-        // Get top tuples
-        $topTuples = $this->getDescendantsByAlias($alias, $taxonomy, $options);
-
-        // Return null if no descendants
-        if (!is_array($topTuples) || count($topTuples) == 0) {
-            return null;
-        }
-
-        // Get top tuple
-        $topTuple = array_pop($topTuples);
-
-        // If top tuple not std class make
-        if (!($topTuple instanceOf \stdClass)) {
-            $topTuple = (object) $topTuple;
-        }
-
-        // Get top tuples from descendants if necessary
-        if (!empty($topTuple->descendants)) {
-            $topTuples = $topTuple->descendants;
-        }
-
-        // New Sub CHildren
-        $newTopChildren = array();
-
-        foreach ($topTuples as $topChild) {
-            $sql = new Sql($this->getDb());
-
-            // Get children
-            $subChildren = $this->resultSet->initialize($sql->prepareStatementForSqlObject(
-                            $this->getSelect($sql)
-                                    ->where($this->termTaxTable_alias .'.parent_id=' . $topChild['term_taxonomy_id'])
-                                    ->order('term_name DESC'))->execute());
-
-            // If error throw an exception
-            if ($subChildren->count() == 0) {
-                throw new Exception('An error occurred while trying to call ' .
-                __FUNCTION__ . ' of the ' . __CLASS__ . ' class.' .
-                'Error received:  Failed to retrieve sub children.');
-            }
-
-            // Clean sub children and add sub sub children 
-            while ($subChildren->valid()) {
-                $child = $subChildren->current();
-                $child->setData(
-                        $this->dbDataHelper
-                            ->reverseEscapeTuple($child->toArray()));
-
-                // Set top tuple
-                $options->topTuple = $child;
-                $subSub =
-                        $this->getDescendantsByAliasRecursive(
-                        $child->term_alias, $child->taxonomy, $options);
-
-                $child->descendants = $subSub;
-                $child->altered = true;
-                $subChildren->next();
-            }
-            
-            var_dump($subChildren->toArray());
-            exit();
-            
-            // If attach children
-            if ($options->attachChildren) {
-                $topChild->descendants = $subChildren;
-                $newTopChildren[] = $topChild;
-            } else {
-                $newTopChildren[] = $topChild;
-                $newTopChildren = array_replace($newTopChildren, $subChildren);
-            }
-        }
-        
     }
 
     /**
@@ -266,44 +95,124 @@ class TermTaxonomyService extends AbstractService {
         $select = $sql->select();
         // @todo implement return values only for current role level
         return $select
-            ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
-            ->join(array('term' => $this->getTermTable()->table), 
-                    'term.alias='. $this->termTaxTable_alias .'.term_alias', array(
-                'term_name' => 'name',
-                'term_group_alias'));
-        
+                ->from(array('user' => $this->getUserTable()->table))
+                ->join(array('contact' => $this->getContactTable()->table), 
+                        'user.contact_id=contact.contact_id');
     }
 
-    public function getTermTaxonomyProxyTable () {
-        if (empty($this->termTaxProxyTable)) {
-//            $table = $this->termTaxProxyTable = new TableGateway(
-//                    $this->termTaxProxyTableName);
+    public function getUserTable() {
+        if (empty($this->userTable)) {
+            $locator = $this->getServiceLocator();
+            $this->userTable = $locator->get('Edm\Db\Table\UserTable');
+            $this->userTable->setServiceLocator($locator);
         }
-        return $this->termTaxProxyTable;
+        return $this->userTable;
+    }
+
+    public function getContactTable() {
+        if (empty($this->contactTable)) {
+            $locator = $this->getServiceLocator();
+            $this->contactTable = $locator->get('Edm\Db\Table\UserTable');
+            $this->contactTable->setServiceLocator($locator);
+        }
+        return $this->contactTable;
+    }
+
+    public function getUserContactRelTable() {
+        if (empty($this->userContactRelTable)) {
+            $locator = $this->getServiceLocator();
+            $this->userContactRelTable = $locator->get('Edm\Db\Table\UserTable');
+            $this->userContactRelTable->setServiceLocator($locator);
+        }
+        return $this->userContactRelTable;
+    }
+
+      /**
+     *
+     * @param string $email
+     * @return boolean 
+     */
+    public function checkUserEmailExists($email) {
+        $rslt = $this->_userTermRelModel->select()
+                ->where('email=?', $email)->query()->fetchAll();
+//        Zend_Debug::dump($rslt); exit();
+        if (empty($rslt)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    
     }
     
     /**
-     * Term Taxonomy Table
-     * @return Edm\Db\Table\TermTaxonomyTable
+     *
+     * @param string $screenName
+     * @return boolean 
      */
-    public function getTermTaxonomyTable() {
-        if (empty($this->termTaxTable)) {
-            $this->termTaxTable = $this->getServiceLocator()
-                    ->get('Edm\Db\Table\TermTaxonomyTable');
+    public function checkScreenNameExists($screenName) {
+        $rslt = $this->_userTermRelModel->select()
+                    ->where('screenName=?', $screenName)
+                    ->query()->fetchAll();
+        if (!empty($rslt)) {
+            return true;
         }
-        return $this->termTaxTable;
+        else {
+            return false;
+        }
+    }
+    
+      /**
+     * Returns an encoded password
+     * @param String $password
+     * @return alnum md5 hash
+     */
+    public function encodePassword($password) {
+        return hash('sha256', SALT . $password . PEPPER);
     }
 
     /**
-     * Term Table
-     * @return Edm\Db\Table\TermTable
+     * Returns activation key for user activation
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $email
+     * @return string
      */
-    public function getTermTable() {
-        if (empty($this->termTable)) {
-            $this->termTable = $this->getServiceLocator()
-                    ->get('Edm\Db\Table\TermTable');
-        }
-        return $this->termTable;
+    public function generateActivationKey($firstName, $lastName, $email) {
+        return hash('md5', SALT . time() .
+                uniqid($firstName) .
+                uniqid($lastName) .
+                uniqid($email) .
+                PEPPER);
+    }
+    
+        /**
+     * Generates short unique ids
+     * @see http://stackoverflow.com/questions/307486/short-unique-id-in-php 
+     *      answer 4
+     * @param int $len default 8
+     * @param string $seed
+     * @return string 
+     */
+    public function gen_uuid($len = 8, $seed = DEFAULT_TOKEN_SEED) {
+        $hex = md5(SALT . $seed . PEPPER . uniqid("", true));
+
+        $pack = pack('H*', $hex);
+
+        $uid = base64_encode($pack);        // max 22 chars
+
+        $uid = ereg_replace("[^A-Za-z0-9]", "", $uid);    // mixed case
+        //$uid = ereg_replace("[^A-Z0-9]", "", strtoupper($uid));    // uppercase only
+
+        if ($len < 4)
+            $len = 4;
+        if ($len > 128)
+            $len = 128;                       // prevent silliness, can remove
+
+        while (strlen($uid) < $len)
+            $uid = $uid . gen_uuid(22);     // append until length achieved
+
+        return substr($uid, 0, $len);
     }
 
 }
