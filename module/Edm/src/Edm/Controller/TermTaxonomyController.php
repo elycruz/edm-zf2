@@ -34,6 +34,12 @@ implements TermTaxonomyServiceAware {
         // Items per page
         $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
         
+        // Sort
+        $sort = $this->getAndSetParam('sort', 'ASC');
+        
+        // Sort by
+        $sortBy = $this->getAndSetParam('sortBy', 'term_alias');
+        
         // Term tax service
         $termTaxService = $this->getTermTaxService();
 
@@ -60,6 +66,9 @@ implements TermTaxonomyServiceAware {
         if (isset($where)) {
             $select->where($where);
         }
+        
+        // Order by
+        $select->order($sortBy . ' ' . $sort);
         
         // Paginator $termTaxService->getDb()
         $paginator = new Paginator(
