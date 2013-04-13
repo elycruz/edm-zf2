@@ -92,17 +92,7 @@ implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(array(
                     'name' => 'role',
                     'required' => false,
-                    'filters' => array(
-                        array(
-                            'name' => 'StringToLower'),
-                    ),
-                    'validators' => array(
-                        array(
-                            'name' => 'Regex',
-                            'options' => array(
-                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                        ),
-                    )
+
                 )));
 
         // Access Group
