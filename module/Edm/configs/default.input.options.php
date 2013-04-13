@@ -62,7 +62,7 @@ return array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[\w]{2,255}$/i'
+                    'pattern' => '/^[a-z\w\s\d]{2,255}$/i'
                 )
             )
         ),
@@ -80,7 +80,7 @@ return array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[\w]{2,55}$/i'
+                    'pattern' => '/^[a-z\w\s\d]{2,55}$/i'
                 )
             )
         ),
@@ -132,7 +132,7 @@ return array(
     
     /**
      * Html Id
-     * @var varchar(255) 
+     * @var varchar(200) 
      */
     'html_id' => array(
         'validators' => array(
@@ -146,7 +146,7 @@ return array(
     
     /**
      * Html Class
-     * @var varchar(255) 
+     * @var varchar(200) 
      */
     'html_class' => array(
         'validators' => array(
