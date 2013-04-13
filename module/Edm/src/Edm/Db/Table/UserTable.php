@@ -12,7 +12,7 @@ class TermTaxonomyTable extends AbstractTable {
 
     
     public function __construct() {
-        $this->table = 'user';
+        $this->table = 'users';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
@@ -26,11 +26,11 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function updateItem($id, array $data) {
-        return $this->update($data, array('term_taxonomy_id' => $id));
+        return $this->update($data, array('user_id' => $id));
     }
 
     public function deleteItem($id) {
-        return $this->delete(array('term_taxonomy_id' => $id));
+        return $this->delete(array('user_id' => $id));
     }
 
     public function read() {
@@ -38,7 +38,7 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('term_taxonomy_id' => $id));
+        return $this->getBy(array('user_id' => $id));
     }
     
 }

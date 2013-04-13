@@ -16,6 +16,7 @@ return array(
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
             'Edm\Service\UserTable'             => 'Edm\Service\UserTable',
             'Edm\Service\ContactTable'          => 'Edm\Service\ContactTable',
+//            'Edm\InputFilter\SharedOptions'    => 'Edm\InputFilter\SharedOptions'
         )
     ),
     'controllers' => array(

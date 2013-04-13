@@ -3,9 +3,6 @@
 namespace Edm\Db\Table;
 
 use Edm\Db\Table\AbstractTable,
-//    Zend\Db\Adapter\Adapter,
-//    Zend\Db\ResultSet\ResultSetInterface,
-//    Zend\Db\Sql\Sql
     Edm\Model\Contact,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
@@ -15,7 +12,7 @@ class TermTaxonomyTable extends AbstractTable {
 
     
     public function __construct() {
-        $this->table = 'contact';
+        $this->table = 'contacts';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
@@ -25,17 +22,15 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function createItem(array $data) {
-        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->insert($data);
     }
 
     public function updateItem($id, array $data) {
-        $data = $this->getDbDataHelper()->escapeTuple($data);
-        return $this->update($data, array('term_taxonomy_id' => $id));
+        return $this->update($data, array('contact_id' => $id));
     }
 
     public function deleteItem($id) {
-        return $this->delete(array('term_taxonomy_id' => $id));
+        return $this->delete(array('contact_id' => $id));
     }
 
     public function read() {
@@ -43,7 +38,7 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('term_taxonomy_id' => $id));
+        return $this->getBy(array('contact_id' => $id));
     }
     
 }

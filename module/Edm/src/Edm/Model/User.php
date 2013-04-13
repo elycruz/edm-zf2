@@ -69,7 +69,10 @@ implements InputFilterAwareInterface {
                     'name' => 'screenName',
                     'required' => true,
                     'validators' => array(
-                        array('name' => 'Alnum')
+                        array('name' => 'Alnum'),
+                        array('name' => 'StringLength',
+                            'options' => array(
+                                'min' => 8, 'max' => 8))
                     )
                 )));
 
@@ -80,7 +83,7 @@ implements InputFilterAwareInterface {
                     'validators' => array(
                         array('name' => 'Regex',
                             'options' => array(
-                                'pattern' => ''
+                                'pattern' => EDM_PASSWORD_REGEX
                         ))
                     )
                 )));
