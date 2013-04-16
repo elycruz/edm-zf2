@@ -11,7 +11,6 @@ use Zend\InputFilter\Factory as InputFactory,
 class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
-    
     protected $validKeys = array(
         'term_taxonomy_id',
         'term_alias',
@@ -21,14 +20,12 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         'assocItemCount',
         'listOrder',
         'parent_id',
-        
         // Joined keys
         'term_name',
         'term_group_alias',
         'taxonomy_name',
         'parent_name',
         'parent_alias',
-        
         // Custom keys
         'children'
     );
@@ -37,6 +34,7 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         if (is_array($data)) {
             $this->exchangeArray($data);
         }
+        $this->getInputFilter();
     }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
@@ -53,42 +51,27 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         $factory = new InputFactory();
 
         // Taxonomy
-        $inputFilter->add($factory->createInput(array(
-                    'name' => 'taxonomy',
-                    'required' => true,
-                    'filters' => array(
-                        array('name' => 'StripTags'),
-                        array('name' => 'StringTrim')
-                    ),
-                    'validators' => array(
-                        array('name' => 'StringLength',
-                            'options' => array(
-                                'min' => 1,
-                                'max' => 55
-                            ))
-                    )
+        $inputFilter->add($factory->createInput(
+           self::getDefaultInputOptionsByKey('short-alias', array(
+                'name' => 'taxonomy',
+                'required' => true,
+            )
         )));
 
         // Description
-        $inputFilter->add($factory->createInput(array(
+        $inputFilter->add($factory->createInput(
+                self::getDefaultInputOptionsByKey('description', array(
                     'name' => 'description',
-                    'required' => false,
-                    'filters' => array(
-                        array('name' => 'StringTrim')
-                    )
+                    'required' => false
+                )
         )));
 
         // Parent Id
-        $inputFilter->add($factory->createInput(array(
+        $inputFilter->add($factory->createInput(
+                self::getDefaultInputOptionsByKey('id', array(
                     'name' => 'parent_id',
-                    'required' => false,
-                    'validators' => array(
-                        array(
-                            'name' => 'Regex',
-                            'options' => array(
-                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                        ),
-                    )
+                    'required' => false
+                )
         )));
 
         return $this->inputFilter = $inputFilter;

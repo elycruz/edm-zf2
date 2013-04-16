@@ -22,8 +22,7 @@ class TermTaxonomyFieldset extends Fieldset {
         parent::__construct($name, $options);
 
         // Term Taxonomy Object
-        $termTax = new TermTaxonomy();
-        $this->setObject($termTax);
+        $this->setObject(new TermTaxonomy());
 
         // Taxonomy
         $this->add(array(

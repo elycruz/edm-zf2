@@ -55,14 +55,14 @@ return array(
     ),
     
     /**
-     * Short Name
+     *  Name
      * @var varchar(55)
      */
     'name' => array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[\w]{2,55}$/i'
+                    'pattern' => '/^[a-z\w\s\d]{2,255}$/i'
                 )
             )
         ),
@@ -80,7 +80,7 @@ return array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[\w]{2,55}$/i'
+                    'pattern' => '/^[a-z\w\s\d]{2,55}$/i'
                 )
             )
         ),
@@ -118,8 +118,21 @@ return array(
     ),
     
     /**
+     * Password
+     * @var varchar(64)
+     */
+    'password' => array(
+        'validators' => array(
+            array('name' => 'Regex',
+                'options' => array(
+                    'pattern' => '/^[a-z\d\-_]{6,32}$/'
+                ))
+        )
+    ),
+    
+    /**
      * Html Id
-     * @var varchar(255) 
+     * @var varchar(200) 
      */
     'html_id' => array(
         'validators' => array(
@@ -133,7 +146,7 @@ return array(
     
     /**
      * Html Class
-     * @var varchar(255) 
+     * @var varchar(200) 
      */
     'html_class' => array(
         'validators' => array(
@@ -165,9 +178,6 @@ return array(
                         'fieldset', 'label', 'legend', 'table', 'caption', 'tbody',
                         'tfoot', 'thead', 'tr', 'th', 'td'
                     ),
-//                    'allowAttribs' => array(
-//                        'style', 'title', 'src', 'id', 'class', 'href'
-//                    )
                 )
             ),
             array('name' => 'StringTrim')

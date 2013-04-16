@@ -4,7 +4,6 @@ namespace Edm\Form;
 
 use Edm\Form\TermFieldset,
     Edm\Form\TermTaxonomyFieldset,
-    Edm\Service\TermTaxonomyService,
     Edm\Service\AbstractService;
 
 /**
