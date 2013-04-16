@@ -28,6 +28,60 @@ class UserService extends AbstractService implements
         $this->resultSet->setArrayObjectPrototype(new User());
     }
 
+    
+//    public function createItem (array $data) {
+//        if (!array_key_exists('user', $data))
+//    }
+//    
+    public function createUser (array $data) {
+        // If no user key
+        if (!array_key_exists('user', $data)) {
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
+                    ' requires the data param to contain a user key.');
+        }
+        
+        // If no contact key
+        if (!array_key_exists('contact', $data)) {
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
+                    ' requires the data param to contain a contact key.');
+        }
+        
+        // If no api key and api key required generate
+        
+        // Set status to "pending-activation"
+        
+        // If no user.role set user.role to "user"
+        
+        // If no contact.type set contact.type to "user"
+
+        // Set registeredDate
+        
+        // Escape tuples 
+        
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        try {
+            // Create contact
+
+            // Create user
+
+            // Create user contact rel
+            
+            $conn->commit();
+            $retVal = true;
+        }
+        catch (\Exception $e) {
+            $conn->rollback();
+            $retVal = false;
+        }
+        
+        return $retVal;
+    }
+    
+    
     /**
      * Gets a user by id
      * @param integer $id
@@ -112,7 +166,7 @@ class UserService extends AbstractService implements
     public function getContactTable() {
         if (empty($this->contactTable)) {
             $locator = $this->getServiceLocator();
-            $this->contactTable = $locator->get('Edm\Db\Table\UserTable');
+            $this->contactTable = $locator->get('Edm\Db\Table\ContactTable');
             $this->contactTable->setServiceLocator($locator);
         }
         return $this->contactTable;
@@ -120,9 +174,9 @@ class UserService extends AbstractService implements
 
     public function getUserContactRelTable() {
         if (empty($this->userContactRelTable)) {
-            $locator = $this->getServiceLocator();
-            $this->userContactRelTable = $locator->get('Edm\Db\Table\UserTable');
-            $this->userContactRelTable->setServiceLocator($locator);
+            $this->userContactRelTable = 
+                new TableGateway('user_contact_relationships', 
+                        $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter'));
         }
         return $this->userContactRelTable;
     }
@@ -133,9 +187,8 @@ class UserService extends AbstractService implements
      * @return boolean 
      */
     public function checkUserEmailExists($email) {
-        $rslt = $this->_userTermRelModel->select()
-                ->where('email=?', $email)->query()->fetchAll();
-//        Zend_Debug::dump($rslt); exit();
+        $rslt = $this->getUserContactRelTable()->select()
+                ->where(array('email' => $email))->query()->fetchAll();
         if (empty($rslt)) {
             return false;
         }
@@ -151,7 +204,7 @@ class UserService extends AbstractService implements
      * @return boolean 
      */
     public function checkScreenNameExists($screenName) {
-        $rslt = $this->_userTermRelModel->select()
+        $rslt = $this->userContactRelTable->select()
                     ->where('screenName=?', $screenName)
                     ->query()->fetchAll();
         if (!empty($rslt)) {
