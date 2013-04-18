@@ -182,6 +182,32 @@ return array(
             ),
             array('name' => 'StringTrim')
         )
+    ),
+    
+    /**
+     * Screen Name
+     * @var alnum [a-z\d]{8,12}
+     */
+    'screen-name' => array(
+        'validators' => array(
+            array('name' => 'Alnum'),
+            array('name' => 'StringLength',
+                'options' => array(
+                    'min' => 8, 'max' => 12))
+        )),
+    
+    /**
+     * Activation Key
+     * @var alnum [a-z\d]{32,64}
+     * @todo should be a fixed length not loose
+     */
+    'activation-key' => array(
+        'validators' => array(
+            array('name' => 'Regex',
+                'options' => array(
+                    'pattern' => '/^[a-z\d]{32,64}$/i'
+                ))
+        )
     )
     
 );
