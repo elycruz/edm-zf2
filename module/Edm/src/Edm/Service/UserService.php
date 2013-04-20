@@ -70,8 +70,87 @@ class UserService extends AbstractService implements
             $contact->type = 'user';
         }
         
+        // If no access group
+        if (empty($user->accessGroup)) {
+            $user->accessGroup = 'cms-manager';
+        }
+        
         // Set registeredDate
         $user->registeredDate = new Zend\Stdlib\DateTime();
+        
+        // Escape tuples 
+        $dbDataHelper = $this->getDbDataHelper();
+        $cleanUser =  $dbDataHelper->escapeTuple((array) $user);
+        $cleanContact = $dbDataHelper->escapeTuple((array) $contact);
+        $userContactRel = array(
+            'email' => $cleanContact['email'],
+            'screenName' => $cleanUser['screenName']);
+        
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        try {
+            // Create contact
+            $cleanUser['contact_id'] = 
+                    $this->getContactTable()->createItem($cleanContact);
+            
+            // Create user
+            $this->getUserTable()->createItem($cleanUser);
+
+            // Create user contact rel
+            $this->getUserContactRelTable()->insert($userContactRel);
+            
+            // Commit and return true
+            $conn->commit();
+            $retVal = true;
+        }
+        catch (\Exception $e) {
+            $conn->rollback();
+            $retVal = false;
+        }
+        return $retVal;
+    }
+    
+    public function updateUser ($user_id, $data) {
+        // If no user key
+        if (!array_key_exists('user', $data)) {
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
+                    ' requires the data param to contain a user key.');
+        }
+        
+        // Contact data check
+        $contactDataExists = array_key_exists('contact', $data);
+        
+        // If contact key exists
+        if ($contactDataExists) {
+            $contact = (object) $data['contact'];
+        }
+        
+        // @todo use only arrays to eliminate multi casting variables multiple
+        // times within a function
+        $user = (object) $data['user'];
+        
+        // Set status to "pending-activation"
+        if (empty($user->status)) {
+            $user->status = 'pending-activation';
+        }
+        
+        // If no user.role set user.role to "user"
+        if (empty($user->role)) {
+            $user->role = 'user';
+        }
+        
+        // If no contact.type set contact.type to "user"
+        if (empty($contact->type)) {
+            $contact->type = 'user';
+        }
+        
+        // If no access group
+        if (empty($user->accessGroup)) {
+            $user->accessGroup = 'cms-manager';
+        }
         
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
@@ -108,78 +187,22 @@ class UserService extends AbstractService implements
         return $retVal;
     }
     
-    public function updateUser ($user_id, $data) {
-        // If no user key
-        if (!array_key_exists('user', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
-                    ' requires the data param to contain a user key.');
-        }
-        
-        // If contact key exists
-        if (array_key_exists('contact', $data)) {
-            $contact = (object) $data['contact'];
-        }
-        
-        // @todo use only arrays to eliminate multi casting variables multiple
-        // times within a function
-        $user = (object) $data['user'];
-        
-        // If no activation key generate
-        if (!empty($user->activationKey) 
-            && !$this->is_validActivationKey($user->activationKey)) {
-            $user->activationKey = $this->generateActivationKey(
-                    $contact->firstName, 
-                    $contact->lastName, 
-                    $contact->email);
-        }
-        
-        // Set status to "pending-activation"
-        if (empty($user->status)) {
-            $user->status = 'pending-activation';
-        }
-        
-        // If no user.role set user.role to "user"
-        if (empty($user->role)) {
-            $user->role = 'user';
-        }
-        
-        // If no contact.type set contact.type to "user"
-        if (empty($contact->type)) {
-            $contact->type = 'user';
-        }
-        
-        // If no access group
-        if (empty($user->accessGroup)) {
-            $user->accessGroup = 'cms-manager';
-        }
-        
-        // Set registeredDate
-        $user->registeredDate = new Zend\Stdlib\DateTime();
-        
-        // Escape tuples 
-        $dbDataHelper = $this->getDbDataHelper();
-        $user =  $dbDataHelper->escapeTuple((array) $user);
-        $contact = $dbDataHelper->escapeTuple((array) $contact);
-        $userContactRel = array(
-            'email' => $contact['email'],
-            'screenName' => $user['screenName']);
-        
+    /**
+     * Deletes a user and depends on RDBMS triggers and cascade rules to delete
+     * it's related tables (contact and user contact rels)
+     * @param int $id
+     * @return boolean
+     */
+    public function deleteUser (int $id) {
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
         
         // Begin transaction
         $conn->beginTransaction();
         try {
-            // Create contact
-            $user['contact_id'] = 
-                    $this->getContactTable()->createItem($contact);
-            
             // Create user
-            $this->getUserTable()->createItem($user);
+            $this->getUserTable()->deleteItem($id);
 
-            // Create user contact rel
-            $this->getUserContactRelTable()->insert($userContactRel);
-            
             // Commit and return true
             $conn->commit();
             $retVal = true;
@@ -187,11 +210,10 @@ class UserService extends AbstractService implements
         catch (\Exception $e) {
             $conn->rollback();
             $retVal = false;
+            var_dump($e);
         }
         return $retVal;
     }
-
-
     
     /**
      * Gets a user by id
@@ -348,8 +370,12 @@ class UserService extends AbstractService implements
                 uniqid($email) .
                 PEPPER);
     }
+ 
+    public function is_validActivationKey($key) {
+        
+    }
     
-        /**
+    /**
      * Generates short unique ids
      * @see http://stackoverflow.com/questions/307486/short-unique-id-in-php 
      *      answer 4

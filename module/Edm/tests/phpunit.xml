@@ -1,7 +1,7 @@
-<phpunit bootstrap="./bootstrap.php" colors="true">
+<phpunit bootstrap="Bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="Edm Test Suite">
-            <directory>./</directory>
+        <testsuite name="EdmTestSuite">
+            <directory>./EdmTest</directory>
         </testsuite>
     </testsuites>
 </phpunit>

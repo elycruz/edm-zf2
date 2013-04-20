@@ -17,13 +17,13 @@ class IndexController extends AbstractActionController
 {
     public function indexAction()
     {
-        return new ViewModel(array('testing' => 'probando'));
+        return new ViewModel(array('key' => 'value'));
     }
 
     public function fooAction()
     {
         // This shows the :controller and :action parameters in default route
         // are working when you browse to /module-specific-root/Index/foo
-        return new JsonModel(array('testing' => 'pla'));
+        return new JsonModel(array('key' => 'value'));
     }
 }
