@@ -47,23 +47,28 @@ implements TermTaxonomyServiceAware {
         $select = $termTaxService->getSelect();
 
         // Where part of query
-        $where = null;
+        $where = array();
 
         // Taxonomy
         $taxonomy = $this->getAndSetParam('taxonomy', '*');
         if (!empty($taxonomy) && $taxonomy != '*') {
-            $where = 'taxonomy="' . $taxonomy . '"';
+            $where['taxonomy'] = $taxonomy;
+        }
+
+        // Access Group
+        $accessGroup = $this->getAndSetParam('accessGroup', '*');
+        if (!empty($accessGroup) && $accessGroup != '*') {
+            $where['accessGroup'] = $accessGroup;
         }
 
         // Parent Id
         $parent_id = $this->getAndSetParam('parent_id', null);
         if (!empty($parent_id)) {
-            $where .= isset($parent_id) ? ' AND ' : '';
-            $where .= 'parent_id="' . $parent_id . '"';
+            $where['parent_id'] = $parent_id;
         }
 
         // Where
-        if (isset($where)) {
+        if (count($where) > 0) {
             $select->where($where);
         }
         

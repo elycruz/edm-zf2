@@ -92,7 +92,9 @@ return array(
                                     '[/page/:page]' .
                                     '[/itemsPerPage/:itemsPerPage]' .
                                     '[/sort/:sort][/sortBy/:sortBy]' .
-                                    '[/taxonomy/:taxonomy][/parent_id/:parent_id]',
+                                    '[/taxonomy/:taxonomy]' .
+                                    '[/accessGroup/:accessGroup]' .
+                                    '[/parent_id/:parent_id]',
                                     '[/filter/:filter][/filterBy/:filterBy]',
                                     'constraints' => array(
                                         'page' => '\d*',
@@ -101,6 +103,7 @@ return array(
                                         'filter' => '[a-zA-Z\d_\-]*',
                                         'filterBy' => '[a-zA-Z0-9\d_\-]*',
                                         'taxonomy' => '[a-zA-Z0-9\d_\-\*]*',
+                                        'accessGroup' => '[a-zA-Z0-9\d_\-\*]*',
                                         'parent_id' => '[a-zA-Z0-9_\-]*',
                                         'itemsPerPage' => '\d*',
                                     ),
