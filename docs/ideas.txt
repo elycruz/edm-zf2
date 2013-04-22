@@ -1,0 +1,14 @@
+Post Categories
+--------------------------------------------------------------------------------
+  - When creating a post category allow the creation of a link category as well
+    via a check box.
+
+Term Taxonomy Layer
+--------------------------------------------------------------------------------
+  -  Don't allow the deletion of a term taxonomy if it has children or 
+     associated items.  
+  -  Message User if term taxonomy has children and or associated items when 
+     ever user tries to delete one.
+  -  Add a dashboard view to the term taxonomy's page so user can see the 
+     associated item count and child count via a 
+     diagram/histogram/interactive graph etc.

@@ -160,18 +160,18 @@ implements TermTaxonomyServiceAware {
         }
         
         // Make form blank
-        $view->form->setData(array(
-            'term-taxonomy' => array(
-                'taxonomy' => '',
-                'parent_id' => '',
-                'description' => ''
-            ),
-            'term' => array(
-                'name' => '',
-                'alias' => '',
-                'term_group_alias' => ''
-            )
-        ));
+//        $view->form->setData(array(
+//            'term-taxonomy' => array(
+//                'taxonomy' => '',
+//                'parent_id' => '',
+//                'description' => ''
+//            ),
+//            'term' => array(
+//                'name' => '',
+//                'alias' => '',
+//                'term_group_alias' => ''
+//            )
+//        ));
 
         // Return message to view
         return $view;
@@ -262,19 +262,19 @@ implements TermTaxonomyServiceAware {
                             . '" failed to be updated.');
         }
 
-        // Make form blank
-        $view->form->setData(array(
-            'term-taxonomy' => array(
-                'taxonomy' => '',
-                'parent_id' => '',
-                'description' => ''
-            ),
-            'term' => array(
-                'name' => '',
-                'alias' => '',
-                'term_group_alias' => ''
-            )
-        ));
+//        // Make form blank
+//        $view->form->setData(array(
+//            'term-taxonomy' => array(
+//                'taxonomy' => '',
+//                'parent_id' => '',
+//                'description' => ''
+//            ),
+//            'term' => array(
+//                'name' => '',
+//                'alias' => '',
+//                'term_group_alias' => ''
+//            )
+//        ));
 
         // Return message to view
         return $view;
@@ -304,14 +304,17 @@ implements TermTaxonomyServiceAware {
         $termTaxService = $this->getTermTaxService();
 
         // Check if term already exists
-        $termTax = new TermTaxonomy($termTaxService->getById($id));
-        if (empty($termTax)) {
+        $termTaxRslt = $termTaxService->getById($id);
+        if (empty($termTaxRslt)) {
             // If not send message and bail
             $fm->setNamespace('error')->addMessage('Term Taxonomy Id "' .
                     $id . '" doesn\'t exist in database.');
             return $view;
         }
 
+        // Term Taxonomy object
+        $termTax = new TermTaxonomy($termTaxRslt);
+        
         // Delete term in db
         $rslt = $termTaxService->deleteItem($termTax->term_taxonomy_id);
 

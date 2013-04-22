@@ -84,6 +84,24 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
     }
 
     /**
+     * Read from db using "get select" and "get sql"
+     * @param mixed $options
+     * @return mixed array result | array
+     */
+    public function read($options = null) {
+        // Normalize/get options object and seed it with default select params
+        $options = $this->seedOptionsForSelect(
+                $this->normalizeMethodOptions($options));
+
+        // Get results
+        $rslt = $this->resultSet->initialize(
+                $options->sql->prepareStatementForSqlObject(
+                        $options->select)->execute());
+
+        return $this->fetchFromResult($rslt, $options->fetchMode);
+    }
+    
+    /**
      * Returns an Sql object seeded with the global db adapter 
      * for the edm module
      * @return Zend\Db\Sql\Sql
@@ -95,6 +113,9 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
         return $this->sql;
     }
 
+    /**
+     * 
+     */
     abstract protected function getSelect();
 
     /**
@@ -106,6 +127,12 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
         return $this->getDbDataHelper()->reverseEscapeTuples($rslt->toArray());
     }
     
+    /**
+     * Fetch items/item from result set object
+     * @param \Zend\Db\ResultSet\ResultSet $rslt
+     * @param type $fetchMode
+     * @return mixed array result | array
+     */
     public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_FIRST_ITEM) {
         $dbDataHelper = $this->getDbDataHelper();
         switch ($fetchMode) {
