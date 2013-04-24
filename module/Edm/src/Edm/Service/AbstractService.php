@@ -133,7 +133,7 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
      * @param type $fetchMode
      * @return mixed array result | array
      */
-    public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_FIRST_ITEM) {
+    public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_RESULT_SET_TO_ARRAY) {
         $dbDataHelper = $this->getDbDataHelper();
         switch ($fetchMode) {
             case self::FETCH_FIRST_ITEM:

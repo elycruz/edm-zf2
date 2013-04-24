@@ -6,7 +6,7 @@ use Edm\Db\Table\AbstractTable,
     Edm\Model\TermTaxonomy,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
-    Zend\Db\TableGateway\Feature\GlobalAdapterFeature;;
+    Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
 class TermTaxonomyTable extends AbstractTable {
 

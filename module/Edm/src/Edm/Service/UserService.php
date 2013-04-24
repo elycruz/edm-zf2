@@ -3,20 +3,19 @@
 namespace Edm\Service;
 
 use Edm\Service\AbstractService,
-    Edm\Service\TermTaxonomyServiceAware,
-    Edm\Service\TermTaxonomyServiceAwareTrait,
+//    Edm\Service\TermTaxonomyServiceAware,
+//    Edm\Service\TermTaxonomyServiceAwareTrait,
     Edm\Model\User,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
+    Zend\Db\TableGateway\Feature\FeatureSet,
+    Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
     Zend\Stdlib\DateTime;
 
 /**
  * @author ElyDeLaCruz
  */
-class UserService extends AbstractService implements 
-        TermTaxonomyServiceAware {
-    
-    use TermTaxonomyServiceAwareTrait;
+class UserService extends AbstractService {
 
     protected $userTable;
     protected $contactTable;
@@ -24,6 +23,10 @@ class UserService extends AbstractService implements
     protected $termTaxService;
     protected $resultSet;
     protected $screenNameLength = 12;
+
+    const SALT = 'saltcontentgoeshere';
+    const PEPPER = 'peppercontentgoeshere';
+    const TOKEN_SEED = 'defaulttokenseed';
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
@@ -35,28 +38,29 @@ class UserService extends AbstractService implements
      * Creates a user and it's constituants 
      *  (contact and user contact relationship)
      * @param array $data
-     * @return boolean
+     * @return mixed int | boolean
      * @throws Exception
      */
-    public function createUser (array $data) {
+    public function createUser(array $data) {
         // If no user key
         if (!array_key_exists('user', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
-                    ' requires the data param to contain a user key.');
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
+            ' requires the data param to contain a user key.');
         }
-        
+
         // If no contact key
         if (!array_key_exists('contact', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
-                    ' requires the data param to contain a contact key.');
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
+            ' requires the data param to contain a contact key.');
         }
-        
+
         // @todo use only arrays to eliminate multi casting variables multiple
         // times within a function
         $user = (object) $data['user'];
         $contact = (object) $data['contact'];
-        $userKeyValid = $this->is_activationKeyValid($key, $user);
-        
+        $key = isset($user->activatioKey) ? $user->activationKey : '';
+        $userKeyValid = $this->is_activationKeyValid($key, $contact);
+
         // If no screen name generate one
         if (empty($user->screenName)) {
             $user->screenName = $this->gen_uuid($this->screenNameLength);
@@ -64,70 +68,83 @@ class UserService extends AbstractService implements
         // If no api key and activation key is required generate
         if (!$userKeyValid) {
             $user->activationKey = $this->generateActivationKey(
-                    $contact->firstName, 
-                    $contact->lastName, 
-                    $contact->email);
+                    $contact->firstName, $contact->lastName, $contact->email);
         }
-        
+
         // Set status to "pending-activation"
-        if (empty($user->status) || ! $userKeyValid) {
+        if (empty($user->status) || !$userKeyValid) {
             $user->status = 'pending-activation';
         }
-        
+
         // If no user.role set user.role to "user"
         if (empty($user->role)) {
             $user->role = 'user';
         }
-        
+
         // If no contact.type set contact.type to "user"
         if (empty($contact->type)) {
             $contact->type = 'user';
         }
-        
+
         // If no access group
         if (empty($user->accessGroup)) {
             $user->accessGroup = 'cms-manager';
         }
-        
+
+        // Contact params default value
+        if (empty($contact->userParams)) {
+            $contact->userParams = '';
+        }
+
+        // Contact description default value
+        if (empty($contact->description)) {
+            $contact->description = '';
+        }
+
+        // If user has a password
+        if (!empty($user->password)) {
+            $user->password = $this->encodePassword($user->password);
+        }
+
         // Set registeredDate
         $today = new DateTime();
-            $user->registeredDate = $today->getTimestamp();
-        
+        $user->registeredDate = $today->getTimestamp();
+
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
-        $cleanUser =  $dbDataHelper->escapeTuple((array) $user);
+        $cleanUser = $dbDataHelper->escapeTuple((array) $user);
         $cleanContact = $dbDataHelper->escapeTuple((array) $contact);
         $userContactRel = array(
             'email' => $cleanContact['email'],
             'screenName' => $cleanUser['screenName']);
-        
+
         // Get database platform object
-        $conn = $this->getDb()->getDriver()->getConnection();
-        
+        $driver = $this->getDb()->getDriver();
+        $conn = $driver->getConnection();
+
         // Begin transaction
         $conn->beginTransaction();
         try {
             // Create contact
-            $cleanUser['contact_id'] = 
-                    $this->getContactTable()->createItem($cleanContact);
+            $this->getContactTable()->insert($cleanContact);
+            $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
             
             // Create user
-            $this->getUserTable()->createItem($cleanUser);
+            $this->getUserTable()->insert($cleanUser);
+            $retVal  = $driver->getLastGeneratedValue();
 
             // Create user contact rel
             $this->getUserContactRelTable()->insert($userContactRel);
             
             // Commit and return true
             $conn->commit();
-            $retVal = true;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $conn->rollback();
             $retVal = false;
         }
         return $retVal;
     }
-    
+
     /**
      * Updates a user and it's constituants
      *   (contact and user contact relationship).  
@@ -138,32 +155,32 @@ class UserService extends AbstractService implements
      * @return boolean
      * @throws Exception
      */
-    public function updateUser ($id, array $data, $contactId = null) {
+    public function updateUser($id, array $data, $contactId = null) {
         // If no user key
         if (!array_key_exists('user', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ . 
-                    ' requires the data param to contain a user key.');
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
+            ' requires the data param to contain a user key.');
         }
-        
+
         // Contact data check
         $contactDataExists = array_key_exists('contact', $data) && $contactId;
-        
+
         // If contact key exists
         if ($contactDataExists) {
             $contact = $data['contact'];
         }
-        
+
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
-        $user =  $dbDataHelper->escapeTuple($user);
+        $user = $dbDataHelper->escapeTuple($user);
         $contact = $dbDataHelper->escapeTuple($contact);
         $userContactRel = array(
             'email' => $contact['email'],
             'screenName' => $user['screenName']);
-        
+
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
-        
+
         // Begin transaction
         $conn->beginTransaction();
         try {
@@ -171,52 +188,49 @@ class UserService extends AbstractService implements
             if (isset($contact)) {
                 $this->getContactTable()->udpate($contactId, $contact);
             }
-            
+
             // Create user
             $this->getUserTable()->update($id, $user);
 
             // Create user contact rel
             $this->getUserContactRelTable()->insert($userContactRel);
-            
+
             // Commit and return true
             $conn->commit();
             $retVal = true;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $conn->rollback();
             $retVal = false;
         }
         return $retVal;
     }
-    
+
     /**
      * Deletes a user and depends on RDBMS triggers and cascade rules to delete
      * it's related tables (contact and user contact rels)
      * @param int $id
      * @return boolean
      */
-    public function deleteUser (int $id) {
+    public function deleteUser($id) {
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
-        
+
         // Begin transaction
         $conn->beginTransaction();
         try {
             // Create user
-            $this->getUserTable()->deleteItem($id);
+            $this->getUserTable()->delete(array('user_id' => $id));
 
             // Commit and return true
             $conn->commit();
             $retVal = true;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $conn->rollback();
             $retVal = false;
-            var_dump($e);
         }
         return $retVal;
     }
-    
+
     /**
      * Gets a user by id
      * @param integer $id
@@ -224,8 +238,8 @@ class UserService extends AbstractService implements
      */
     public function getById($id) {
         return $this->read(array(
-            'fetchMode' => self::FETCH_FIRST_ITEM,
-            'where' => array('user.user_id' => $id)));
+                    'fetchMode' => self::FETCH_FIRST_ITEM,
+                    'where' => array('user.user_id' => $id)));
     }
 
     /**
@@ -235,19 +249,19 @@ class UserService extends AbstractService implements
      */
     public function getByScreenName($screenName) {
         return $this->read(array(
-            'fetchMode' => self::FETCH_FIRST_ITEM,
-            'where' => array('user.screenName' => $screenName)));
+                    'fetchMode' => self::FETCH_FIRST_ITEM,
+                    'where' => array('user.screenName' => $screenName)));
     }
-    
+
     /**
      * Gets a user by email
      * @param string $email
      * @return mixed array | boolean
      */
-    public function getByEmail ($email) {
+    public function getByEmail($email) {
         return $this->read(array(
-            'fetchMode' => self::FETCH_FIRST_ITEM,
-            'where' => array('contact.email' => $email)));
+                    'fetchMode' => self::FETCH_FIRST_ITEM,
+                    'where' => array('contact.email' => $email)));
     }
 
     /**
@@ -264,9 +278,9 @@ class UserService extends AbstractService implements
         $select = $sql->select();
         // @todo implement return values only for current role level
         return $select
-                ->from(array('user' => $this->getUserTable()->table))
-                ->join(array('contact' => $this->getContactTable()->table), 
-                        'user.contact_id=contact.contact_id');
+            ->from(array('user' => $this->getUserTable()->table))
+            ->join(array('contact' => $this->getContactTable()->table),
+                    'contact.contact_id=user.contact_id');
     }
 
     public function getUserTable() {
@@ -289,9 +303,12 @@ class UserService extends AbstractService implements
 
     public function getUserContactRelTable() {
         if (empty($this->userContactRelTable)) {
-            $this->userContactRelTable = 
-                new TableGateway('user_contact_relationships', 
-                        $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter'));
+            $feature = new FeatureSet();
+            $feature->addFeature(new GlobalAdapterFeature());
+            $this->userContactRelTable =
+                    new \Zend\Db\TableGateway\TableGateway(
+                            'user_contact_relationships', $this->getServiceLocator()
+                            ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
         return $this->userContactRelTable;
     }
@@ -302,15 +319,14 @@ class UserService extends AbstractService implements
      */
     public function checkUserEmailExists($email) {
         $rslt = $this->getUserContactRelTable()->select()
-                ->where(array('email' => $email))->query()->fetchAll();
+                        ->where(array('email' => $email))->query()->fetchAll();
         if (empty($rslt)) {
             return false;
-        }
-        else {
+        } else {
             return true;
         }
     }
-    
+
     /**
      *
      * @param string $screenName
@@ -318,23 +334,22 @@ class UserService extends AbstractService implements
      */
     public function checkScreenNameExists($screenName) {
         $rslt = $this->userContactRelTable->select()
-                    ->where('screenName=?', $screenName)
-                    ->query()->fetchAll();
+                        ->where('screenName=?', $screenName)
+                        ->query()->fetchAll();
         if (!empty($rslt)) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
-    
-      /**
+
+    /**
      * Returns an encoded password
      * @param String $password
      * @return alnum md5 hash
      */
     public function encodePassword($password) {
-        return hash('sha256', SALT . $password . PEPPER);
+        return hash('sha256', self::SALT . $password . self::PEPPER);
     }
 
     /**
@@ -345,24 +360,24 @@ class UserService extends AbstractService implements
      * @return string
      */
     public function generateActivationKey($firstName, $lastName, $email) {
-        return hash('md5', SALT . time() .
+        return hash('md5', self::SALT . time() .
                 uniqid($firstName) .
                 uniqid($lastName) .
                 uniqid($email) .
-                PEPPER);
+                self::PEPPER);
     }
- 
+
     /**
      * Compares activation key to generated one.
      * @param string $key
      * @param array $user
      * @return boolean
      */
-    public function is_activationKeyValid($key, array $user) {
+    public function is_activationKeyValid($key, $user) {
         return $key === $this->generateActivationKey(
-                $user->firstName, $user->lastName, $user->email);
+                        $user->firstName, $user->lastName, $user->email);
     }
-    
+
     /**
      * Generates short unique ids
      * @see http://stackoverflow.com/questions/307486/short-unique-id-in-php 
@@ -371,14 +386,14 @@ class UserService extends AbstractService implements
      * @param string $seed
      * @return string 
      */
-    public function gen_uuid($len = 8, $seed = DEFAULT_TOKEN_SEED) {
-        $hex = md5(SALT . $seed . PEPPER . uniqid("", true));
+    public function gen_uuid($len = 8, $seed = self::TOKEN_SEED) {
+        $hex = md5(self::SALT . $seed . self::PEPPER . uniqid("", true));
 
         $pack = pack('H*', $hex);
 
         $uid = base64_encode($pack);        // max 22 chars
 
-        $uid = ereg_replace("[^A-Za-z0-9]", "", $uid);    // mixed case
+        $uid = preg_replace("/[^A-Za-z0-9]/", "", $uid);    // mixed case
         //$uid = ereg_replace("[^A-Z0-9]", "", strtoupper($uid));    // uppercase only
 
         if ($len < 4)
@@ -387,7 +402,7 @@ class UserService extends AbstractService implements
             $len = 128;                       // prevent silliness, can remove
 
         while (strlen($uid) < $len)
-            $uid = $uid . gen_uuid(22);     // append until length achieved
+            $uid = $uid . $this->gen_uuid(22);     // append until length achieved
 
         return substr($uid, 0, $len);
     }

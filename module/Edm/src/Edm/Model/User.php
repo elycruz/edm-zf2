@@ -40,7 +40,8 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         'lastUpdatedById',
         'checkedInDate',
         'checkedOutDate',
-        'checkedOutById'
+        'checkedOutById',
+        'contact_id'
     );
 
     public function __construct($data = null) {

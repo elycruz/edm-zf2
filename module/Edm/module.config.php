@@ -14,8 +14,8 @@ return array(
             'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
             'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
-            'Edm\Service\UserTable'             => 'Edm\Service\UserTable',
-            'Edm\Service\ContactTable'          => 'Edm\Service\ContactTable',
+            'Edm\Db\Table\UserTable'             => 'Edm\Db\Table\UserTable',
+            'Edm\Db\Table\ContactTable'          => 'Edm\Db\Table\ContactTable',
             
             // Shared global input filter options (mostly validators and filters)
             'Edm\InputFilter\DefaultInputOptions'    => 'Edm\InputFilter\DefaultInputOptions'

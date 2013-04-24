@@ -20,6 +20,6 @@ class TermTaxonomyLayerTest extends PHPUnit_Framework_TestCase {
 
     public function testTermTaxonomyLayer() {
         $db = $this->serviceLocator->get('Zend\Db\Adapter\Adapter');
-        var_dump($db->query('SELECT * FROM terms'));
+//        var_dump($db->query('SELECT * FROM terms'));
     }
 }

@@ -8,7 +8,7 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\AbstractModel;
 
-class Term extends AbstractModel implements InputFilterAwareInterface {
+class Contact extends AbstractModel implements InputFilterAwareInterface {
 
     /**
      * Input Filter
