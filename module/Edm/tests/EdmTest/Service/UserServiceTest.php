@@ -77,10 +77,10 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
         }
     }
     
-//    public function testGetByScreenName () {
-//        $rslt = $this->userService->getByScreenName($this->userScreenNames[0]);
-//        return $this->assertNotEmpty($rslt, 'User Screen Name: ' . $rslt['screenName']);
-//    }
+    public function testGetByScreenName () {
+        $rslt = $this->userService->getByScreenName($this->userScreenNames[0]);
+        return $this->assertNotEmpty($rslt, 'User Screen Name: ' . $rslt['screenName']);
+    }
     
     protected function generateData() {
         for ($i = 0; $i < $this->numUsers; $i += 1) {
