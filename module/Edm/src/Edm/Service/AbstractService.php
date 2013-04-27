@@ -137,9 +137,14 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
         $dbDataHelper = $this->getDbDataHelper();
         switch ($fetchMode) {
             case self::FETCH_FIRST_ITEM:
-                return $rslt->current()->exchangeArray(
-                        $dbDataHelper->reverseEscapeTuple(
-                                $rslt->current()->toArray()));
+                if ($rslt->valid()) {
+                    $current = $rslt->current();
+                    $data = $current->toArray();
+                    $current->exchangeArray(
+                        $dbDataHelper->reverseEscapeTuple($data));
+                    return $current;
+                }
+                return null;
                 break;
             case self::FETCH_RESULT_SET:
                 return (new ResultSet())->initialize($rslt);
