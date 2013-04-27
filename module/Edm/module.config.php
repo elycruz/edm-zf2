@@ -1,32 +1,57 @@
 <?php
 
+//-----------------------------------------------------------------------------
 // Defines
-defined('APPVAR_NAME_ALIAS_REGEX') ||
-        define('APPVAR_NAME_ALIAS_REGEX', '/[a-z\-_\.\d]+/i');
+//-----------------------------------------------------------------------------
+
+// Application path
 defined('APP_PATH') ||
         define('APP_PATH', realpath(__DIR__ . '/../../'));
 
+// Edm salt seed
+defined('EDM_SALT') ||
+    define('EDM_SALT', 'youruniquesalttextgoeshere');
+
+// Edm pepper seed
+defined('EDM_PEPPER') ||
+    define('EDM_PEPPER', 'youruniquepeppertextgoeshere');
+
+// Edm token seed
+defined('EDM_TOKEN_SEED') ||
+    define('EDM_TOKEN_SEED', 'tokenseedtextgoeshere');
+
+// Module Configuration
 return array(
     'service_manager' => array(
         'invokables' => array(
+            
+            // Service invokables
             'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
+            'Edm\Service\UserService'           => 'Edm\Service\UserService',
+
+            // Db invokables
             'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
             'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
             'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
-            'Edm\Service\UserService'           => 'Edm\Service\UserService',
-            'Edm\Db\Table\UserTable'             => 'Edm\Db\Table\UserTable',
-            'Edm\Db\Table\ContactTable'          => 'Edm\Db\Table\ContactTable',
+            'Edm\Db\Table\UserTable'            => 'Edm\Db\Table\UserTable',
+            'Edm\Db\Table\ContactTable'         => 'Edm\Db\Table\ContactTable',
             
+            // Form invokables
+            'Edm\Form\TermTaxonomyForm'         => 'Edm\Form\TermTaxonomyForm',
+            
+            // Config invokables
+            // --------------------------------------------------------------
             // Shared global input filter options (mostly validators and filters)
-            'Edm\InputFilter\DefaultInputOptions'    => 'Edm\InputFilter\DefaultInputOptions'
+            'Edm\InputFilter\DefaultInputOptions' 
+                => 'Edm\InputFilter\DefaultInputOptions'
         )
     ),
     'controllers' => array(
         'invokables' => array(
-            'Edm\Controller\Index' => 'Edm\Controller\IndexController',
-            'Edm\Controller\Term' => 'Edm\Controller\TermController',
+            'Edm\Controller\Index'        => 'Edm\Controller\IndexController',
+            'Edm\Controller\Term'         => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
-            'Edm\Controller\User' => 'Edm\Controller\UserController',
+            'Edm\Controller\User'         => 'Edm\Controller\UserController',
         ),
     ),
     'view_helpers' => array(
@@ -85,6 +110,8 @@ return array(
                                     ),
                                 )
                             ),
+                            // @todo figure out a more compact way of doing this
+                            // @todo maybe generate it dynamically at the top if no other solution
                             'paginator' => array(
                                 'type' => 'Segment',
                                 'options' => array(

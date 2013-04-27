@@ -22,7 +22,7 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
     const FETCH_FIRST_ITEM = 0;
     const FETCH_RESULT_SET = 1;
     const FETCH_RESULT_SET_TO_ARRAY = 3;
-
+    
     /**
      * Services Sql Object
      * @var Zend\Db\Sql\Sql

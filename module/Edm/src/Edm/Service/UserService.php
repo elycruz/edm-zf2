@@ -20,13 +20,8 @@ class UserService extends AbstractService {
     protected $userTable;
     protected $contactTable;
     protected $userContactRelTable;
-    protected $termTaxService;
     protected $resultSet;
     protected $screenNameLength = 12;
-
-    const SALT = 'saltcontentgoeshere';
-    const PEPPER = 'peppercontentgoeshere';
-    const TOKEN_SEED = 'defaulttokenseed';
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
@@ -63,7 +58,7 @@ class UserService extends AbstractService {
 
         // If no screen name generate one
         if (empty($user->screenName)) {
-            $user->screenName = $this->gen_uuid($this->screenNameLength);
+            $user->screenName = $this->generateUniqueScreenName();
         }
         // If no api key and activation key is required generate
         if (!$userKeyValid) {
@@ -314,12 +309,14 @@ class UserService extends AbstractService {
     }
 
     /**
+     * Checks if an email already exists for a user
      * @param string $email
      * @return boolean 
      */
     public function checkUserEmailExists($email) {
         $rslt = $this->getUserContactRelTable()->select()
-                        ->where(array('email' => $email))->query()->fetchAll();
+                        ->where(array('email' => $email))
+                        ->current();
         if (empty($rslt)) {
             return false;
         } else {
@@ -328,28 +325,40 @@ class UserService extends AbstractService {
     }
 
     /**
-     *
+     * Checks if screen name exists
      * @param string $screenName
      * @return boolean 
      */
     public function checkScreenNameExists($screenName) {
-        $rslt = $this->userContactRelTable->select()
-                        ->where('screenName=?', $screenName)
-                        ->query()->fetchAll();
+        $rslt = $this->userContactRelTable->select()    
+                        ->where(array('screenName' => $screenName))
+                        ->current();
         if (!empty($rslt)) {
             return true;
-        } else {
-            return false;
-        }
+        } 
+        return false;
     }
 
+    /**
+     * Returns a unique screen name with length of "screen name length"
+     * @return string
+     */
+    public function generateUniqueScreenName () {
+        $screenName = '';
+        do {
+            $screenName = $this->gen_uuid($this->screenNameLength);
+        }
+        while ($this->checkScreenNameExists($screenName));
+        return $screenName;
+    }
+    
     /**
      * Returns an encoded password
      * @param String $password
      * @return alnum md5 hash
      */
     public function encodePassword($password) {
-        return hash('sha256', self::SALT . $password . self::PEPPER);
+        return hash('sha256', EDM_SALT . $password . EDM_PEPPER);
     }
 
     /**
@@ -360,11 +369,11 @@ class UserService extends AbstractService {
      * @return string
      */
     public function generateActivationKey($firstName, $lastName, $email) {
-        return hash('md5', self::SALT . time() .
+        return hash('md5', EDM_SALT . time() .
                 uniqid($firstName) .
                 uniqid($lastName) .
                 uniqid($email) .
-                self::PEPPER);
+                EDM_PEPPER);
     }
 
     /**
@@ -387,7 +396,7 @@ class UserService extends AbstractService {
      * @return string 
      */
     public function gen_uuid($len = 8, $seed = self::TOKEN_SEED) {
-        $hex = md5(self::SALT . $seed . self::PEPPER . uniqid("", true));
+        $hex = md5(EDM_SALT . $seed . EDM_PEPPER . uniqid("", true));
 
         $pack = pack('H*', $hex);
 

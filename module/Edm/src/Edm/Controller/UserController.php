@@ -7,17 +7,15 @@
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
-    Edm\Form\TermTaxonomyForm,
-    Edm\Model\TermTaxonomy,
+    Edm\Form\UserForm,
     Edm\Service\TermTaxonomyServiceAware,
     Edm\Service\TermTaxonomyServiceAwareTrait,
-    Edm\Service\AbstractService,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect;
 
-class TermTaxonomyController extends AbstractController implements TermTaxonomyServiceAware {
+class UserController extends AbstractController implements TermTaxonomyServiceAware {
 
     use TermTaxonomyServiceAwareTrait;
 
@@ -89,10 +87,10 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
         $fm = $this->initFlashMessenger();
 
         // Setup form
-        $form = new TermTaxonomyForm('term-taxonomy-form', array(
+        $form = new UserForm('user-form', array(
             'serviceLocator' => $this->getServiceLocator()
         ));
-        $form->setAttribute('action', '/edm-admin/term-taxonomy/create');
+        $form->setAttribute('action', '/edm-admin/user/create');
         $view->form = $form;
 
         // If not post bail
@@ -111,18 +109,16 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
             return $view;
         }
 
-        // Get Term Taxonomy service
-        $termTaxTable = $this->getUserTable();
-        $termTaxService = $this->getTermTaxService();
+        // Get User Service
 
         // Get data
         $data = (object) $view->form->getData();
-        $termTaxData = (object) $data->{'term-taxonomy'};
-        $termData = (object) $data->term;
+        $userData = (object) $data->user;
+        $contactData = (object) $data->contact;
 
         // Check if term taxonomy already exists
         $termTaxCheck = $termTaxService->getByAlias(
-                $termData->alias, $termTaxData->taxonomy);
+                $contactData->alias, $userData->taxonomy);
         if (!empty($termTaxCheck)) {
             $fm->setNamespace('error')->addMessage('Term Taxonomy "" already ' .
                     'exists in the database.  Click here to edit it.');
@@ -134,7 +130,7 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
         
         // Get Term from data 
         $term = $this->getTermFromData($dbDataHelper
-                ->escapeTuple($data->term));
+                ->escapeTuple($data->contact));
         
         // If failed to fetch term
         if (empty($term)) {
@@ -144,17 +140,17 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
         }
 
         // Normalize description
-        $desc = $termTaxData->description;
-        $termTaxData->description = $desc ? $desc : '';
+        $desc = $userData->description;
+        $userData->description = $desc ? $desc : '';
 
         // Normalize parent id
-        $parent_id = !empty($termTaxData->parent_id) ? 
-                $termTaxData->parent_id : 0;
+        $parent_id = !empty($userData->parent_id) ? 
+                $userData->parent_id : 0;
         
         // Create term taxonomy
         $rslt = $termTaxTable->createItem(array(
             'term_alias' => $term->alias,
-            'taxonomy' => $termTaxData->taxonomy,
+            'taxonomy' => $userData->taxonomy,
             'parent_id' => $parent_id,
             'description' => $desc
         ));
@@ -163,13 +159,13 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
         if ($rslt) {
             $fm->setNamespace('highlight')
                     ->addMessage('Term Taxonomy "' . $term->name . ' -> '
-                            . $termTaxData->taxonomy . '" added successfully.');
+                            . $userData->taxonomy . '" added successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
                     ->addMessage('Term Taxonomy "' . $term->name . ' -> '
-                            . $termTaxData->taxonomy . '" failed to be added.');
+                            . $userData->taxonomy . '" failed to be added.');
         }
 
         // Return message to view
@@ -193,10 +189,10 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
         $termTaxService = $this->getTermTaxService();
 
         // Setup form
-        $form = new TermTaxonomyForm('term-taxonomy-form', array(
+        $form = new UserForm('user-form', array(
             'serviceLocator' => $this->getServiceLocator()
         ));
-        $form->setAttribute('action', '/edm-admin/term-taxonomy/update/id/' . $id);
+        $form->setAttribute('action', '/edm-admin/user/update/id/' . $id);
         $view->form = $form;
 
         // Check if term already exists
@@ -338,111 +334,26 @@ class TermTaxonomyController extends AbstractController implements TermTaxonomyS
         // Return message to view
         return $view;
     }
-
-    public function setListOrderAction () {
-        $view =
-            $this->view =
-                new JsonModel();
-
-        // Let view be terminal in this action
-        $view->setTerminal(true);
+    
+    public function loginAction () {
         
-        // Get id of item to update
-        $id = $this->getParam('itemId');
-        $listOrder = $this->getParam('listOrder');
-        
-        // Get term tax
-        $termTaxService = $this->getTermTaxService();
-        $termTax = new TermTaxonomy ($termTaxService->getById($id));
-        $fm = $this->initFlashMessenger();
-        
-        // Set error message if term tax not found
-        if (empty($termTax)) {
-            $fm->setNamespace('error')
-                    ->addMessage('Term Taxonomy id "' . $id
-                            . '" not found in database.  '.
-                            'List order change failed.');
-            return $view;
-        }
-
-        // Update listorder
-        $rslt = $termTaxService->setListOrderForId($id, $listOrder);
-        
-        // Send success message to user
-        if (!empty($rslt)) {
-            $fm->setNamespace('highlight')
-                    ->addMessage('Term Taxonomy "' 
-                            . $termTax->term_name . ' > ' . $termTax->taxonomy 
-                            . '" updated successfully.');
-        }
-        // send failure message to user 
-        else {
-            $fm->setNamespace('error')
-                    ->addMessage('Term Taxonomy "' 
-                            . $termTax->term_name . ' > ' . $termTax->taxonomy 
-                            . '" failed to be updated.');
-        }
-
-        // Return message to view
-        return $view;
     }
     
-
-    public function getTermModel() {
-        if (empty($this->termTable)) {
-            $locator = $this->getServiceLocator();
-            $this->termTable = $locator->get('Edm\Db\Table\TermTable');
-            $this->termTable->setServiceLocator($locator);
-        }
-        return $this->termTable;
-    }
-
-    public function fooAction() {
-        $view = new JsonModel();
-        $termTaxService = $this->getTermTaxService();
-//        $rslt = $termTaxService->getByAlias('taxonomy');
-//        $rslt = $termTaxService->getByTaxonomy('taxonomy');
-        $rslt = $termTaxService->getByTaxonomy('taxonomy', array(
-            'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
-            'nestedResults' => true,
-            'order' => 'term_name ASC',
-//            'where' => array('term_alias' => 'testing-9')
-        ));
-
-        $view->result = $rslt;
-        return $view;
-    }
-
-    /**
-     * Get term from data and create it if it doesn't exists
-     * @param mixed [array, object] $termData gets cast as (object) 
-     * @return mixed Edm\Model\Term | array
-     */
-    public function getTermFromData($termData) {
-        // Convert from array if necessary
-        if (is_array($termData)) {
-            $termData = (object) $termData;
-        }
+    public function logoutAction () {
         
-        // Get term table
-        $termTable = $this->getTermModel();
-        
-        // Check if term already exists
-        $term = $termTable->getByAlias((string) $termData->alias);
-        
-        // Create term if empty
-        if (empty($term)) {
-            $rslt = $termTable->createItem((array) $termData);
-            if (empty($rslt)) {
-                return false;
-            }
-            $term = $termTable->getByAlias((string) $termData->alias);
-        }
-        // Update term
-        else if (!empty($term->name) && !empty($term->term_group_alias)) {
-            $termTable->updateItem($term->alias, $term->toArray());
-        }
-        return $term;
     }
+    
+    public function sendActivationAction () {
+        
+    }
+    
+    public function activtionAction () {
+        
+    }
+    
+    public function sendActivationEmail () {
+        
+    }
+    
+    
 }
-
