@@ -21,11 +21,13 @@ class UserTable extends AbstractTable {
     }
 
     public function createItem(array $data) {
-        return $this->insert($data);
+        $this->insert($data);
+        return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function updateItem($id, array $data) {
-        return $this->update($data, array('user_id' => $id));
+        $this->update($data, array('user_id' => $id));
+        return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function deleteItem($id) {

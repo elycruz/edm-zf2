@@ -9,7 +9,6 @@ use Edm\Db\Table\AbstractTable,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
 class ContactTable extends AbstractTable {
-
     
     public function __construct() {
         $this->table = 'contacts';
@@ -22,11 +21,13 @@ class ContactTable extends AbstractTable {
     }
 
     public function createItem(array $data) {
-        return $this->insert($data);
+        $this->insert($data);
+        return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function updateItem($id, array $data) {
-        return $this->update($data, array('contact_id' => $id));
+        $this->update($data, array('contact_id' => $id));
+        return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function deleteItem($id) {

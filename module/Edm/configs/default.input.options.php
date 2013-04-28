@@ -193,7 +193,7 @@ return array(
             array('name' => 'Alnum'),
             array('name' => 'StringLength',
                 'options' => array(
-                    'min' => 8, 'max' => 12))
+                    'min' => 6, 'max' => 32))
         )),
     
     /**

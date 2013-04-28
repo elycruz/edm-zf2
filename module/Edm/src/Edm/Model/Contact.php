@@ -54,13 +54,6 @@ class Contact extends AbstractModel implements InputFilterAwareInterface {
                 new InputFilter();
         $factory = new InputFactory();
 
-        // Contact Id
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('id', array(
-                'name' => 'contact_id',
-                'required' => false
-        ))));
-
         // Parent Id
         $retVal->add($factory->createInput(
             self::getDefaultInputOptionsByKey('id', array(
@@ -118,7 +111,7 @@ class Contact extends AbstractModel implements InputFilterAwareInterface {
                 'required' => false
         ))));
         
-        // User Params
+//         User Params
 //        $retVal->add($factory->createInput(
 //            self::getDefaultInputOptionsByKey('short-alias', array(
 //                'name' => 'contact-type',

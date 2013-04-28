@@ -1,5 +1,5 @@
 <?php
-namespace ApplicationTest;//Change this namespace for your test
+namespace EdmTest;//Change this namespace for your test
 
 use Zend\Loader\AutoloaderFactory;
 use Zend\Mvc\Service\ServiceManagerConfig;
@@ -19,10 +19,10 @@ class Bootstrap
     public static function init()
     {
         // Load the user-defined test configuration file, if it exists; otherwise, load
-        if (is_readable(__DIR__ . '/TestConfig.php')) {
-            $testConfig = include __DIR__ . '/TestConfig.php';
+        if (is_readable(__DIR__ . '/../TestConfig.php')) {
+            $testConfig = include __DIR__ . '/../TestConfig.php';
         } else {
-            $testConfig = include __DIR__ . '/TestConfig.php.dist';
+            $testConfig = include __DIR__ . '/../TestConfig.php.dist';
         }
 
         $zf2ModulePaths = array();
@@ -67,6 +67,16 @@ class Bootstrap
     {
         return static::$config;
     }
+    
+    public static function initDbAdapter () {
+        self::getServiceManager()->set('Zend\Db\Adapter\Adapter', 
+            new \Zend\Db\Adapter\Adapter(array(
+                'dbname' => 'edm-0.4.0',
+                'username' => 'root',
+                'password' => '07-bienven',
+                'host' => 'localhost'
+            )));
+    }
 
     protected static function initAutoloader()
     {
@@ -93,6 +103,8 @@ class Bootstrap
                 ),
             ),
         ));
+        
+        self::initDbAdapter();
     }
 
     protected static function findParentPath($path)
@@ -106,6 +118,7 @@ class Bootstrap
         }
         return $dir . '/' . $path;
     }
+    
 }
 
 Bootstrap::init();

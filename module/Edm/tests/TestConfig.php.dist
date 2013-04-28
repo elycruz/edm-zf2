@@ -1,11 +1,12 @@
 <?php
 return array(
     'modules' => array(
+        'Application',
         'Edm',
     ),
     'module_listener_options' => array(
         'config_glob_paths'    => array(
-            '../../../config/autoload/{,*.}{global,local}.php',
+            __DIR__ . '/../../../../../config/autoload/{,*.}{global,local}.php',
         ),
         'module_paths' => array(
             'module',

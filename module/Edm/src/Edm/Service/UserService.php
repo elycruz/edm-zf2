@@ -49,6 +49,12 @@ class UserService extends AbstractService {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
             ' requires the data param to contain a contact key.');
         }
+        
+        // If no contact key
+        if (!array_key_exists('email', $data['contact'])) {
+            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
+            ' requires the data param to contain a contact key with an email key.');
+        }
 
         // @todo use only arrays to eliminate multi casting variables multiple
         // times within a function
@@ -77,29 +83,38 @@ class UserService extends AbstractService {
             $user->role = 'user';
         }
 
-        // If no contact.type set contact.type to "user"
-        if (empty($contact->type)) {
-            $contact->type = 'user';
-        }
-
         // If no access group
         if (empty($user->accessGroup)) {
             $user->accessGroup = 'cms-manager';
         }
 
+        // If user has a password
+        if (!empty($user->password)) {
+            $user->password = $this->encodePassword($user->password);
+        }
+        
+        // Make sure these are not set
+        unset($contact->contact_id);
+        unset($contact->name);
+        
+        // Remove parent id if not valid
+        if (!is_numeric($contact->parent_id)) {
+            unset($contact->parent_id);
+        }
+        
+        // If no contact.type set contact.type to "user"
+        if (empty($contact->type)) {
+            $contact->type = 'user';
+        }
+
         // Contact params default value
         if (empty($contact->userParams)) {
-            $contact->userParams = '';
+            $contact->userParams = '{}';
         }
 
         // Contact description default value
         if (empty($contact->description)) {
-            $contact->description = '';
-        }
-
-        // If user has a password
-        if (!empty($user->password)) {
-            $user->password = $this->encodePassword($user->password);
+            $contact->description = 'None';
         }
 
         // Set registeredDate
@@ -117,17 +132,16 @@ class UserService extends AbstractService {
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-
+        
         // Begin transaction
         $conn->beginTransaction();
         try {
             // Create contact
-            $this->getContactTable()->insert($cleanContact);
-            $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
+            $cleanUser['contact_id'] = 
+                    $this->getContactTable()->createItem($cleanContact);
             
             // Create user
-            $this->getUserTable()->insert($cleanUser);
-            $retVal  = $driver->getLastGeneratedValue();
+            $retVal = $this->getUserTable()->createItem($cleanUser);
 
             // Create user contact rel
             $this->getUserContactRelTable()->insert($userContactRel);
@@ -137,7 +151,6 @@ class UserService extends AbstractService {
         } catch (\Exception $e) {
             $conn->rollback();
             $retVal = false;
-            var_dump($e); exit();
         }
         return $retVal;
     }
@@ -284,16 +297,14 @@ class UserService extends AbstractService {
         if (empty($this->userTable)) {
             $locator = $this->getServiceLocator();
             $this->userTable = $locator->get('Edm\Db\Table\UserTable');
-            $this->userTable->setServiceLocator($locator);
         }
         return $this->userTable;
     }
 
     public function getContactTable() {
         if (empty($this->contactTable)) {
-            $locator = $this->getServiceLocator();
-            $this->contactTable = $locator->get('Edm\Db\Table\ContactTable');
-            $this->contactTable->setServiceLocator($locator);
+            $this->contactTable = $this->getServiceLocator()
+                    ->get('Edm\Db\Table\ContactTable');
         }
         return $this->contactTable;
     }
@@ -348,7 +359,7 @@ class UserService extends AbstractService {
         do {
             $screenName = $this->gen_uuid($this->screenNameLength);
         }
-        while ($this->checkScreenNameExists($screenName));
+        while ($this->checkScreenNameExistsInDb($screenName));
         return $screenName;
     }
     
@@ -395,7 +406,7 @@ class UserService extends AbstractService {
      * @param string $seed
      * @return string 
      */
-    public function gen_uuid($len = 8, $seed = self::TOKEN_SEED) {
+    public function gen_uuid($len = 8, $seed = EDM_TOKEN_SEED) {
         $hex = md5(EDM_SALT . $seed . EDM_PEPPER . uniqid("", true));
 
         $pack = pack('H*', $hex);
