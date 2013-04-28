@@ -1,4 +1,4 @@
-<phpunit bootstrap="Bootstrap.php" colors="true">
+<phpunit bootstrap="EdmTest\Bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="EdmTestSuite">
             <directory>./EdmTest</directory>

@@ -13,14 +13,16 @@ use Edm\Controller\AbstractController,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
-    Zend\Paginator\Adapter\DbSelect;
+    Zend\Paginator\Adapter\DbSelect,
+        
+    Edm\Service\UserAware,
+    Edm\Service\UserAwareTrait;
 
-class UserController extends AbstractController implements TermTaxonomyServiceAware {
+class UserController extends AbstractController 
+implements TermTaxonomyServiceAware, UserAware {
 
-    use TermTaxonomyServiceAwareTrait;
-
-    protected $termTaxTable;
-    protected $termTable;
+    use TermTaxonomyServiceAwareTrait,
+            UserAwareTrait;
 
     public function indexAction() {
         // View
@@ -28,40 +30,46 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
                 $this->view =
                 new JsonModel();
 
-        // Model
-        $model = $this->getUserTable();
-
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
 
         // Items per page
         $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
 
+        // Get User Service
+        $userService = $this->getUserService();
+        
         // Select 
-        $select = $this->getTermTaxService()->getSelect();
-
+        $select = $userService->getSelect();
+        
         // Where part of query
-        $where = null;
+        $where = array();
 
-        // Taxonomy
-        $taxonomy = $this->getAndSetParam('taxonomy', '*');
-        if (!empty($taxonomy) && $taxonomy != '*') {
-            $where = 'taxonomy="' . $taxonomy . '"';
+        // Status
+        $status = $this->getAndSetParam('status', '*');
+        if (!empty($status) && $status != '*') {
+            $where['user.status'] = $status;
         }
 
-        // Parent Id
-        $parent_id = $this->getAndSetParam('parent_id', null);
-        if (!empty($parent_id)) {
-            $where .= isset($parent_id) ? ' AND ' : '';
-            $where .= 'parent_id="' . $parent_id . '"';
+        // Role
+        $role = $this->getAndSetParam('role', '*');
+        if (!empty($role) && $role != '*') {
+            $where['user.role'] = $role;
+        }
+
+        // Access Group
+        $accessGroup = $this->getAndSetParam('accessGroup', '*');
+        if (!empty($accessGroup) && $accessGroup != '*') {
+            $where['user.accessGroup'] = $accessGroup;
         }
 
         // Where
-        if (isset($where)) {
+        if (count($where) > 0) {
             $select->where($where);
         }
+        
         // Paginator
-        $paginator = new Paginator(new DbSelect($select, $model->getAdapter()));
+        $paginator = new Paginator(new DbSelect($select, $userService->getDb()));
         $paginator->setItemCountPerPage($itemCountPerPage)
                 ->setCurrentPageNumber($pageNumber);
 
@@ -110,62 +118,44 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         }
 
         // Get User Service
+        $userService = $this->getUserService();
 
         // Get data
         $data = (object) $view->form->getData();
         $userData = (object) $data->user;
         $contactData = (object) $data->contact;
 
-        // Check if term taxonomy already exists
-        $termTaxCheck = $termTaxService->getByAlias(
-                $contactData->alias, $userData->taxonomy);
-        if (!empty($termTaxCheck)) {
-            $fm->setNamespace('error')->addMessage('Term Taxonomy "" already ' .
-                    'exists in the database.  Click here to edit it.');
+        // Check if user exists by email
+        $email = $contactData->email;
+        $emailCheck = $userService->checkEmailExistsInDb($email);
+        if (!empty($emailCheck)) {
+            $fm->setNamespace('error')->addMessage('A user with email "'. $email 
+                    .'" already exists in the database.  Click here to edit it.');
             return $view;
         }
-
-        // Database data helper
-        $dbDataHelper = $this->getDbDataHelper();
         
-        // Get Term from data 
-        $term = $this->getTermFromData($dbDataHelper
-                ->escapeTuple($data->contact));
-        
-        // If failed to fetch term
-        if (empty($term)) {
-            $fm->setNamespace('error')->addMessage('Failed to create term '. 
-                    'needed for Term Taxonomy creation.');
+        // Check if user exists by screen name
+        $screenName = $userData->screenName;
+        $screenNameCheck = $userService->checkScreenNameExistsInDb($screenName);
+        if (!empty($screenNameCheck)) {
+            $fm->setNamespace('error')->addMessage('A user with screenName "'. $screenName 
+                    .'" already exists in the database.  Click here to edit it.');
             return $view;
         }
-
-        // Normalize description
-        $desc = $userData->description;
-        $userData->description = $desc ? $desc : '';
-
-        // Normalize parent id
-        $parent_id = !empty($userData->parent_id) ? 
-                $userData->parent_id : 0;
         
         // Create term taxonomy
-        $rslt = $termTaxTable->createItem(array(
-            'term_alias' => $term->alias,
-            'taxonomy' => $userData->taxonomy,
-            'parent_id' => $parent_id,
-            'description' => $desc
-        ));
+        $rslt = $userService->createUser($view->form->getData());
 
         // Send success message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term Taxonomy "' . $term->name . ' -> '
-                            . $userData->taxonomy . '" added successfully.');
+                    ->addMessage('User with email "' . $email . '" added successfully.');
         }
         // send failure message to user 
         else {
+            var_dump($rslt);
             $fm->setNamespace('error')
-                    ->addMessage('Term Taxonomy "' . $term->name . ' -> '
-                            . $userData->taxonomy . '" failed to be added.');
+                    ->addMessage('User with email "' . $email . '" failed to be added.');
         }
 
         // Return message to view
@@ -185,8 +175,8 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         $id = $this->getParam('itemId');
 
         // Put data into model
-        $termTaxTable = $this->getUserTable();
-        $termTaxService = $this->getTermTaxService();
+        $userTable = $this->getUserTable();
+        $userService = $this->getTermTaxService();
 
         // Setup form
         $form = new UserForm('user-form', array(
@@ -197,7 +187,7 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
 
         // Check if term already exists
         try {
-            $existingTermTax = new TermTaxonomy((array) $termTaxService->getById($id));
+            $existingTermTax = new TermTaxonomy((array) $userService->getById($id));
         } catch (\Exception $e) {
             $fm->setNamespace('error')->addMessage('Term Taxonomy with id "'
                     . $id . '" doesn\'t exist in database.');
@@ -239,38 +229,38 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         
         // Allocoate updates
         $term = $this->getTermFromData($data['term']); //->exchangeArray($data);
-        $termTax = (object) $data['term-taxonomy'];
+        $user = (object) $data['term-taxonomy'];
 
         // Normalize description
-        $desc = $termTax->description;
-        $termTax->description = $desc ? $desc : '';
+        $desc = $user->description;
+        $user->description = $desc ? $desc : '';
 
         // Normalize parent id
-        $parent_id = !empty($termTax->parent_id) ? 
-                $termTax->parent_id : 0;
+        $parent_id = !empty($user->parent_id) ? 
+                $user->parent_id : 0;
         
         $data = array(
             'term_alias' => $term->alias,
-            'taxonomy' => $termTax->taxonomy,
+            'taxonomy' => $user->taxonomy,
             'parent_id' => $parent_id,
-            'description' => $termTax->description
+            'description' => $user->description
         );
         
         // Update term in db
-        $rslt = $termTaxTable->updateItem($id, $data);
+        $rslt = $userTable->updateItem($id, $data);
         
         // Send success message to user
         if (!empty($rslt)) {
             $fm->setNamespace('highlight')
                     ->addMessage('Term Taxonomy "' 
-                            . $term->name . ' > ' . $termTax->taxonomy 
+                            . $term->name . ' > ' . $user->taxonomy 
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
                     ->addMessage('Term Taxonomy "' 
-                            . $term->name . ' > ' . $termTax->taxonomy 
+                            . $term->name . ' > ' . $user->taxonomy 
                             . '" failed to be updated.');
         }
 
@@ -299,7 +289,7 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         }
 
         // Get term table
-        $termTaxTable = $this->getUserTable();
+        $userTable = $this->getUserTable();
 
         try {
             // Check if term already exists
@@ -314,7 +304,7 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         }
 
         // Delete term in db
-        $rslt = $termTaxTable->deleteItem($term->term_taxonomy_id);
+        $rslt = $userTable->deleteItem($term->term_taxonomy_id);
 
         // Send success message to user
         if ($rslt) {

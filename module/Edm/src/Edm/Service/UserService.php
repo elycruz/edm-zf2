@@ -37,6 +37,7 @@ class UserService extends AbstractService {
      * @throws Exception
      */
     public function createUser(array $data) {
+
         // If no user key
         if (!array_key_exists('user', $data)) {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
@@ -136,6 +137,7 @@ class UserService extends AbstractService {
         } catch (\Exception $e) {
             $conn->rollback();
             $retVal = false;
+            var_dump($e); exit();
         }
         return $retVal;
     }
@@ -313,10 +315,9 @@ class UserService extends AbstractService {
      * @param string $email
      * @return boolean 
      */
-    public function checkUserEmailExists($email) {
-        $rslt = $this->getUserContactRelTable()->select()
-                        ->where(array('email' => $email))
-                        ->current();
+    public function checkEmailExistsInDb($email) {
+        $rslt = $this->getUserContactRelTable()->select(
+                array('email' => $email))->current();
         if (empty($rslt)) {
             return false;
         } else {
@@ -329,10 +330,9 @@ class UserService extends AbstractService {
      * @param string $screenName
      * @return boolean 
      */
-    public function checkScreenNameExists($screenName) {
-        $rslt = $this->userContactRelTable->select()    
-                        ->where(array('screenName' => $screenName))
-                        ->current();
+    public function checkScreenNameExistsInDb($screenName) {
+        $rslt = $this->userContactRelTable->select(
+                array('screenName' => $screenName))->current();
         if (!empty($rslt)) {
             return true;
         } 

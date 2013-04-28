@@ -29,11 +29,24 @@ class UserFieldset extends Fieldset {
             'name' => 'screenName',
             'type' => 'Zend\Form\Element\Text',
             'options' => array(
-                'label' => 'Screen Name'
+                'label' => 'Screen Name',
             ),
             'attributes' => array(
                 'required' => false,
                 'id' => 'screenName'
+            )
+        ));
+        
+        // Password
+        $this->add(array(
+            'name' => 'password',
+            'type' => 'Zend\Form\Element\Password',
+            'options' => array(
+                'label' => 'Password'
+            ),
+            'attributes' => array(
+                'required' => true,
+                'id' => 'password'
             )
         ));
         
@@ -45,7 +58,7 @@ class UserFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Role',
                 'value_options' => array(
-                    'null' => '-- Select a Taxonomy --'
+                    '*' => '-- Select a Role --'
                 )
             ),
             'attributes' => array(
@@ -61,7 +74,7 @@ class UserFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Status',
                 'value_options' => array(
-                    'null' => '-- Select a Status --'
+                    '*' => '-- Select a Status --'
                 )
             ),
             'attributes' => array(
@@ -77,7 +90,7 @@ class UserFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Access Group',
                 'value_options' => array(
-                    'null' => '-- Select a Access Group --'
+                    '*' => '-- Select a Access Group --'
                 )
             ),
             'attributes' => array(

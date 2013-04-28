@@ -73,7 +73,7 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(
             self::getDefaultInputOptionsByKey('screen-name', array(
                 'name' => 'screenName',
-                'required' => true
+                'required' => false
         ))));
 
         // Password
@@ -108,7 +108,7 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         // Activation Key
         $retVal->add($factory->createInput(
             self::getDefaultInputOptionsByKey('activation-key', array(
-                    'name' => 'status',
+                    'name' => 'activationKey',
                     'required' => false
         ))));
         

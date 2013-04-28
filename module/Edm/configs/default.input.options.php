@@ -110,7 +110,7 @@ return array(
      */
     'email' => array(
         'validators' => array(
-            array('name' => 'Email')
+            array('name' => 'EmailAddress')
         ),
         'filters' => array(
             array('name' => 'StringToLower')

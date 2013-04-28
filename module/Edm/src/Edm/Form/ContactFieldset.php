@@ -94,11 +94,10 @@ class ContactFieldset extends Fieldset {
             'name' => 'altEmail',
             'type' => 'Zend\Form\Element\Email',
             'options' => array(
-                'label' => 'Email'
+                'label' => 'Alternate Email'
             ),
             'attributes' => array(
-                'id' => 'altEmail',
-                'required' => false,
+                'id' => 'altEmail'
             )
         ));
         
@@ -114,7 +113,7 @@ class ContactFieldset extends Fieldset {
             ),
             'attributes' => array(
                 'id' => 'type',
-                'required' => true
+                'required' => false
             )
         ));
 

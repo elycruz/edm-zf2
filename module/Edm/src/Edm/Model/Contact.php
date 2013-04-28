@@ -15,7 +15,7 @@ class Contact extends AbstractModel implements InputFilterAwareInterface {
      * @var Zend\InputFilter\Filter
      */
     protected $inputFilter = null;
-    
+
     /**
      * Valid keys for model
      * @var array
@@ -50,65 +50,82 @@ class Contact extends AbstractModel implements InputFilterAwareInterface {
         }
 
         $retVal =
-                $this->inputFilter =
+            $this->inputFilter =
                 new InputFilter();
         $factory = new InputFactory();
 
         // Contact Id
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('id', array(
+                'name' => 'contact_id',
+                'required' => false
+        ))));
+
         // Parent Id
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('id', array(
+                'name' => 'parent_id',
+                'required' => false
+        ))));
+
         // Name
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('name', array(
+                'name' => 'name',
+                'required' => false
+        ))));
+
         // First Name
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('short-name', array(
+                'name' => 'firstName',
+                'required' => false
+        ))));
+        
         // Middle Name
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('name', array(
+                'name' => 'middleName',
+                'required' => false
+        ))));
+        
         // Last Name
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('short-name', array(
+                'name' => 'lastName',
+                'required' => false
+        ))));
+        
         // Email
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('email', array(
+                'name' => 'email',
+                'required' => true
+        ))));
+        
         // Alternate Email
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('email', array(
+                'name' => 'altEmail',
+                'required' => false
+        ))));
+        
+
         // Type
-         
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('short-alias', array(
+                'name' => 'type',
+                'required' => false
+        ))));
+        
         // User Params
-         
-        // Name
-        $retVal->add($factory->createInput(array(
-                    'name' => 'name',
-                    'required' => true,
-                    'filters' => array(
-                        array('name' => 'StripTags'),
-                        array('name' => 'StringTrim')
-                    ),
-                    'validators' => array(
-                        array('name' => 'StringLength',
-                            'options' => array(
-                                'min' => 1,
-                                'max' => 255
-                            ))
-                    )
-        )));
+//        $retVal->add($factory->createInput(
+//            self::getDefaultInputOptionsByKey('short-alias', array(
+//                'name' => 'contact-type',
+//                'required' => false
+//        ))));
 
-        // Alias
-        $retVal->add($factory->createInput(array(
-                    'name' => 'alias',
-                    'required' => false,
-                    'filters' => array(
-                        array(
-                            'name' => 'StringToLower'),
-                    ),
-                    'validators' => array(
-                        array(
-                            'name' => 'Regex',
-                            'options' => array(
-                                'pattern' => APPVAR_NAME_ALIAS_REGEX)
-                        ),
-                    )
-        )));
-
-        $this->inputFilter = $retVal;
+                $this->inputFilter = $retVal;
 
         return $retVal;
     }

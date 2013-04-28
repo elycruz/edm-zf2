@@ -121,6 +121,9 @@ return array(
                                     '[/sort/:sort][/sortBy/:sortBy]' .
                                     '[/taxonomy/:taxonomy]' .
                                     '[/accessGroup/:accessGroup]' .
+                                    '[/role/:role]' .
+                                    '[/status/:status]' .
+                                    
                                     '[/parent_id/:parent_id]',
                                     '[/filter/:filter][/filterBy/:filterBy]',
                                     'constraints' => array(
@@ -131,6 +134,8 @@ return array(
                                         'filterBy' => '[a-zA-Z0-9\d_\-]*',
                                         'taxonomy' => '[a-zA-Z0-9\d_\-\*]*',
                                         'accessGroup' => '[a-zA-Z0-9\d_\-\*]*',
+                                        'role' => '[a-zA-Z0-9\d_\-\*]*',
+                                        'status' => '[a-zA-Z0-9\d_\-\*]*',
                                         'parent_id' => '[a-zA-Z0-9_\-]*',
                                         'itemsPerPage' => '\d*',
                                     ),
