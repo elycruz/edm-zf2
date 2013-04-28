@@ -139,10 +139,12 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
             case self::FETCH_FIRST_ITEM:
                 if ($rslt->valid()) {
                     $current = $rslt->current();
-                    $data = $current->toArray();
-                    $current->exchangeArray(
-                        $dbDataHelper->reverseEscapeTuple($data));
-                    return $current;
+                    if ($current !== false) {
+                        $data = $current->toArray();
+                        $current->exchangeArray(
+                            $dbDataHelper->reverseEscapeTuple($data));
+                        return $current;
+                    }
                 }
                 return null;
                 break;

@@ -9,7 +9,6 @@ use Edm\Db\Table\AbstractTable,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
 class TermTaxonomyTable extends AbstractTable {
-
     
     public function __construct() {
         $this->table = 'term_taxonomies';
@@ -22,14 +21,13 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function createItem(array $data) {
-        if (!empty($data['parent_id'])) 
-        $data = $this->getDbDataHelper()->escapeTuple($data);
-        return $this->insert($data);
+        $this->insert($data);
+        return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function updateItem($id, array $data) {
-        $data = $this->getDbDataHelper()->escapeTuple($data);
-        return $this->update($data, array('term_taxonomy_id' => $id));
+        $this->update($data, array('term_taxonomy_id' => $id));
+        return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function deleteItem($id) {

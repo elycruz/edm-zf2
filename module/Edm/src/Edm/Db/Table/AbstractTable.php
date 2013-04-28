@@ -15,12 +15,12 @@ implements DbDataHelperAware, ServiceLocatorAwareInterface {
     ServiceLocatorAwareTrait;
     
     public function getBy(array $by) {
-        $row = $this->select($by)->current();
-        if (!empty($row)) {
-            $copy = $this->getDbDataHelper()->reverseEscapeTuple($row->toArray());
-            $row->exchangeArray($copy);
-        }
-        return $row;
+        return $this->select($by)->current();
+//        if (!empty($row)) {
+//            $copy = $this->getDbDataHelper()->reverseEscapeTuple($row->toArray());
+//            $row->exchangeArray($copy);
+//        }
+//        return $row;
     }
 }
 

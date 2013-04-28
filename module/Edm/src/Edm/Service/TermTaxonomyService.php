@@ -13,7 +13,6 @@ use Edm\Service\AbstractService,
  *      within each other
  */
 class TermTaxonomyService extends AbstractService {
-
     protected $termTable;
     protected $termTaxTable;
     protected $termTable_alias = 'term';
@@ -144,22 +143,26 @@ class TermTaxonomyService extends AbstractService {
         $term = $dbDataHelper->escapeTuple($data['term']);
         $termTax = $dbDataHelper->escapeTuple($data['term-taxonomy']);
 
+        // If parent is not greater than 0
+        if (empty($termTax['parent_id']) 
+                || !is_numeric($termTax['parent_id'])) {
+            unset($termTax['parent_id']);
+        }
+        
+        // If empty access group remove it's key
+            if (empty($termTax['accessGroup'])) {
+            unset($termTax['accessGroup']);
+        }
+        
         // Normalize description
         $desc = $termTax['description'];
-        $termTaxData['description'] = $desc ? $desc : '';
-
-        // Normalize parent id
-        $termTaxData['parent_id'] = !empty($termTaxData['parent_id']) ?
-                $termTaxData['parent_id'] : 0;
+        $termTax['description'] = $desc ? $desc : 'None';
 
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
 
-        // Begin transaction
-        $conn->beginTransaction();
-
-        // Try db insertions
-        try {
+        var_dump($termTax);
+        
             // Process Term and rollback if failure
             $termRslt = $this->getTermFromData($term);
 
@@ -169,17 +172,25 @@ class TermTaxonomyService extends AbstractService {
             // Process Term Taxonomy 
             $termTaxRslt = $this->getTermTaxonomyTable()
                     ->createItem($termTax);
-
-            // Commit changes
-            $conn->commit();
-
-            // Return success message
+            
             return $termTaxRslt;
-        } catch (\Exception $e) {
-            // Rollback changes
-            $conn->rollback();
-            return $e;
-        }
+//
+//        // Begin transaction
+//        $conn->beginTransaction();
+//
+//        // Try db insertions
+//        try {
+//
+//            // Commit changes
+//            $conn->commit();
+//
+//            // Return success message
+//            return $termTaxRslt;
+//        } catch (\Exception $e) {
+//            // Rollback changes
+//            $conn->rollback();
+//            return $e;
+//        }
     }
 
     public function updateItem($id, $data) {
@@ -235,7 +246,7 @@ class TermTaxonomyService extends AbstractService {
 
     public function deleteItem($id) {
         // Throw error if term or term-taxonomy not set
-        if (!is_numeric($id)) {
+        if (!is_numeric((int) $id)) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' expects ' .
             'id to be numeric.');
         }
@@ -281,19 +292,20 @@ class TermTaxonomyService extends AbstractService {
         $termTable = $this->getTermTable();
 
         // Check if term already exists
-        $term = $termTable->getByAlias((string) $termData->alias);
+        $term = $termTable->getByAlias($termData->alias);
 
         // Create term if empty
         if (empty($term)) {
-            $rslt = $termTable->createItem((array) $termData);
+            $rslt = $termTable->insert((array) $termData);
             if (empty($rslt)) {
                 return false;
             }
-            $term = $termTable->getByAlias((string) $termData->alias);
+            $term = $termTable->getByAlias($termData->alias);
         }
-        // Update term
-        else if (!empty($term->name) && !empty($term->alias)) {
+        // Update term if data and term are differen
+        else if ((!empty($term->name) && $term->name !== $termData->name)) {
             $termTable->updateItem($term->alias, $term->toArray());
+            $term->name = $termData->name;
         }
         return $term;
     }

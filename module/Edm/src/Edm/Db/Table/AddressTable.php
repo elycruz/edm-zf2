@@ -25,13 +25,10 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function createItem(array $data) {
-        if (!empty($data['parent_id'])) 
-        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->insert($data);
     }
 
     public function updateItem($id, array $data) {
-        $data = $this->getDbDataHelper()->escapeTuple($data);
         return $this->update($data, array('term_taxonomy_id' => $id));
     }
 

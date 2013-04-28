@@ -385,21 +385,5 @@ implements TermTaxonomyServiceAware {
         return $view;
     }
     
-    public function fooAction() {
-        $view = new JsonModel();
-        $termTaxService = $this->getTermTaxService();
-//        $rslt = $termTaxService->getByAlias('taxonomy');
-//        $rslt = $termTaxService->getByTaxonomy('taxonomy');
-        $rslt = $termTaxService->getByTaxonomy('taxonomy', array(
-            'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY,
-            'nestedResults' => true,
-            'order' => 'term_name ASC',
-//            'where' => array('term_alias' => 'testing-9')
-        ));
-
-        $view->result = $rslt;
-        return $view;
-    }
-
 }
 

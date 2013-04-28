@@ -58,6 +58,14 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
             )
         )));
 
+        // Access Group
+        $inputFilter->add($factory->createInput(
+           self::getDefaultInputOptionsByKey('short-alias', array(
+                'name' => 'accessGroup',
+                'required' => false,
+            )
+        )));
+
         // Description
         $inputFilter->add($factory->createInput(
                 self::getDefaultInputOptionsByKey('description', array(
