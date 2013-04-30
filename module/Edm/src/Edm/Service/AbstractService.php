@@ -19,9 +19,10 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
         DbDataHelperAwareTrait,
         DbAwareTrait;
 
-    const FETCH_FIRST_ITEM = 0;
-    const FETCH_RESULT_SET = 1;
-    const FETCH_RESULT_SET_TO_ARRAY = 3;
+    const FETCH_FIRST_AS_ARRAY_OBJ = 1;
+    const FETCH_FIRST_AS_ARRAY = 2;
+    const FETCH_RESULT_SET = 3;
+    const FETCH_RESULT_SET_TO_ARRAY = 4;
     
     /**
      * Services Sql Object
@@ -74,7 +75,7 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
         
         // Fetch mode
         $options->fetchMode = isset($options->fetchMode) ? 
-                $options->fetchMode : self::FETCH_FIRST_ITEM;
+                $options->fetchMode : self::FETCH_FIRST_AS_ARRAY;
         
         // Send some prelims to user
         $options->select = $select;
@@ -135,26 +136,42 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
      */
     public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_RESULT_SET_TO_ARRAY) {
         $dbDataHelper = $this->getDbDataHelper();
+        // Resolve fetchmode
         switch ($fetchMode) {
-            case self::FETCH_FIRST_ITEM:
-                if ($rslt->valid()) {
-                    $current = $rslt->current();
-                    if ($current !== false) {
-                        $data = $current->toArray();
-                        $current->exchangeArray(
-                            $dbDataHelper->reverseEscapeTuple($data));
-                        return $current;
+            case self::FETCH_FIRST_AS_ARRAY:
+                    if ($rslt->valid() === false) {
+                        return null;
                     }
-                }
-                return null;
+                    $current = $rslt->current();
+                    if (empty($current)) {
+                        return null;
+                    }
+                    $data = $current->toArray();
+                    $current->exchangeArray($dbDataHelper->reverseEscapeTuple($data));
+                    return $current->toArray();
+                break;
+            case self::FETCH_FIRST_AS_ARRAY_OBJ:
+                    // Is current index in result set valid
+                    $validRslt = $rslt->valid();
+                    if (!$validRslt) {
+                        return null;
+                    }
+                    $current = $rslt->current();
+                    if (empty($current)) {
+                        return null;
+                    }
+                    // Clean current
+                    $data = $current->toArray();
+                    $current->exchangeArray($dbDataHelper->reverseEscapeTuple($data));
+                    return $current;
                 break;
             case self::FETCH_RESULT_SET:
-                return (new ResultSet())->initialize($rslt);
+                    return (new ResultSet())->initialize($rslt);
                 break;
             case self::FETCH_RESULT_SET_TO_ARRAY: 
             default: 
                 return $this->cleanResultSetToArray($rslt);
-                break;
+            break;
         }
     }
     

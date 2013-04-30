@@ -95,7 +95,7 @@ return array(
                                 'options' => array(
                                     'route' => '[/id/:itemId]',
                                     'constraints' => array(
-                                        'itemId' => '[a-zA-Z\d\_\-]*'
+                                        'itemId' => '[a-zA-Z\d\_\-]+'
                                     ),
                                 )
                             ),
@@ -105,8 +105,8 @@ return array(
                                     'route' => '[/id/:itemId]' .
                                     '[/listOrder/:listOrder]',
                                     'constraints' => array(
-                                        'itemId' => '[a-zA-Z\d\_\-]*',
-                                        'listOrder' => '[\d]*'
+                                        'itemId' => '[a-zA-Z\d\_\-]+',
+                                        'listOrder' => '[\d]+'
                                     ),
                                 )
                             ),

@@ -10,12 +10,18 @@ use Zend\Config\Config,
  * @author ElyDeLaCruz
  */
 class AbstractModel {
-
+    
     /**
      * Valid keys for model
      * @var array
      */
     protected $validKeys;
+    
+    /**
+     * Not allowed for updates (ommitted from updates)
+     * @var array
+     */
+    protected $notAllowedForUpdate;
     
     /**
      * Default input options
@@ -48,7 +54,7 @@ class AbstractModel {
         }
         return $this;
     }
-
+    
     /**
      * Setter
      * @param string $name
@@ -70,13 +76,26 @@ class AbstractModel {
     }
 
     /**
-     * Returns model as array
+     * Get models valid keys
      * @return array
      */
-    public function toArray() {
+    public function getValidKeys () {
+        return $this->validKeys;
+    }
+    
+    /**
+     * Returns model as array
+     * @param bool $omitEmpty default true
+     * @return array
+     */
+    public function toArray ($omitEmpty = true) {
         $retVal = array();
         foreach ($this->validKeys as $key) {
-            $retVal[$key] = $this->{$key};
+            $val = $this->{$key};
+            if ($omitEmpty && empty($val)) {
+                continue;
+            }
+            $retVal[$key] = $val;
         }
         return $retVal;
     }

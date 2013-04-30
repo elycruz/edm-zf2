@@ -33,7 +33,7 @@ class TermTaxonomyService extends AbstractService {
      */
     public function getById($term_taxonomy_id) {
         return $this->read(array(
-            'fetchMode' => self::FETCH_FIRST_ITEM,
+            'fetchMode' => self::FETCH_FIRST_AS_ARRAY,
             'where' => array(
                 $this->termTaxTable_alias . '.term_taxonomy_id' => 
                     $term_taxonomy_id )));
@@ -50,7 +50,7 @@ class TermTaxonomyService extends AbstractService {
             array $options = null) {
         // Default options
         $options1 = array(
-            'fetchMode' => self::FETCH_FIRST_ITEM,
+            'fetchMode' => self::FETCH_FIRST_AS_ARRAY,
             'where' => array(
                 $this->termTaxTable_alias . '.taxonomy' => $taxonomy,
                 $this->termTaxTable_alias . '.term_alias' => $alias ));
@@ -72,7 +72,7 @@ class TermTaxonomyService extends AbstractService {
     public function getByTaxonomy($taxonomy, $options = null) {
         // Default options
         $options1 = array(
-            'fetchMode' => self::FETCH_FIRST_ITEM,
+            'fetchMode' => self::FETCH_FIRST_AS_ARRAY,
             'where' => array(
                 $this->termTaxTable_alias . '.taxonomy' => $taxonomy));
         
@@ -161,8 +161,11 @@ class TermTaxonomyService extends AbstractService {
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
 
-        var_dump($termTax);
-        
+        // Begin transaction
+        $conn->beginTransaction();
+
+        // Try db insertions
+        try {
             // Process Term and rollback if failure
             $termRslt = $this->getTermFromData($term);
 
@@ -173,24 +176,17 @@ class TermTaxonomyService extends AbstractService {
             $termTaxRslt = $this->getTermTaxonomyTable()
                     ->createItem($termTax);
             
+            // Commit changes
+            $conn->commit();
+
+            // Return success message
             return $termTaxRslt;
-//
-//        // Begin transaction
-//        $conn->beginTransaction();
-//
-//        // Try db insertions
-//        try {
-//
-//            // Commit changes
-//            $conn->commit();
-//
-//            // Return success message
-//            return $termTaxRslt;
-//        } catch (\Exception $e) {
-//            // Rollback changes
-//            $conn->rollback();
-//            return $e;
-//        }
+        } 
+        catch (\Exception $e) {
+            // Rollback changes
+            $conn->rollback();
+            return $e;
+        }
     }
 
     public function updateItem($id, $data) {

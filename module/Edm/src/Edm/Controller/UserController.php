@@ -4,29 +4,29 @@
  * @todo modify term taxonomy service to include term term taxonomy
  * @todo Unable to update term taxonomies name error is sent in flash message
  */
+
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\UserForm,
     Edm\Service\TermTaxonomyServiceAware,
     Edm\Service\TermTaxonomyServiceAwareTrait,
+    Edm\Service\AbstractService,
+    Edm\Service\UserAware,
+    Edm\Service\UserAwareTrait,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
-    Zend\Paginator\Adapter\DbSelect,
-        
-    Edm\Service\UserAware,
-    Edm\Service\UserAwareTrait;
+    Zend\Paginator\Adapter\DbSelect;
 
-class UserController extends AbstractController 
-implements TermTaxonomyServiceAware, UserAware {
+class UserController extends AbstractController implements TermTaxonomyServiceAware, UserAware {
 
     use TermTaxonomyServiceAwareTrait,
-            UserAwareTrait;
+        UserAwareTrait;
 
     public function indexAction() {
         // View
-        $view = 
+        $view =
                 $this->view =
                 new JsonModel();
 
@@ -38,10 +38,10 @@ implements TermTaxonomyServiceAware, UserAware {
 
         // Get User Service
         $userService = $this->getUserService();
-        
+
         // Select 
         $select = $userService->getSelect();
-        
+
         // Where part of query
         $where = array();
 
@@ -67,7 +67,7 @@ implements TermTaxonomyServiceAware, UserAware {
         if (count($where) > 0) {
             $select->where($where);
         }
-        
+
         // Paginator
         $paginator = new Paginator(new DbSelect($select, $userService->getDb()));
         $paginator->setItemCountPerPage($itemCountPerPage)
@@ -129,20 +129,20 @@ implements TermTaxonomyServiceAware, UserAware {
         $email = $contactData->email;
         $emailCheck = $userService->checkEmailExistsInDb($email);
         if (!empty($emailCheck)) {
-            $fm->setNamespace('error')->addMessage('A user with email "'. $email 
-                    .'" already exists in the database.  Click here to edit it.');
+            $fm->setNamespace('error')->addMessage('A user with email "' . $email
+                    . '" already exists in the database.  Click here to edit it.');
             return $view;
         }
-        
+
         // Check if user exists by screen name
         $screenName = $userData->screenName;
         $screenNameCheck = $userService->checkScreenNameExistsInDb($screenName);
         if (!empty($screenNameCheck)) {
-            $fm->setNamespace('error')->addMessage('A user with screenName "'. $screenName 
-                    .'" already exists in the database.  Click here to edit it.');
+            $fm->setNamespace('error')->addMessage('A user with screenName "' . $screenName
+                    . '" already exists in the database.  Click here to edit it.');
             return $view;
         }
-        
+
         // Create term taxonomy
         $rslt = $userService->createUser($view->form->getData());
 
@@ -153,7 +153,6 @@ implements TermTaxonomyServiceAware, UserAware {
         }
         // send failure message to user 
         else {
-            var_dump($rslt);
             $fm->setNamespace('error')
                     ->addMessage('User with email "' . $email . '" failed to be added.');
         }
@@ -174,39 +173,45 @@ implements TermTaxonomyServiceAware, UserAware {
         // Id
         $id = $this->getParam('itemId');
 
-        // Put data into model
-        $userTable = $this->getUserTable();
-        $userService = $this->getTermTaxService();
+        // Get service
+        $userService = $this->getUserService();
 
         // Setup form
         $form = new UserForm('user-form', array(
-            'serviceLocator' => $this->getServiceLocator()
-        ));
+            'serviceLocator' => $this->getServiceLocator()));
         $form->setAttribute('action', '/edm-admin/user/update/id/' . $id);
         $view->form = $form;
 
-        // Check if term already exists
-        try {
-            $existingTermTax = new TermTaxonomy((array) $userService->getById($id));
-        } catch (\Exception $e) {
-            $fm->setNamespace('error')->addMessage('Term Taxonomy with id "'
+        // Check if user already exists
+        $userCheck = $userService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+        if (empty($userCheck)) {
+            $fm->setNamespace('error')->addMessage('User with id "'
                     . $id . '" doesn\'t exist in database.');
             return $view;
         }
 
+        // Get contact data
+        $contactData = $userCheck->getContactProto();
+
         // Set data
         $form->setData(array(
-            'term-taxonomy' => array(
-                'taxonomy' => $existingTermTax->taxonomy,
-                'parent_id' => $existingTermTax->parent_id,
-                'description' => $existingTermTax->description
+            'user' => array(
+                'screenName' => $userCheck->screenName,
+                'status' => $userCheck->status,
+                'role' => $userCheck->role,
+                'accessGroup' => $userCheck->accessGroup,
             ),
-            'term' => array(
-                'name' => $existingTermTax->term_name,
-                'alias' => $existingTermTax->term_alias,
-                'term_group_alias' => $existingTermTax->term_group_alias
+            'contact' => array(
+                'firstName' => $contactData->firstName,
+                'lastName' => $contactData->lastName,
+                'email' => $contactData->email,
+                'altEmail' => $contactData->altEmail,
             )
         ));
+        
+        // Make password optional
+        // @todo make password optional and add password verification field
+//        $form->get('user')->get('password')->setAttribute('required', false);
 
         // If not post bail
         $request = $this->getRequest();
@@ -224,44 +229,44 @@ implements TermTaxonomyServiceAware, UserAware {
             return $view;
         }
 
-        // Set data
         $data = $view->form->getData();
+        $user = (object) $data['user'];
+        $contact = (object) $data['contact'];
         
-        // Allocoate updates
-        $term = $this->getTermFromData($data['term']); //->exchangeArray($data);
-        $user = (object) $data['term-taxonomy'];
+        // Update user in db
+        $rslt = $userService->updateUser($id, $userCheck->contact_id, array(
+            'user' => array(
+                'screenName' => $user->screenName,
+                'status' => $user->status,
+                'role' => $user->role,
+                'accessGroup' => $user->accessGroup,
+            ),
+            'contact' => array(
+                'firstName' => $contact->firstName,
+                'lastName' => $contact->lastName,
+                'email' => $contact->email,
+                'altEmail' => $contact->altEmail,
+            ),
+            'originalContact' => $contactData->toArray()
+        ));
 
-        // Normalize description
-        $desc = $user->description;
-        $user->description = $desc ? $desc : '';
-
-        // Normalize parent id
-        $parent_id = !empty($user->parent_id) ? 
-                $user->parent_id : 0;
-        
-        $data = array(
-            'term_alias' => $term->alias,
-            'taxonomy' => $user->taxonomy,
-            'parent_id' => $parent_id,
-            'description' => $user->description
-        );
-        
-        // Update term in db
-        $rslt = $userTable->updateItem($id, $data);
-        
         // Send success message to user
-        if (!empty($rslt)) {
+        if ($rslt instanceof \Exception === false) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term Taxonomy "' 
-                            . $term->name . ' > ' . $user->taxonomy 
-                            . '" updated successfully.');
+                    ->addMessage('User "'
+                            . $contact->firstName . ', '
+                            . $contact->lastName . '" '
+                            . 'with email "' . $contact->email . '" '
+                            . 'updated successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Term Taxonomy "' 
-                            . $term->name . ' > ' . $user->taxonomy 
-                            . '" failed to be updated.');
+                    ->addMessage('User "'
+                            . $contact->firstName . ', '
+                            . $contact->lastName . '" '
+                            . 'with email "' . $contact->email . '" '
+                            . '" failed to be updated. <br />' . $rslt);
         }
 
         // Return message to view
@@ -270,9 +275,7 @@ implements TermTaxonomyServiceAware, UserAware {
 
     public function deleteAction() {
         // Set up prelims and populate $this -> view for 
-        $view =
-                $this->view =
-                new JsonModel();
+        $view = $this->view = new JsonModel();
         $view->setTerminal(true);
 
         // init flash messenger
@@ -289,61 +292,62 @@ implements TermTaxonomyServiceAware, UserAware {
         }
 
         // Get term table
-        $userTable = $this->getUserTable();
+        $userService = $this->getUserService();
 
         try {
             // Check if term already exists
-            $term = new TermTaxonomy($this->getTermTaxService()->getById($id));
-        } 
-        catch (\Exception $e) {
+            $user = $userService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+            $contact = $user->getContactProto();
+        } catch (\Exception $e) {
             // If not send message and bail
-            $fm->setNamespace('error')->addMessage('Term Taxonomy Id "' .
+            $fm->setNamespace('error')->addMessage('User Id "' .
                     $id . '" doesn\'t exist in database.');
-            $view->error = $e;
             return $view;
         }
 
         // Delete term in db
-        $rslt = $userTable->deleteItem($term->term_taxonomy_id);
+        $rslt = $userService->deleteUser($user->user_id);
 
         // Send success message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Term Taxonomy "' 
-                            . $term->term_name . ' > ' . $term->term_alias 
+                    ->addMessage('User "'
+                            . $contact->firstName . ', '
+                            . $contact->lastName . '" '
+                            . 'with email "' . $contact->email . '" '
                             . '" deleted successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Term Taxonomy "' 
-                            . $term->term_name . ' > ' . $term->term_alias 
+                    ->addMessage('User "'
+                            . $contact->firstName . ', '
+                            . $contact->lastName . '" '
+                            . 'with email "' . $contact->email . '" '
                             . '" failed to be deleted.');
         }
 
         // Return message to view
         return $view;
     }
-    
-    public function loginAction () {
-        
-    }
-    
-    public function logoutAction () {
-        
-    }
-    
-    public function sendActivationAction () {
-        
-    }
-    
-    public function activtionAction () {
-        
-    }
-    
-    public function sendActivationEmail () {
-        
-    }
-    
-    
+
+//    public function loginAction () {
+//        
+//    }
+//    
+//    public function logoutAction () {
+//        
+//    }
+//    
+//    public function sendActivationAction () {
+//        
+//    }
+//    
+//    public function activtionAction () {
+//        
+//    }
+//    
+//    public function sendActivationEmail () {
+//        
+//    }
 }

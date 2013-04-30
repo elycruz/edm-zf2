@@ -11,7 +11,6 @@ use Edm\Controller\AbstractController,
     Edm\Model\TermTaxonomy,
     Edm\Service\TermTaxonomyServiceAware,
     Edm\Service\TermTaxonomyServiceAwareTrait,
-    Edm\Service\AbstractService,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -200,7 +199,7 @@ implements TermTaxonomyServiceAware {
         $view->form = $form;
 
         // Check if term already exists if not bail
-        $existingTermTax = new TermTaxonomy((array) $termTaxService->getById($id));
+        $existingTermTax = new TermTaxonomy($termTaxService->getById($id));
         if (empty($existingTermTax)) {
             $fm->setNamespace('error')->addMessage('Term Taxonomy with id "'
                     . $id . '" doesn\'t exist in database.');

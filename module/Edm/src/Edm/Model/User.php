@@ -6,20 +6,10 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
+    Edm\Model\Contact,
     Edm\Model\AbstractModel;
 
 class User extends AbstractModel implements InputFilterAwareInterface {
-
-    /**
-     * Input filter
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected $inputFilter = null;
-
-    // Defaults
-    public $role        = 'user';
-    public $status      = 'pending-activation';
-    public $accessGroup = 'cms-manager';
 
     /**
      * Valid keys for model
@@ -43,7 +33,27 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         'checkedOutById',
         'contact_id'
     );
+    
+    public $notAllowedForUpdate = array(
+        'activationKey',
+        'registeredDate',
+        'registeredBy',
+        'contact_id',
+        'user_id'
+    );
 
+    /**
+     * Input filter
+     * @var Zend\InputFilter\InputFilter
+     */
+    protected $inputFilter = null;
+    
+    /**
+     * Contact Proto Object
+     * @var Edm\Model\Contact
+     */
+    protected $contactProto;
+    
     public function __construct($data = null) {
         if (is_array($data)) {
             $this->exchangeArray($data);
@@ -124,6 +134,39 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         $this->inputFilter = $retVal;
 
         return $retVal;
+    }
+    
+    
+    /**
+     * Exchange array overriden to divide data between user data and contact data
+     * @param array $data
+     * @return \Edm\Model\AbstractModel
+     */
+    public function exchangeArray(array $data) {
+        $contact = $this->getContactProto();
+        $contactValidKeys = $contact->getValidKeys();
+        foreach ($data as $key => $val) {
+            if (in_array($key, $this->validKeys)) {
+                $this->{$key} = $val;
+            }
+            else if (in_array($key, $contactValidKeys)) {
+                $contact->{$key} = $val;
+            }
+        }
+        $this->contactProto = $contact;
+        return $this;
+    }
+    
+    /**
+     * Gets Contact Proto
+     * @param array $data
+     * @return Edm\Model\Contact
+     */
+    public function getContactProto($data = null) {
+        if (empty($this->contactProto)) {
+            $this->contactProto = new Contact($data);
+        }
+        return $this->contactProto;
     }
 
 }

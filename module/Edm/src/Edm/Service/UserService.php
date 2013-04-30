@@ -21,7 +21,15 @@ class UserService extends AbstractService {
     protected $contactTable;
     protected $userContactRelTable;
     protected $resultSet;
-    protected $screenNameLength = 12;
+    protected $screenNameLength = 8;
+    protected $notAllowedForUpdate = array(
+        'activationKey',
+        'registeredDate',
+        'registeredBy',
+        'contact_id',
+        'user_id',
+        'type'
+    );
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
@@ -109,12 +117,12 @@ class UserService extends AbstractService {
 
         // Contact params default value
         if (empty($contact->userParams)) {
-            $contact->userParams = '{}';
+            $contact->userParams = '';
         }
 
         // Contact description default value
         if (empty($contact->description)) {
-            $contact->description = 'None';
+            $contact->description = '';
         }
 
         // Set registeredDate
@@ -160,57 +168,76 @@ class UserService extends AbstractService {
      *   (contact and user contact relationship).  
      * @todo There are no safety checks being done in this method
      * @param int $id
-     * @param array $data
      * @param int $contactId
+     * @param array $data
      * @return boolean
      * @throws Exception
      */
-    public function updateUser($id, array $data, $contactId = null) {
+    public function updateUser($id, $contactId,  array $data) {
         // If no user key
         if (!array_key_exists('user', $data)) {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
             ' requires the data param to contain a user key.');
         }
 
-        // Contact data check
-        $contactDataExists = array_key_exists('contact', $data) && $contactId;
-
-        // If contact key exists
-        if ($contactDataExists) {
-            $contact = $data['contact'];
-        }
-
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
-        $user = $dbDataHelper->escapeTuple($user);
-        $contact = $dbDataHelper->escapeTuple($contact);
-        $userContactRel = array(
-            'email' => $contact['email'],
-            'screenName' => $user['screenName']);
-
+        $user = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['user']));
+        $contact = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['contact']));
+        
+//        // Contact data check
+//        $contactDataExists = array_key_exists('contact', $data);
+//        
+//        // If contact key exists
+//        if ($contactDataExists) {
+//            $contactData = $this->ensureOkForUpdate($data['contact']);
+//            $originalData = array_key_exists('originalContact', $data) ? 
+//                    $this->ensureOkForUpdate($data['originalContact']) : array();
+//
+//            // Difference in data
+//            $diff = array_diff_assoc($contactData, $originalData);
+//
+//            // Compare original contact data and new contact data
+//            // If data has not changed don't do anything for contact
+//            if (count($diff) > 0) {
+//                foreach ($diff as $key => $val) {
+//                    if (empty($val)) {
+//                        unset($diff[$key]);
+//                    }
+//                }
+//                if (count($diff) > 0) {
+//                    $contact = $dbDataHelper->escapeTuple($diff);
+//                }
+//            }
+//        }
+        
+        // If password encode it
+        if (!empty($user['password'])) {
+            $user['password'] = $this->encodePassword($user['password']);
+        }
+        
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
 
         // Begin transaction
         $conn->beginTransaction();
+        
         try {
-            // Create contact
+            
+            // Update contact
             if (isset($contact)) {
-                $this->getContactTable()->udpate($contactId, $contact);
+                $this->getContactTable()->update($contact, array('contact_id' => $contactId));
             }
 
-            // Create user
-            $this->getUserTable()->update($id, $user);
-
-            // Create user contact rel
-            $this->getUserContactRelTable()->insert($userContactRel);
+            // Update user
+            return $this->getUserTable()->update($user, array('user_id' => $id), $user);
 
             // Commit and return true
             $conn->commit();
             $retVal = true;
         } catch (\Exception $e) {
             $conn->rollback();
-            $retVal = false;
+            $retVal = $e;
         }
         return $retVal;
     }
@@ -236,7 +263,7 @@ class UserService extends AbstractService {
             $retVal = true;
         } catch (\Exception $e) {
             $conn->rollback();
-            $retVal = false;
+            $retVal = $e;
         }
         return $retVal;
     }
@@ -244,22 +271,24 @@ class UserService extends AbstractService {
     /**
      * Gets a user by id
      * @param integer $id
+     * @param integer $fetchMode
      * @return mixed array | boolean
      */
-    public function getById($id) {
+    public function getById($id, $fetchMode = AbstractService::FETCH_FIRST_AS_ARRAY) {
         return $this->read(array(
-                    'fetchMode' => self::FETCH_FIRST_ITEM,
+                    'fetchMode' => $fetchMode,
                     'where' => array('user.user_id' => $id)));
     }
 
     /**
      * Fetches a user by screen name
-     * @param type $screenName
+     * @param string $screenName
+     * @param int $fetchMode
      * @return mixed array | boolean
      */
-    public function getByScreenName($screenName) {
+    public function getByScreenName($screenName, $fetchMode = AbstractService::FETCH_FIRST_AS_ARRAY) {
         return $this->read(array(
-                    'fetchMode' => self::FETCH_FIRST_ITEM,
+                    'fetchMode' => $fetchMode,
                     'where' => array('user.screenName' => $screenName)));
     }
 
@@ -268,9 +297,9 @@ class UserService extends AbstractService {
      * @param string $email
      * @return mixed array | boolean
      */
-    public function getByEmail($email) {
+    public function getByEmail($email, $fetchMode = AbstractService::FETCH_FIRST_AS_ARRAY) {
         return $this->read(array(
-                    'fetchMode' => self::FETCH_FIRST_ITEM,
+                    'fetchMode' => $fetchMode,
                     'where' => array('contact.email' => $email)));
     }
 
@@ -348,6 +377,21 @@ class UserService extends AbstractService {
             return true;
         } 
         return false;
+    }
+    
+    /**
+     * Remove any empty keys and ones in the not ok for update list
+     * @param array $data
+     * @return array
+     */
+    public function ensureOkForUpdate (array $data) {
+        foreach ($this->notAllowedForUpdate as $key) {
+            if (array_key_exists($key, $data) || 
+                    (array_key_exists($key, $data) && empty($data[$key]))) {
+                unset($data[$key]);
+            }
+        }
+        return $data;
     }
 
     /**
