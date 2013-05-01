@@ -11,11 +11,11 @@ class Acl extends ZendAcl
     {
        $roles = $config->acl->roles;
        $resources = $config->acl->resources;
-       $this->_addRoles($roles);
-       $this->_addResources($resources);
+       $this->addRoles($roles);
+       $this->addResources($resources);
     }
 
-    private function _addRoles($roles)
+    private function addRoles($roles)
     {
         foreach($roles as $name => $parents){
             if(!$this->hasRole($name)) {
@@ -25,12 +25,12 @@ class Acl extends ZendAcl
                     $parents = explode(',', $parents);
                 }
 
-                $this->addRole(new Zend_Acl_Role($name), $parents);
+                $this->addRole(new ZendAclRole($name), $parents);
             }
         }
     }
 
-    private function _addResources($resources)
+    private function addResources($resources)
     {
         foreach($resources as $permissions => $controllers){
             foreach($controllers as $controller => $actions){
@@ -39,7 +39,7 @@ class Acl extends ZendAcl
                     $controller = null;
                 } else {
                     if(!$this->has($controller)){
-                        $this->add(new Zend_Acl_Resource($controller));
+                        $this->add(new ZendAclResource($controller));
                     }
                 }
 
