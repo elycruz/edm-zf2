@@ -30,7 +30,6 @@ class Module {
         $sessionManager = new SessionManager($config, $storage, $saveHandler);
         Container::setDefaultManager($sessionManager);
         
-        
         // Start session
         $sessionManager->start();
        

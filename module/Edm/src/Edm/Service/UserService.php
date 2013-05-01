@@ -179,7 +179,7 @@ class UserService extends AbstractService {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
             ' requires the data param to contain a user key.');
         }
-
+        
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
         $user = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['user']));
@@ -230,7 +230,7 @@ class UserService extends AbstractService {
             }
 
             // Update user
-            return $this->getUserTable()->update($user, array('user_id' => $id), $user);
+            $this->getUserTable()->update($user, array('user_id' => $id), $user);
 
             // Commit and return true
             $conn->commit();
