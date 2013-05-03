@@ -1,6 +1,6 @@
 <?php
 
-namespace Edm;
+namespace EdmAccessGateway\Permissions\Acl;
 
 use Zend\Config\Config,
     Zend\Permissions\Acl\Acl as ZendAcl,
@@ -18,9 +18,7 @@ class Acl extends ZendAcl {
      */
     public function __construct(Config $config = null) {
         if ($config !== null) {
-            $this->addRoles($config->roles);
-            $this->addResourcesAndPerms(
-                    $config->resources_and_permissions);
+            $this->setConfig($config);
         }
     }
 
@@ -51,7 +49,7 @@ class Acl extends ZendAcl {
             // For each resource privilege (action)
             foreach ($resource as $privileges) {
 
-                
+
                 // Resolve if all access
                 if ('all' === $resource) {
                     $resource = null;
@@ -95,6 +93,18 @@ class Acl extends ZendAcl {
                 }
             }
         }
+    }
+
+    /**
+     * Inject the acl configuration into our acl object
+     * @param \Zend\Config\Config $config
+     * @return \EdmAccessGateway\EdmAccessGatewayAcl
+     */
+    public function setConfig(Config $config) {
+        $this->addRoles($config->roles);
+        $this->addResourcesAndPerms(
+                $config->resources_and_permissions);
+        return $this;
     }
 
 }
