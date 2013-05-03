@@ -44,7 +44,7 @@ class Module implements AutoloaderProviderInterface {
     }
 
     public function getConfig() {
-        return include __DIR__ . '/module.config.php';
+        return include __DIR__ . '/configs/module.config.php';
     }
 
     public function registerJsonStrategy($e) {
