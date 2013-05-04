@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework (http://framework.zend.com/)
  *
@@ -9,21 +10,76 @@
 
 namespace Edm\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController,
-    Zend\View\Model\ViewModel,
-    Zend\View\Model\JsonModel;
+use Zend\View\Model\ViewModel,
+    Edm\Controller\AbstractController,
+    Edm\Service\UserServiceAwareTrait,
+    Edm\Form\UserLoginForm;
 
-class IndexController extends AbstractActionController
-{
-    public function indexAction()
-    {
-        return new ViewModel(array('key' => 'value'));
+class IndexController extends AbstractController {
+
+    use UserServiceAwareTrait;
+
+    public function indexAction() {
+        // Get our view
+        $view = $this->view = new ViewModel();
+
+        // Init flash messenger
+        $fm = $this->initFlashMessenger();
+
+        // Get service
+        $userService = $this->getUserService();
+        
+        if ($userService->getAuthService()->hasIdentity()) {
+            return $this->redirect('/edm-admin/ajax-ui');
+        }
+
+        // Setup form
+        $form = new UserLoginForm('login-form');
+        $form->setAttribute('action', '/edm-admin/index');
+        $view->form = $form;
+
+        // If not post bail
+        $request = $this->getRequest();
+        if (!$request->isPost()) {
+            return $view;
+        }
+
+        // Processing request
+        $view->form->setData($request->getPost());
+
+        // If form not valid return
+        if (!$view->form->isValid()) {
+            $fm->setNamespace('error')->addMessage('Login attempt failed. ' .
+                    'Please try again.');
+            return $view;
+        }
+
+        // Get data
+        $data = $view->form->getData();
+
+        // Update user in db
+        $rslt = $userService->loginUser($data);
+
+        // Login success message to user
+        if ($rslt === true) {
+            $fm->setNamespace('highlight')
+                    ->addMessage('You\'ve been logged in successfully.');
+        }
+        // Login failure message to user 
+        else {
+            $fm->setNamespace('error')
+                    ->addMessage('Login attempt failed!  Please try again.');
+        }
+        
+        $view->messages = $fm->getMessages();
+        
+        // Return message to view
+        return $view;
     }
 
-    public function fooAction()
-    {
-        // This shows the :controller and :action parameters in default route
-        // are working when you browse to /module-specific-root/Index/foo
-        return new JsonModel(array('key' => 'value'));
+    public function logoutAction() {
+        $this->view = new ViewModel();
+        $this->getUserService()->logoutUser();
+        return $this->view;
     }
 }

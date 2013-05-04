@@ -328,19 +328,26 @@ extends Edm_Service_Internal_AbstractCrudService  {
      * @param string $email
      * @param string $password
      */
-    public function loginUser($email, $password) {
+    public function loginUser($screenName, $password) {
         // Encode password
         $password = $this->encodePassword($password);
         
+        // Get auth adapater
         $auth = $this->getAuthAdapter();
+        
+        // Set auth type
         $authAdapter = new Zend_Auth_Adapter_DbTable(
                         $this->getDb(), 
-                        'user_lookup', 'email', 'password');
-        $authAdapter->setIdentity($email);
+                        $this->getUserTable()->table, 'screenName', 'password');
+        
+        
+        // Set preliminaries before check
+        $authAdapter->setIdentity($screenName);
         $authAdapter->setCredential($password);
         $authAdapter->getDbSelect()->where('status=?', 'activated');
         $rslt = $auth->authenticate($authAdapter);
 
+        // Check if credentials are valid
         if ($rslt->isValid()) {
             // store the username, first and last names of the user
             $storage = $auth->getStorage();

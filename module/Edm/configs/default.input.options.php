@@ -118,14 +118,15 @@ return array(
     ),
     
     /**
-     * Password
+     * Password @todo create friendlier password mismatch message
      * @var varchar(64)
      */
     'password' => array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[a-z\d\-_]{6,32}$/'
+                    'pattern' => '/^[a-z\d\-_]{6,32}$/',
+                    'message' => 'Password doesn\'t match password pattern.'
                 ))
         )
     ),
@@ -186,7 +187,7 @@ return array(
     
     /**
      * Screen Name
-     * @var alnum [a-z\d]{8,12}
+     * @var alnum [a-z\d]{6,32}
      */
     'screen-name' => array(
         'validators' => array(
@@ -198,14 +199,14 @@ return array(
     
     /**
      * Activation Key
-     * @var alnum [a-z\d]{32,64}
-     * @todo should be a fixed length not loose
+     * @var alnum [a-z\d]{32}
      */
     'activation-key' => array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[a-z\d]{32,64}$/i'
+                    'pattern' => '/^[a-z\d]{32}$/i',
+                    'message' => 'Activation key is invalid.'
                 ))
         )
     )

@@ -42,4 +42,9 @@ class UserTable extends AbstractTable {
         return $this->getBy(array('user_id' => $id));
     }
     
+    public function updateLastLoginForId ($id) {
+        $today = new \Zend\Stdlib\DateTime();
+        $this->updateItem($id, array('lastLogin' => $today->getTimestamp()));
+    }
+    
 }

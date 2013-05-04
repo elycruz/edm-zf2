@@ -6,7 +6,7 @@
 
 // Application path
 defined('APP_PATH') ||
-        define('APP_PATH', realpath(__DIR__ . '/../../'));
+        define('APP_PATH', realpath(__DIR__ . '/../../../'));
 
 // Edm salt seed
 defined('EDM_SALT') ||
@@ -52,6 +52,7 @@ return array(
             'Edm\Controller\Term'         => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
+            'Edm\Controller\AjaxUi'         => 'Edm\Controller\AjaxUiController',
         ),
     ),
     'view_helpers' => array(
@@ -90,6 +91,15 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
+//                            'edm-ko-ui' => array(
+//                                'type' => 'Literal',
+//                                'options' => array(
+//                                    'route' => '/ajax-ui',
+//                                    'constraints' => array(
+//                                        'itemId' => '[a-zA-Z\d\_\-]+'
+//                                    ),
+//                                )
+//                            ),
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
                                 'options' => array(
@@ -153,11 +163,11 @@ return array(
     ),
     'view_manager' => array(
         'template_path_stack' => array(
-            'Edm' => __DIR__ . '/src/Edm/view-scripts',
+            'Edm' => __DIR__ . '/../src/Edm/view-scripts',
         ),
         'template_map' => array(
-            'layout/layout'     => __DIR__ . '/../../../public/module-templates/edm-ko-ui/login.phtml',
-            'layout/edm-ko-ui'  => __DIR__ . '/../../../public/module-templates/edm-ko-ui/index.phtml'
+            'layout/layout'     => APP_PATH .'/public/module-templates/edm-ko-ui/login.phtml',
+            'layout/ajax-ui'  => __DIR__ . '/../../../public/module-templates/edm-ko-ui/index.phtml'
         )
     ),
 );

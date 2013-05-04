@@ -3,19 +3,23 @@
 namespace Edm\Service;
 
 use Edm\Service\AbstractService,
-//    Edm\Service\TermTaxonomyServiceAware,
-//    Edm\Service\TermTaxonomyServiceAwareTrait,
     Edm\Model\User,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
+    Zend\Authentication\Adapter\DbTable,
     Zend\Stdlib\DateTime;
 
 /**
  * @author ElyDeLaCruz
  */
-class UserService extends AbstractService {
+class UserService extends AbstractService 
+implements \Edm\UserAware,
+            \Edm\Db\CompositeDataColumnAware {
+    
+    use \Edm\UserAwareTrait,
+        \Edm\Db\CompositeDataColumnAwareTrait;
 
     protected $userTable;
     protected $contactTable;
@@ -43,6 +47,9 @@ class UserService extends AbstractService {
      * @param array $data
      * @return mixed int | boolean
      * @throws Exception
+     * @todo make our service use model objects for CRUD operations; I.e.
+     * $service->createItem (array $data) should be 
+     * $service->createItem (Model $model);
      */
     public function createUser(array $data) {
 
@@ -57,7 +64,7 @@ class UserService extends AbstractService {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
             ' requires the data param to contain a contact key.');
         }
-        
+
         // If no contact key
         if (!array_key_exists('email', $data['contact'])) {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
@@ -100,16 +107,16 @@ class UserService extends AbstractService {
         if (!empty($user->password)) {
             $user->password = $this->encodePassword($user->password);
         }
-        
+
         // Make sure these are not set
         unset($contact->contact_id);
         unset($contact->name);
-        
+
         // Remove parent id if not valid
         if (!is_numeric($contact->parent_id)) {
             unset($contact->parent_id);
         }
-        
+
         // If no contact.type set contact.type to "user"
         if (empty($contact->type)) {
             $contact->type = 'user';
@@ -140,20 +147,20 @@ class UserService extends AbstractService {
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-        
+
         // Begin transaction
         $conn->beginTransaction();
         try {
             // Create contact
-            $cleanUser['contact_id'] = 
+            $cleanUser['contact_id'] =
                     $this->getContactTable()->createItem($cleanContact);
-            
+
             // Create user
             $retVal = $this->getUserTable()->createItem($cleanUser);
 
             // Create user contact rel
             $this->getUserContactRelTable()->insert($userContactRel);
-            
+
             // Commit and return true
             $conn->commit();
         } catch (\Exception $e) {
@@ -173,18 +180,18 @@ class UserService extends AbstractService {
      * @return boolean
      * @throws Exception
      */
-    public function updateUser($id, $contactId,  array $data) {
+    public function updateUser($id, $contactId, array $data) {
         // If no user key
         if (!array_key_exists('user', $data)) {
             throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
             ' requires the data param to contain a user key.');
         }
-        
+
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
         $user = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['user']));
         $contact = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['contact']));
-        
+
 //        // Contact data check
 //        $contactDataExists = array_key_exists('contact', $data);
 //        
@@ -210,20 +217,19 @@ class UserService extends AbstractService {
 //                }
 //            }
 //        }
-        
         // If password encode it
         if (!empty($user['password'])) {
             $user['password'] = $this->encodePassword($user['password']);
         }
-        
+
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
 
         // Begin transaction
         $conn->beginTransaction();
-        
+
         try {
-            
+
             // Update contact
             if (isset($contact)) {
                 $this->getContactTable()->update($contact, array('contact_id' => $contactId));
@@ -266,6 +272,60 @@ class UserService extends AbstractService {
             $retVal = $e;
         }
         return $retVal;
+    }
+
+    /**
+     * Log user in and validate them by (email|screenName) and password
+     * @param User $user
+     * @param string $credentialColumn default 'screenName'
+     * @return boolean
+     */
+    public function loginUser(User $user, $credentialColumn = 'screenName') {
+        // Encode password
+        $password = $this->encodePassword($user->password);
+
+        // Get auth adapater
+        $authService = $this->getAuthService();
+        
+        // Set auth type
+        $authAdapter = new DbTable(
+                        $this->getDb(), 
+                        $this->getUserTable()->table, $credentialColumn, 'password');
+        
+        // Set preliminaries before check
+        $authAdapter->setIdentity($user->screenName);
+        $authAdapter->setCredential($password);
+        $authAdapter->getDbSelect()->where(array('status' => 'activated'));
+        $rslt = $authService->authenticate($authAdapter);
+
+        // Check if credentials are valid
+        if ($rslt->isValid()) {
+            // store the username, first and last names of the user
+            $storage = $authService->getStorage();
+            $storage->write($authAdapter->getResultRowObject(array(
+                                'user_id', $credentialColumn, 'lastLogin',
+                                'role', 'registeredDate')));
+
+            // Update user lastLogin
+            $this->getUserTable()
+                    ->updateLastLoginForId($authService->getIdentity()->user_id);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Clears the user token
+     */
+    public function logoutUser() {
+        $auth = $this->getAuthService();
+        if ($auth->hasIdentity()) {
+            $auth->clearIdentity();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -317,9 +377,8 @@ class UserService extends AbstractService {
         $select = $sql->select();
         // @todo implement return values only for current role level
         return $select
-            ->from(array('user' => $this->getUserTable()->table))
-            ->join(array('contact' => $this->getContactTable()->table),
-                    'contact.contact_id=user.contact_id');
+                        ->from(array('user' => $this->getUserTable()->table))
+                        ->join(array('contact' => $this->getContactTable()->table), 'contact.contact_id=user.contact_id');
     }
 
     public function getUserTable() {
@@ -344,7 +403,7 @@ class UserService extends AbstractService {
             $feature->addFeature(new GlobalAdapterFeature());
             $this->userContactRelTable =
                     new \Zend\Db\TableGateway\TableGateway(
-                            'user_contact_relationships', $this->getServiceLocator()
+                    'user_contact_relationships', $this->getServiceLocator()
                             ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
         return $this->userContactRelTable;
@@ -357,7 +416,7 @@ class UserService extends AbstractService {
      */
     public function checkEmailExistsInDb($email) {
         $rslt = $this->getUserContactRelTable()->select(
-                array('email' => $email))->current();
+                        array('email' => $email))->current();
         if (empty($rslt)) {
             return false;
         } else {
@@ -372,21 +431,21 @@ class UserService extends AbstractService {
      */
     public function checkScreenNameExistsInDb($screenName) {
         $rslt = $this->userContactRelTable->select(
-                array('screenName' => $screenName))->current();
+                        array('screenName' => $screenName))->current();
         if (!empty($rslt)) {
             return true;
-        } 
+        }
         return false;
     }
-    
+
     /**
      * Remove any empty keys and ones in the not ok for update list
      * @param array $data
      * @return array
      */
-    public function ensureOkForUpdate (array $data) {
+    public function ensureOkForUpdate(array $data) {
         foreach ($this->notAllowedForUpdate as $key) {
-            if (array_key_exists($key, $data) || 
+            if (array_key_exists($key, $data) ||
                     (array_key_exists($key, $data) && empty($data[$key]))) {
                 unset($data[$key]);
             }
@@ -398,15 +457,14 @@ class UserService extends AbstractService {
      * Returns a unique screen name with length of "screen name length"
      * @return string
      */
-    public function generateUniqueScreenName () {
+    public function generateUniqueScreenName() {
         $screenName = '';
         do {
             $screenName = $this->gen_uuid($this->screenNameLength);
-        }
-        while ($this->checkScreenNameExistsInDb($screenName));
+        } while ($this->checkScreenNameExistsInDb($screenName));
         return $screenName;
     }
-    
+
     /**
      * Returns an encoded password
      * @param String $password

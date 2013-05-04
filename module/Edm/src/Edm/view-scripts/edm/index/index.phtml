@@ -1,3 +1,18 @@
-<strong>Module:</strong>        Edm &raquo;
-<strong>Controller:</strong>    Index &raquo;
-<strong>Action:</strong>        index
+<section class="module base-rounded-module module-2">
+    <header><h3><span>Login</span></h3></header>
+    <div>
+        <div>
+            <?php
+            foreach ($this->messages as $message):
+                ?>
+                <p class="m10px mTB20px"><?= $message; ?></p>
+            <?php endforeach; ?>
+            <?php
+            // Prepare form and render
+            $this->form->prepare();
+            echo $this->partial('edm/index/login-form.phtml', array('form' => $this->form));
+            ?>
+        </div>
+    </div>
+    <footer></footer>
+</section>

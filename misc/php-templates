@@ -1,0 +1,14 @@
+# Lazy load
+/**
+ * ${varDescription}
+ * @return ${varType}
+ */
+public function get${funcName}() {
+    if (empty($this->${varName})) {
+        $this->${varName} = 
+                $this->getServiceLocator()
+                    ->get(${varSrcNamespace});
+    }
+    return $this->${varName};
+}
+

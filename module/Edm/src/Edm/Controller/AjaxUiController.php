@@ -10,20 +10,14 @@
 namespace Edm\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController,
-    Zend\View\Model\ViewModel,
-    Zend\View\Model\JsonModel;
+    Zend\View\Model\ViewModel;
 
-class EdmAjaxUiController extends AbstractActionController
+class AjaxUiController extends AbstractActionController
 {
     public function indexAction()
     {
-        return new ViewModel(array('key' => 'value'));
-    }
-
-    public function fooAction()
-    {
-        // This shows the :controller and :action parameters in default route
-        // are working when you browse to /module-specific-root/Index/foo
-        return new JsonModel(array('key' => 'value'));
+        $this->view = new ViewModel(array('key' => 'value'));
+        $this->view->setTemplate('layout/ajax-ui');
+        return $this->view;
     }
 }

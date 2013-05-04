@@ -331,13 +331,6 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         return $view;
     }
 
-//    public function loginAction () {
-//        
-//    }
-//    
-//    public function logoutAction () {
-//        
-//    }
 //    
 //    public function sendActivationAction () {
 //        
