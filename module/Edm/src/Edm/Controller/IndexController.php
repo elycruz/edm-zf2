@@ -29,6 +29,8 @@ class IndexController extends AbstractController {
         // Get service
         $userService = $this->getUserService();
         
+        $view->messages = array();
+        
         if ($userService->getAuthService()->hasIdentity()) {
             return $this->redirect()->toUrl('/edm-admin/ajax-ui');
         }

@@ -68,10 +68,6 @@ class Module implements AutoloaderProviderInterface {
             $role = 'guest';
         }
 
-//        var_dump('<pre>');
-//        var_dump($routeMatch);
-//        var_dump('</pre>');
-        
         // Restrict access
 //        var_dump('user role is "' . $role . '" <br /> '. $resource);
         if (preg_match('/\\+/', $resource) > -1) {
@@ -79,12 +75,21 @@ class Module implements AutoloaderProviderInterface {
             $resource = $resourceParts[count($resourceParts) - 1];
         }
 
-        // Does user have permission to access the privilege of this resource
-        if ($acl->hasResource($resource) && !$acl->isAllowed($role, $resource, $privilege)) {
+        // Make sure we log users out when they visit edm-admin pages
+        if ($role === 'user' && $module === 'edm-admin' && 
+                $resource !== 'index') {
             return $routeMatch
-                            ->setParam('module', $module)
-                            ->setParam('controller', 'error')
-                            ->setParam('action', 'not-authorized')
+                            ->setParam('controller', 'Edm\\Controller\\Index')
+                            ->setParam('action', 'logout')
+                            ->setParam('dispatched', false);
+        }
+        
+        // Redirect un-authorized users
+        if (($acl->hasResource($resource) && 
+                !$acl->isAllowed($role, $resource, $privilege))) {
+            return $routeMatch
+                            ->setParam('controller', 'Edm\\Controller\\Index')
+                            ->setParam('action', 'index')
                             ->setParam('dispatched', false);
         }
     }

@@ -1,4 +1,6 @@
 <?php
+//echo phpinfo();
+//exit();
 
 /**
  * Zend Framework (http://framework.zend.com/)

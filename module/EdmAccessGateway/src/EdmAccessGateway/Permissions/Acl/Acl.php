@@ -46,29 +46,28 @@ class Acl extends ZendAcl {
         // For each resource (controller)
         foreach ($resources as $resource => $resourceVals) {
 
+            // ------------------------------------------------------
+            // Set Resources
+            // ------------------------------------------------------
+            // We allow the resource to set either 1) a parent resource
+            // 2) an array of actions/privileges with
+            // their role => permission key value
+            // Add resource
+            if (!$this->hasResource($resource)) {
+                if (is_string($resourceVals)) {
+                    $parentResource = $resourceVals;
+                    $this->addResource(new Resource($resource), $parentResource);
+                    continue;
+                }
+                $this->addResource(new Resource($resource));
+            }
+
             // For each resource privilege (action)
             foreach ($resourceVals as $privilege => $privilegeVals) {
 
-                // ------------------------------------------------------
-                // Set Resources
-                // ------------------------------------------------------
-                // We allow the privilege to set either 1) a parent resource
-                // 2) an array of actions/privileges with
-                // their role => permission key value
-                // Add resource
-                if (!$this->hasResource($resource)) {
-                    if (is_string($privilegeVals)) {
-                        $parentResource = $privilegeVals;
-                        $this->addResource(new Resource($resource), $parentResource);
-                        continue;
-                    }
-                    $this->addResource(new Resource($resource));
-                }
 
                 foreach ($privilegeVals as $role => $permission) {
-
 //                    var_dump($resource . ' > ' . $privilege . ' > ' . $permission . ' > ' . $role . '<br />');
-
                     // If privilege is equal to all then we pass null when setting permissions 
                     // to allow all
                     if ($privilege === 'all') {

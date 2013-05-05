@@ -71,6 +71,8 @@ return array(
                     // Change this to something specific to your module
                     'route' => '/edm-admin',
                     'defaults' => array(
+                        // Set for Edm Access Gateway control
+                        'module' => 'edm-admin',
                         // Change this value to reflect the namespace in which
                         // the controllers for your module are found
                         '__NAMESPACE__' => 'Edm\Controller',
