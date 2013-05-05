@@ -7,61 +7,43 @@
 
 namespace Edm;
 
-use Edm\Model\AbstractModel,
-    Edm\Auth\AuthServiceAwareTrait;
+use Edm\Auth\AuthServiceAwareTrait;
 
 /**
- * Getter and Setters for a user model.  
- * ** Note ** Assumes "user model class name" is used in class; 
- * I.e., use Edm\Model\"UserName" where "UserName" is your model's class name
+ * Getter and Setters for a user std object.  
  * @uses AuthServiceAwareTrait
  * @author ElyDeLaCruz
  */
 trait UserAwareTrait {
 
     use AuthServiceAwareTrait;
-    
+
     /**
      * User variable
      * @var Edm\Model\User
      */
-    protected $user;
-
-    /**
-     * User Model Class Name to use in fetch
-     * @var string
-     */
-    public $userModelClassName = 'UserModel';
+    protected $user = null;
 
     /**
      * Gets a user
-     * @return Edm\Model\Abstract
+     * @return \stdClass
      */
     public function getUser() {
+        $authService = $this->getAuthService();
         if (empty($this->user)) {
-            $this->user = new $this->userModelClassName();
+            if ($authService->hasIdentity()) {
+                $this->user = $authService->getIdentity();
+            }
         }
         return $this->user;
     }
 
     /**
-     * Set our user model
-     * @param \Edm\Model\AbstractModel $user
+     * Set our user
+     * @param \stdClass $user
      */
-    public function setUser(AbstractModel $user) {
+    public function setUser(stdClass $user) {
         $this->user = $user;
-    }
-
-    /**
-     * Set a user model from an array
-     * @param array $user
-     * @param boolean $fresh false (use a fresh copy)
-     */
-    public function setUserFromArray(array $user, $fresh = false) {
-        if ($fresh) {
-            unset($this->user);
-        }
-        $this->getUser()->exhangeArray($user);
     }
 
 }

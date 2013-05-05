@@ -19,6 +19,12 @@ return array(
             )
         )
     ),
+
+    'int' => array(
+        'validators' => array(
+            array('name' => 'Digits')
+        )
+    ),
     
     /**
      * Alias

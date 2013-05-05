@@ -85,21 +85,20 @@ class AbstractModel {
     
     /**
      * Returns model as array
-     * @param bool $omitEmpty default true
+     * @param bool $omitNull default true
      * @return array
      */
-    public function toArray ($omitEmpty = true) {
+    public function toArray ($omitNull = true) {
         $retVal = array();
         foreach ($this->validKeys as $key) {
             $val = $this->{$key};
-            if ($omitEmpty && empty($val)) {
+            if ($omitNull && !isset($val)) {
                 continue;
             }
             $retVal[$key] = $val;
         }
         return $retVal;
     }
-    
     
     public static function setDefaultInputOptions (Config $options) {
         self::$defaultInputOptions = $options;

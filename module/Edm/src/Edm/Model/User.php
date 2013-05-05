@@ -168,5 +168,5 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         }
         return $this->contactProto;
     }
-
+    
 }
