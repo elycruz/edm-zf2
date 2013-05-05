@@ -30,7 +30,7 @@ class IndexController extends AbstractController {
         $userService = $this->getUserService();
         
         if ($userService->getAuthService()->hasIdentity()) {
-            return $this->redirect('/edm-admin/ajax-ui');
+            return $this->redirect()->toUrl('/edm-admin/ajax-ui');
         }
 
         // Setup form
@@ -64,6 +64,7 @@ class IndexController extends AbstractController {
         if ($rslt === true) {
             $fm->setNamespace('highlight')
                     ->addMessage('You\'ve been logged in successfully.');
+            return $this->redirect()->toUrl('/edm-admin/ajax-ui');
         }
         // Login failure message to user 
         else {
@@ -81,5 +82,13 @@ class IndexController extends AbstractController {
         $this->view = new ViewModel();
         $this->getUserService()->logoutUser();
         return $this->view;
+    }
+    
+    /**
+     * Test action for Edm Access Gateway
+     * @return \Edm\Controller\JsonModel
+     */
+    public function protectedAction () {
+        return new JsonModel();
     }
 }

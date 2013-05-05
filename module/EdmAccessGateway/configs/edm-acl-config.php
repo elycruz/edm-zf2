@@ -8,13 +8,13 @@
 return array(
     
     'roles' => array(
-        'guest'         => '',
+        'guest'         => 'none',
         'user'          => 'guest',
         'cms-user'      => 'user',
         'cms-author'    => 'cms-user',
         'cms-editor'    => 'cms-author',
         'cms-publisher' => 'cms-editor',
-        'cms-admin'     => 'cms-admin',
+        'cms-admin'     => 'cms-publisher',
         'cms-manager'   => 'cms-admin',
         'cms-super-admin' => 'cms-manager'
     ),
@@ -55,28 +55,33 @@ return array(
             'delete' => array(
                 'cms-author' => 'allow'),
         ),
-//        
-//        'error' => array(
-//            'all' => 'guest'),
-//        
-//        'index' => array(
-//            // Redirect to user/login allows for some interesting
-//            // Security possibilites
-//            'index'     => array(
-//                'guest' => 'allow'),
-//            // Redirect to user/logout
-//            'logout'    => array(
-//                'guest' => 'allow'),
-//            // Redirect to user/login
-//            'login'     => array(
-//                'guest' => 'allow')
-//        ),
-//        
-//        'dashboard' => array(
-//            'all' => array(
-//                'cms-user' => 'allow')
-//        ),
-//        
+
+        'error' => array(
+            'all' => array('guest' => 'allow')
+        ),
+        
+        'ajax-ui' => array(
+            'all' => array('cms-user' => 'allow')
+        ),
+        
+        'index' => array(
+            // Redirect to user/login allows for some interesting
+            // Security possibilites
+            'index'     => array(
+                'guest' => 'allow'),
+            // Redirect to user/logout
+            'logout'    => array(
+                'guest' => 'allow'),
+            // Redirect to user/login
+            'login'     => array(
+                'guest' => 'allow')
+        ),
+        
+        'dashboard' => array(
+            'all' => array(
+                'cms-user' => 'allow')
+        ),
+        
 
     )
 );

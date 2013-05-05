@@ -17,6 +17,7 @@ class AjaxUiController extends AbstractActionController
     public function indexAction()
     {
         $this->view = new ViewModel(array('key' => 'value'));
+        $this->view->setTerminal(true);
         $this->view->setTemplate('layout/ajax-ui');
         return $this->view;
     }

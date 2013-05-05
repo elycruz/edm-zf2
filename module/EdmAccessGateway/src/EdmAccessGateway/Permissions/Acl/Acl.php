@@ -29,8 +29,8 @@ class Acl extends ZendAcl {
     protected function addRoles($roles) {
         foreach ($roles as $name => $parents) {
             if (!$this->hasRole($name)) {
-                if (empty($parents)) {
-                    $parents = array();
+                if (empty($parents) || $parents === 'none') {
+                    $parents = null;
                 }
                 $this->addRole(new Role($name), $parents);
             }
@@ -44,51 +44,55 @@ class Acl extends ZendAcl {
      */
     protected function addResourcesAndPerms($resources) {
         // For each resource (controller)
-        foreach ($resources as $resource) {
+        foreach ($resources as $resource => $resourceVals) {
 
             // For each resource privilege (action)
-            foreach ($resource as $privileges) {
+            foreach ($resourceVals as $privilege => $privilegeVals) {
 
-
-                // Resolve if all access
-                if ('all' === $resource) {
-                    $resource = null;
-                }
-                // Else add resource
-                else if (!$this->has($resource)) {
-                    if (is_string($privileges)) {
-                        $parentResource = $privileges;
-                        $this->add(new Resource($resource), $parentResource);
+                // ------------------------------------------------------
+                // Set Resources
+                // ------------------------------------------------------
+                // We allow the privilege to set either 1) a parent resource
+                // 2) an array of actions/privileges with
+                // their role => permission key value
+                // Add resource
+                if (!$this->hasResource($resource)) {
+                    if (is_string($privilegeVals)) {
+                        $parentResource = $privilegeVals;
+                        $this->addResource(new Resource($resource), $parentResource);
                         continue;
                     }
-                    $this->add(new Resource($resource));
+                    $this->addResource(new Resource($resource));
                 }
 
-                // For each $role => $permission in $privileges
-                foreach ($privileges as $privilege => $roles) {
-                    // If privilege is all 
+                foreach ($privilegeVals as $role => $permission) {
+
+//                    var_dump($resource . ' > ' . $privilege . ' > ' . $permission . ' > ' . $role . '<br />');
+
+                    // If privilege is equal to all then we pass null when setting permissions 
+                    // to allow all
                     if ($privilege === 'all') {
                         $privilege = null;
                     }
 
-                    // Loop through roles and get their permissions
-                    foreach ($roles as $role => $permission) {
-                        // If allow
-                        if ($permission === 'allow') {
-                            $this->allow($role, $resource, $privilege);
-                        }
-                        // If deny
-                        else if ($permission === 'deny') {
-                            $this->deny($role, $resource, $privilege);
-                        }
-                        // Else throw exception
-                        else {
-                            throw new \Exception(__CLASS__ . '->'
-                            . __FUNCTION__ . ' expects permission ' .
-                            'settings of either "allow" ' .
-                            'or "deny".  Value : ' . $permission . ' ' .
-                            'is not accepted.');
-                        }
+                    // ------------------------------------------------------
+                    // Set Permissions
+                    // ------------------------------------------------------
+                    // If allow
+                    if ($permission === 'allow') {
+                        $this->allow($role, $resource, $privilege);
+                    }
+                    // If deny
+                    else if ($permission === 'deny') {
+                        $this->deny($role, $resource, $privilege);
+                    }
+                    // Else throw exception
+                    else {
+                        throw new \Exception(__CLASS__ . '->'
+                        . __FUNCTION__ . ' expects permission ' .
+                        'settings of either "allow" ' .
+                        'or "deny".  Value : ' . $permission . ' ' .
+                        'is not accepted.');
                     }
                 }
             }
@@ -101,9 +105,13 @@ class Acl extends ZendAcl {
      * @return \EdmAccessGateway\EdmAccessGatewayAcl
      */
     public function setConfig(Config $config) {
-        $this->addRoles($config->roles);
-        $this->addResourcesAndPerms(
-                $config->resources_and_permissions);
+        $roles = $config->roles;
+        $resources = $config->resources_and_privileges;
+
+//        var_dump($resources->toArray());
+        $this->addRoles($roles->toArray());
+        $this->addResourcesAndPerms($resources->toArray());
+
         return $this;
     }
 

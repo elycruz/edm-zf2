@@ -10,6 +10,7 @@ return array(
     'modules' => array(
         'Application',
         'EdmSession',
+        'EdmAccessGateway',
         'Edm'
     ),
     'module_listener_options' => array(

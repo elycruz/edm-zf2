@@ -12,8 +12,7 @@ namespace EdmAccessGateway;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface,
     Zend\Config\Config,
-    Zend\Mvc\MvcEvent,
-    Zend\Session\Container;
+    Zend\Mvc\MvcEvent;
 
 class Module implements AutoloaderProviderInterface {
 
@@ -23,50 +22,71 @@ class Module implements AutoloaderProviderInterface {
      */
     protected $acl;
 
+    public function getConfig() {
+        return include __DIR__ . '/configs/module.config.php';
+    }
+
+    /**
+     * Service locator
+     * @var Zend\ServiceManager\ServiceLocator
+     */
+    protected $serviceLocator;
+
     public function onBootstrap(MvcEvent $e) {
         $app = $e->getApplication();
+        $this->serviceLocator = $app->getServiceManager();
         $eventMngr = $app->getEventManager();
-        $eventMngr->attach('route', $this->onRoute, 100);
+        $eventMngr->attach('route', array($this, 'onRoute'), -1);
         $this->acl = $app->getServiceManager()
                 ->get('EdmAccessGateway\Permissions\Acl\Acl');
     }
 
-    public function onRoute($e) {
+    public function onRoute(MvcEvent $e) {
         // Get route match
         $routeMatch = $e->getRouteMatch();
 
         // Get module name (if any)
         $module = $routeMatch->getParam('module');
 
-        // Get controller name
-        $controller = $routeMatch->getParam('controller');
+        // Get resource/controller name
+        $resource = $routeMatch->getParam('__CONTROLLER__');
 
-        // Get action name
-        $action = $routeMatch->getParam('action');
+        // Get privilege/action name
+        $privilege = $routeMatch->getParam('action');
 
         // Get Acl
-        $acl = $this->acl->setConfig(new Config(include('configs/edm-acl-config.php')));
-        
-        // Get session container 
-        $session = new Container('edmSession');
-        
-        // Get current user
-        $user = $session->user;
-        
-        // Get role
-        if (empty($user)) {
+        $aclSource = include(__DIR__ . '/configs/edm-acl-config.php');
+        $acl = $this->acl->setConfig(new Config($aclSource));
+
+        // Get auth service
+        $authService = $this->serviceLocator->get('Zend\Authentication\AuthService');
+
+        // If has identity set user else use default user role
+        if ($authService->hasIdentity()) {
+            $role = $authService->getIdentity()->role;
+        } else {
             $role = 'guest';
         }
-        else {
-            $role = $user->role;
-        }
+
+//        var_dump('<pre>');
+//        var_dump($routeMatch);
+//        var_dump('</pre>');
         
         // Restrict access
-        
-        
-        // Redirect if necessary
-        
-        // Etc.
+//        var_dump('user role is "' . $role . '" <br /> '. $resource);
+        if (preg_match('/\\+/', $resource) > -1) {
+            $resourceParts = explode('\\', strtolower($resource));
+            $resource = $resourceParts[count($resourceParts) - 1];
+        }
+
+        // Does user have permission to access the privilege of this resource
+        if ($acl->hasResource($resource) && !$acl->isAllowed($role, $resource, $privilege)) {
+            return $routeMatch
+                            ->setParam('module', $module)
+                            ->setParam('controller', 'error')
+                            ->setParam('action', 'not-authorized')
+                            ->setParam('dispatched', false);
+        }
     }
 
     public function getAutoloaderConfig() {
@@ -78,4 +98,5 @@ class Module implements AutoloaderProviderInterface {
             ),
         );
     }
+
 }

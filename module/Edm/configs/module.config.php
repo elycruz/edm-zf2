@@ -43,7 +43,10 @@ return array(
             // --------------------------------------------------------------
             // Shared global input filter options (mostly validators and filters)
             'Edm\InputFilter\DefaultInputOptions' 
-                => 'Edm\InputFilter\DefaultInputOptions'
+                => 'Edm\InputFilter\DefaultInputOptions',
+            
+            'Zend\Authentication\AuthService' => 
+                'Zend\Authentication\AuthenticationService'
         )
     ),
     'controllers' => array(
@@ -52,7 +55,7 @@ return array(
             'Edm\Controller\Term'         => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
-            'Edm\Controller\AjaxUi'         => 'Edm\Controller\AjaxUiController',
+            'Edm\Controller\AjaxUi'       => 'Edm\Controller\AjaxUiController',
         ),
     ),
     'view_helpers' => array(
@@ -71,7 +74,7 @@ return array(
                         // Change this value to reflect the namespace in which
                         // the controllers for your module are found
                         '__NAMESPACE__' => 'Edm\Controller',
-                        'controller' => 'Index',
+                        'controller' => 'index',
                         'action' => 'index',
                     ),
                 ),
@@ -91,15 +94,6 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
-//                            'edm-ko-ui' => array(
-//                                'type' => 'Literal',
-//                                'options' => array(
-//                                    'route' => '/ajax-ui',
-//                                    'constraints' => array(
-//                                        'itemId' => '[a-zA-Z\d\_\-]+'
-//                                    ),
-//                                )
-//                            ),
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
                                 'options' => array(
@@ -163,11 +157,11 @@ return array(
     ),
     'view_manager' => array(
         'template_path_stack' => array(
-            'Edm' => __DIR__ . '/../src/Edm/view-scripts',
+            'Edm' => __DIR__ . '/../view-scripts',
         ),
         'template_map' => array(
             'layout/layout'     => APP_PATH .'/public/module-templates/edm-ko-ui/login.phtml',
-            'layout/ajax-ui'  => __DIR__ . '/../../../public/module-templates/edm-ko-ui/index.phtml'
+            'layout/ajax-ui'  => APP_PATH . '/public/module-templates/edm-ko-ui/index.phtml'
         )
     ),
 );
