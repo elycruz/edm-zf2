@@ -42,7 +42,7 @@ trait UserAwareTrait {
      * Set our user
      * @param \stdClass $user
      */
-    public function setUser(stdClass $user) {
+    public function setUser(\stdClass $user) {
         $this->user = $user;
     }
 

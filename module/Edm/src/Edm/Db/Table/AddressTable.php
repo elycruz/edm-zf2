@@ -13,6 +13,7 @@ use Edm\Db\Table\AbstractTable,
 
 class TermTaxonomyTable extends AbstractTable {
 
+    protected $alias = 'address';
     
     public function __construct() {
         $this->table = 'term_taxonomies';

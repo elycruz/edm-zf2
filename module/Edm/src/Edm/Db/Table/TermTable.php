@@ -13,6 +13,8 @@ use Edm\Db\Table\AbstractTable,
 
 class TermTable extends AbstractTable {
 
+    protected $alias = 'term';
+    
     public function __construct() {
         $this->table = 'terms';
         $this->featureSet = new FeatureSet();

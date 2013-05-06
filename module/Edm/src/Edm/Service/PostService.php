@@ -8,7 +8,6 @@ use Edm\Service\AbstractService,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Authentication\Adapter\DbTable,
     Zend\Stdlib\DateTime;
 
 /**
@@ -39,7 +38,6 @@ implements \Edm\UserAware,
      *  (post and post relationship)
      * @param Post $post
      * @return mixed int | boolean | \Exception
-     * @throws Exception
      */
     public function createPost(Post $post) {
 
@@ -54,11 +52,6 @@ implements \Edm\UserAware,
         // Post Term Rel
         $postTermRel = $post->getPostTermRelProto();
         
-        // Remove parent id if not valid
-        if (!is_numeric($post->parent_id)) {
-            unset($post->parent_id);
-        }
-
         // Created Date
         $today = new DateTime();
         $post->createdDate = $today->getTimestamp();
@@ -79,7 +72,8 @@ implements \Edm\UserAware,
         $conn->beginTransaction();
         try {
             // Create post
-            $post_id = $this->getPostTable()->insert($cleanPost);
+            $this->getPostTable()->insert($cleanPost);
+            $post_id = $driver->getLastGeneratedValue();
             
             // Create post postTermRel rel
             $cleanPostTermRel['post_id'] = $post_id;
@@ -89,7 +83,7 @@ implements \Edm\UserAware,
             $conn->commit();
         } catch (\Exception $e) {
             $conn->rollback();
-            $retVal = false;
+            $retVal = $e;
         }
         return $retVal;
     }
@@ -99,52 +93,16 @@ implements \Edm\UserAware,
      *   (postTermRel and post postTermRel relationship).  
      * @todo There are no safety checks being done in this method
      * @param int $id
-     * @param int $postTermRelId
-     * @param array $data
-     * @return boolean
-     * @throws Exception
+     * @param Post $post
+     * @return mixed boolean | Exception
      */
-    public function updatePost($id, $postTermRelId, array $data) {
-        // If no post key
-        if (!array_key_exists('post', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
-            ' requires the data param to contain a post key.');
-        }
+    public function updatePost($id, Post $post) {
 
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
-        $post = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['post']));
-        $postTermRel = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($data['post-term-rel']));
-
-//        // Contact data check
-//        $postTermRelDataExists = array_key_exists('post-term-rel', $data);
-//        
-//        // If postTermRel key exists
-//        if ($postTermRelDataExists) {
-//            $postTermRelData = $this->ensureOkForUpdate($data['post-term-rel']);
-//            $originalData = array_key_exists('originalContact', $data) ? 
-//                    $this->ensureOkForUpdate($data['originalContact']) : array();
-//
-//            // Difference in data
-//            $diff = array_diff_assoc($postTermRelData, $originalData);
-//
-//            // Compare original postTermRel data and new postTermRel data
-//            // If data has not changed don't do anything for postTermRel
-//            if (count($diff) > 0) {
-//                foreach ($diff as $key => $val) {
-//                    if (empty($val)) {
-//                        unset($diff[$key]);
-//                    }
-//                }
-//                if (count($diff) > 0) {
-//                    $postTermRel = $dbDataHelper->escapeTuple($diff);
-//                }
-//            }
-//        }
-        // If password encode it
-        if (!empty($post['password'])) {
-            $post['password'] = $this->encodePassword($post['password']);
-        }
+        $post = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($post->toArray()));
+        $postTermRel = $dbDataHelper->escapeTuple(
+                $this->ensureOkForUpdate($post->getPostTermRelProto()->toArray()));
 
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
@@ -155,12 +113,13 @@ implements \Edm\UserAware,
         try {
 
             // Update postTermRel
-            if (isset($postTermRel)) {
-                $this->getContactTable()->update($postTermRel, array('postTermRel_id' => $postTermRelId));
+            if (is_array($postTermRel) && count($postTermRel) > 0) {
+                $this->getPostTermRelTable()
+                        ->update($postTermRel, array('post_id' => $id));
             }
 
             // Update post
-            $this->getPostTable()->update($post, array('post_id' => $id), $post);
+            $this->getPostTable()->update($post, array('post_id' => $id));
 
             // Commit and return true
             $conn->commit();

@@ -9,6 +9,8 @@ use Edm\Db\Table\AbstractTable,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
 class UserTable extends AbstractTable {
+
+    protected $alias = 'user';
     
     public function __construct() {
         $this->table = 'users';

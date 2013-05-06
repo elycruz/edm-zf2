@@ -10,6 +10,8 @@ use Edm\Db\Table\AbstractTable,
 
 class ContactTable extends AbstractTable {
     
+    protected $alias = 'contact';
+    
     public function __construct() {
         $this->table = 'contacts';
         $this->featureSet = new FeatureSet();

@@ -10,6 +10,8 @@ use Edm\Db\Table\AbstractTable,
 
 class TermTaxonomyTable extends AbstractTable {
     
+    protected $alias = 'termTaxonomy';
+    
     public function __construct() {
         $this->table = 'term_taxonomies';
         $this->featureSet = new FeatureSet();

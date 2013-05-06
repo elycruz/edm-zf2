@@ -202,7 +202,7 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
     
     /**
      * Gets PostTermRel Proto
-     * @param array $data
+     * @param mixed array $data
      * @return Edm\Model\PostTermRel
      */
     public function getPostTermRelProto($data = null) {
@@ -212,4 +212,17 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         return $this->postTermRelProto;
     }
 
+    /**
+     *  Sets Post Term Rel Proto
+     * @param array | \Edm\Model\AbstractModel $data
+     */
+    public function setPostTermRelProto($data) {
+        if (is_array($data)) {
+            $this->postTermRelProto = new PostTermRel($data);
+        }
+        else if ($data instanceof AbstractModel) {
+            $this->postTermRelProto = $data;
+        }
+    }
+    
 }

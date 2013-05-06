@@ -14,6 +14,17 @@ implements DbDataHelperAware, ServiceLocatorAwareInterface {
     use DbDataHelperAwareTrait,
     ServiceLocatorAwareTrait;
     
+    /**
+     * Table Alias 
+     * ** Should be the same as the extending classes name camel cased 
+     * without the trailing "Table";  I.e.,  for the "UserTable" class the 
+     * alias should be "user" this allows services to get tables by alias and
+     * allows sql to have an oop nature by having columns that point to these
+     * tables by aliases as well.
+     * @var string
+     */
+    protected $alias;
+    
     public function getBy(array $by) {
         return $this->select($by)->current();
 //        if (!empty($row)) {
