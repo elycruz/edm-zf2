@@ -214,7 +214,7 @@ implements \Edm\UserAware,
             $feature->addFeature(new GlobalAdapterFeature());
             $this->postTermRelTable =
                     new \Zend\Db\TableGateway\TableGateway(
-                    'post_term_relationships', $this->getServiceLocator()
+                    'post_category_relationships', $this->getServiceLocator()
                             ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
         return $this->postTermRelTable;

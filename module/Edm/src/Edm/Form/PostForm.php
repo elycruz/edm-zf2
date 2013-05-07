@@ -6,8 +6,7 @@ use Edm\Form\PostTermRelFieldset,
     Edm\Form\PostFieldset;
 
 /**
- * Description of TermForm
- *
+ * Description of PostForm
  * @author ElyDeLaCruz
  */
 class PostForm extends EdmForm {
@@ -25,38 +24,90 @@ class PostForm extends EdmForm {
         // Set method
         $this->setAttribute('method', 'post');
 
-        // Create fieldset
-        $termFieldset = new TermFieldset('term');
-        $termTaxFieldset = new PostFieldset('post');
-        $submitAndReset = new SubmitAndResetFieldset('submit-and-reset');
-
-        // Set value options for taxonomy
-        $termTaxFieldset->get('taxonomy')->setValueOptions(
-                $this->getTaxonomySelectElmOptions());
-
-        // Set value options for parent_id
-        $termTaxFieldset->get('parent_id')->setValueOptions(
-                $this->getTaxonomySelectElmOptions(array(
-                    'taxonomy' => null,
-                    'defaultOption' => array(
-                        'value' => '0',
-                        'label' => '-- Select a Parent (optional) --'
-                    ),
-                    'optionValueAndLabelKeys' => array(
-                        'value' => 'term_taxonomy_id',
-                        'label' => 'term_name'
-                    )
+        // Post Fieldset
+        $postFieldset = new PostFieldset('post-fieldset');
+        
+        // Post Term Rel Fieldset
+        $postTermRelFieldset = new PostTermRelFieldset('post-term-rel-fieldset');
+        
+        // Add Status values
+        $postFieldset->get('status')->setValueOptions(
+            $this->getTaxonomySelectElmOptions(array(
+                'taxonomy' => 'post-status',
+                'defaultOption' => array(
+                    'value' => 'draft',
+                    'label' => '-- Select a Post Status --'
+                ),
+                'optionValueAndLabelKeys' => array(
+                    'value' => 'term_alias',
+                    'label' => 'term_name'
+                )
         )));
-
-        // Set value options for parent_id
-        // Post Term Rel Feildset
-        $this->add($termFieldset);
-
-        // Post Term Rel Taxonomy Fieldset
-        $this->add($termTaxFieldset);
-
+        
+        // Add Access Group values
+        $postFieldset->get('accessGroup')->setValueOptions(
+            $this->getTaxonomySelectElmOptions(array(
+                'taxonomy' => 'user-group',
+                'defaultOption' => array(
+                    'value' => 'user',
+                    'label' => '-- Select an Access Group --'
+                ),
+                'optionValueAndLabelKeys' => array(
+                    'value' => 'term_alias',
+                    'label' => 'term_name'
+                )
+        )));
+        
+        // Add Type values
+        $postFieldset->get('type')->setValueOptions(
+            $this->getTaxonomySelectElmOptions(array(
+                'taxonomy' => 'post-type',
+                'defaultOption' => array(
+                    'value' => 'post',
+                    'label' => '-- Select a Post Type --'
+                ),
+                'optionValueAndLabelKeys' => array(
+                    'value' => 'term_alias',
+                    'label' => 'term_name'
+                )
+        )));
+        
+        // Add Post Category values
+        $postTermRelFieldset->get('term_taxonomy_id')->setValueOptions(
+            $this->getTaxonomySelectElmOptions(array(
+                'taxonomy' => 'post-category',
+                'defaultOption' => array(
+                    'value' => '0',
+                    'label' => '-- Select a Post Category --'
+                ),
+                'optionValueAndLabelKeys' => array(
+                    'value' => 'term_alias',
+                    'label' => 'term_name'
+                )
+        )));
+        
+        // Add Commenting values
+        $postFieldset->get('commenting')->setValueOptions(
+            $this->getTaxonomySelectElmOptions(array(
+                'taxonomy' => 'commenting',
+                'defaultOption' => array(
+                    'value' => '0',
+                    'label' => '-- Select a Commenting Status --'
+                ),
+                'optionValueAndLabelKeys' => array(
+                    'value' => 'term_alias',
+                    'label' => 'term_name'
+                )
+        )));
+        
+        // Add Post Fieldset
+        $this->add($postFieldset);
+        
+        // Add Post Term Rel Fieldset
+        $this->add($postTermRelFieldset);
+        
         // Submit and Reset Fieldset
-        $this->add($submitAndReset);
+        $this->add(new SubmitAndResetFieldset('submit-and-reset'));
     }
 
 }

@@ -10,12 +10,6 @@ use Zend\InputFilter\Factory as InputFactory,
 
 class PostTermRel extends AbstractModel implements InputFilterAwareInterface {
 
-    public $accessGroup = 'cms-manager';
-    
-    public $status      = 'draft';
-    
-    public $type        = 'post';
-    
     /**
      * Valid keys for model
      * @var array
@@ -23,12 +17,9 @@ class PostTermRel extends AbstractModel implements InputFilterAwareInterface {
     public $validKeys = array(
         'post_id',
         'term_taxonomy_id',
-        'accessGroup',
-        'status',
-        'type'
     );
     
-    public $notAllowedForUpdate = array('type');
+    public $notAllowedForUpdate = array('post_id');
 
     /**
      * Input filter
@@ -76,27 +67,6 @@ class PostTermRel extends AbstractModel implements InputFilterAwareInterface {
                     'required' => false
                 )
         )));
-        
-        // Type
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('short-alias', array(
-                    'name' => 'type',
-                    'required' => false
-        ))));
-
-        // Access Group
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('short-alias', array(
-                    'name' => 'accessGroup',
-                    'required' => false
-        ))));
-        
-        // Status
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('short-alias', array(
-                    'name' => 'status',
-                    'required' => false
-        ))));
         
         $this->inputFilter = $retVal;
 

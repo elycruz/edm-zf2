@@ -16,7 +16,7 @@ use Zend\Form\Fieldset,
  */
 class PostFieldset extends Fieldset {
 
-    public function __construct($name = 'post', $options = array()) {
+    public function __construct($name = 'post-fieldset', $options = array()) {
 
         parent::__construct($name, $options);
 
@@ -62,15 +62,15 @@ class PostFieldset extends Fieldset {
             )
         ));
 
-        // Description
+        // Content
         $this->add(array(
             'options' => array(
                 'label' => 'Content'
             ),
             'name' => 'content',
-            'type' => 'Zend\Form\Element\TextArea',
+            'type' => 'TextArea',
             'attributes' => array(
-                'id' => 'description',
+                'id' => 'content',
                 'placeholder' => 'Content',
                 'cols' => 72,
                 'rows' => 5,
@@ -82,10 +82,10 @@ class PostFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Excerpt'
             ),
-            'name' => 'content',
+            'name' => 'excerpt',
             'type' => 'Zend\Form\Element\TextArea',
             'attributes' => array(
-                'id' => 'description',
+                'id' => 'excerpt',
                 'placeholder' => 'Excerpt',
                 'cols' => 72,
                 'rows' => 5,

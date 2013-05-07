@@ -1,0 +1,34 @@
+<?php
+$form = $this->form;
+
+$post = $form->get('post-fieldset');
+$postTermRel = $form->get('post-term-rel-fieldset');
+$submitAndReset = $form->get('submit-and-reset');
+echo <<<HTML
+    <form id="{$form->getName()}" 
+        method="{$form->getAttribute('method')}" 
+        action="{$form->getAttribute('action')}">
+        <fieldset>
+            <legend>Post</legend>
+            {$this->edmFormElement($post->get('title'))}
+            {$this->edmFormElement($post->get('alias'))}
+            {$this->edmFormElement($post->get('content'))}
+            {$this->edmFormElement($post->get('excerpt'))}
+            {$this->edmFormElement($post->get('commenting'))}
+            {$this->edmFormElement($post->get('status'))}
+            {$this->edmFormElement($post->get('accessGroup'))}
+            {$this->edmFormElement($post->get('type'))}
+        </fieldset>
+        <fieldset>
+            <legend>Category</legend>
+            {$this->edmFormElement($postTermRel->get('term_taxonomy_id'))}
+        </fieldset>
+        <fieldset class="controls">
+            <div class="form-item">
+            {$this->formElement($submitAndReset->get('submit'))}
+            {$this->formElement($submitAndReset->get('reset'))}
+            </div>
+        </fieldset>
+    </form>
+HTML;
+

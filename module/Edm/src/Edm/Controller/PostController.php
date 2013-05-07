@@ -110,8 +110,7 @@ implements PostServiceAware {
 
         // Setup form
         $form = new PostForm('post-form', array(
-            'serviceLocator' => $this->getServiceLocator()
-        ));
+            'serviceLocator' => $this->getServiceLocator() ));
         $form->setAttribute('action', '/edm-admin/post/create');
         $view->form = $form;
 
