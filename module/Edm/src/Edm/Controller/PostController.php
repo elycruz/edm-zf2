@@ -14,7 +14,8 @@ use Edm\Controller\AbstractController,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
-    Zend\Paginator\Adapter\DbSelect;
+    Zend\Paginator\Adapter\DbSelect,
+        Zend\Debug\Debug;
 
 class PostController extends AbstractController 
 implements PostServiceAware {
@@ -37,7 +38,7 @@ implements PostServiceAware {
         $sort = $this->getAndSetParam('sort', 'ASC');
         
         // Sort by
-        $sortBy = $this->getAndSetParam('sortBy', 'term_alias');
+        $sortBy = $this->getAndSetParam('sortBy', 'alias');
         
         // Term tax service
         $postService = $this->getPostService();
@@ -63,7 +64,7 @@ implements PostServiceAware {
         // Category
         $category = $this->getAndSetParam('category', '*');
         if (!empty($category) && $category != '*') {
-            $where['category'] = $category;
+            $where['term_taxonomy_id'] = $category;
         }
 
         // Parent Id
@@ -127,6 +128,7 @@ implements PostServiceAware {
         if (!$view->form->isValid()) {
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
+            Debug::dump($form->getMessages());
             return $view;
         }
 
@@ -134,11 +136,12 @@ implements PostServiceAware {
         $postService = $this->getPostService();
 
         // Get data
-        $postData = $form->get('post-model');
-        $postTermRelData = $form->get('post-term-rel-model');
+        $data = $form->getData();
+        $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset']);
+        $postData = new Post($mergedData);
         
-        // Set Post's Term Rel proto
-        $postData->setPostTermRelProto($postTermRelData);
+        Debug::dump($postData->toArray());
+        Debug::dump($postData->getPostTermRelProto()->toArray());
         
         // Check if term taxonomy already exists
         $postCheck = $postService->getByAlias($postData->alias);

@@ -12,9 +12,11 @@ return array(
      */
     'id' => array(
         'validators' => array(
-            array('name' => 'Regex',
+            array('name' => 'Digits'),
+            array('name' => 'StringLength',
                 'options' => array(
-                    'pattern' => '/^\d{1,20}$/'
+                    'min' => 0,
+                    'max' => 20
                 )
             )
         )

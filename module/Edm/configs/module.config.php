@@ -28,12 +28,14 @@ return array(
             // Service invokables
             'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
+            'Edm\Service\PostService'           => 'Edm\Service\PostService',
 
             // Db invokables
             'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
             'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
             'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
             'Edm\Db\Table\UserTable'            => 'Edm\Db\Table\UserTable',
+            'Edm\Db\Table\PostTable'            => 'Edm\Db\Table\PostTable',
             'Edm\Db\Table\ContactTable'         => 'Edm\Db\Table\ContactTable',
             
             // Form invokables

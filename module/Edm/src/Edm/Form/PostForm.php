@@ -81,7 +81,7 @@ class PostForm extends EdmForm {
                     'label' => '-- Select a Post Category --'
                 ),
                 'optionValueAndLabelKeys' => array(
-                    'value' => 'term_alias',
+                    'value' => 'term_taxonomy_id',
                     'label' => 'term_name'
                 )
         )));

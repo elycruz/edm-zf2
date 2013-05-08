@@ -8,7 +8,7 @@
 namespace Edm\Form;
 
 use Zend\Form\Fieldset,
-    Edm\Model\Post;
+    Edm\Model\PostTermRel;
 
 /**
  * Description of PostTermRelFieldset
@@ -21,7 +21,7 @@ class PostTermRelFieldset extends Fieldset {
         parent::__construct($name, $options);
 
         // Post Object
-        $this->setObject(new Post());
+        $this->setObject(new PostTermRel());
 
         // Term Taxonomy Id
         $this->add(array(

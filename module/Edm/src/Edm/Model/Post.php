@@ -26,6 +26,9 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         'listOrder',
         'commenting',
         'commentCount',
+        'type',
+        'accessGroup',
+        'status',
         'createdDate',
         'createdById',
         'lastUpdated',
@@ -128,6 +131,27 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(
             self::getDefaultInputOptionsByKey('short-alias', array(
                     'name' => 'commenting',
+                    'required' => false
+        ))));
+        
+        // Post Status
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('short-alias', array(
+                    'name' => 'status',
+                    'required' => false
+        ))));
+        
+        // Post Type
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('short-alias', array(
+                    'name' => 'type',
+                    'required' => false
+        ))));
+        
+        // Access Group
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('short-alias', array(
+                    'name' => 'accessGroup',
                     'required' => false
         ))));
         

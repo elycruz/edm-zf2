@@ -8,7 +8,8 @@ use Edm\Service\AbstractService,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Stdlib\DateTime;
+    Zend\Stdlib\DateTime,
+        Zend\Debug\Debug;
 
 /**
  * @author ElyDeLaCruz
@@ -58,6 +59,7 @@ implements \Edm\UserAware,
         
         // Created by
         $post->createdById = $user->user_id;
+        $post->userParams = '';
 
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
@@ -67,13 +69,15 @@ implements \Edm\UserAware,
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
+        
+        var_dump($cleanPost);
 
         // Begin transaction
         $conn->beginTransaction();
         try {
             // Create post
             $this->getPostTable()->insert($cleanPost);
-            $post_id = $driver->getLastGeneratedValue();
+            $retVal = $post_id = $driver->getLastGeneratedValue();
             
             // Create post postTermRel rel
             $cleanPostTermRel['post_id'] = $post_id;
@@ -83,6 +87,7 @@ implements \Edm\UserAware,
             $conn->commit();
         } catch (\Exception $e) {
             $conn->rollback();
+            Debug::dump($e->getMessage());
             $retVal = $e;
         }
         return $retVal;
@@ -196,7 +201,7 @@ implements \Edm\UserAware,
         return $select
                 ->from(array('post' => $this->getPostTable()->table))
                 ->join(array('postTermRel' => 
-                    $this->getPostTermRelTableTable()->table), 
+                    $this->getPostTermRelTable()->table), 
                         'postTermRel.post_id=post.post_id');
     }
 
