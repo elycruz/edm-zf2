@@ -6,7 +6,7 @@ use EdmTest\Bootstrap;
 use Zend\Mvc\Router\Http\TreeRouteStack as HttpRouter;
 use Edm\Controller\IndexController;
 use Zend\Http\Request;
-use Zend\Http\Response;
+//use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\RouteMatch;
 use PHPUnit_Framework_TestCase;

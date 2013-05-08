@@ -3,7 +3,7 @@
 namespace EdmTest\Service;
 
 use EdmTest\Bootstrap,
-        Edm\Service\AbstractService;
+    Edm\Service\AbstractService;
 
 /**
  * Description of UserServiceTest
@@ -11,26 +11,19 @@ use EdmTest\Bootstrap,
  * @author ElyDeLaCruz
  */
 class UserServiceTest extends \PHPUnit_Framework_TestCase {
-    
+
     /**
      * @var Edm\Service\UserService
      */
     protected $userService;
-    
     protected $numUsers = 8;
-    
     protected $data = array();
- 
     protected $userIds = array();
-    
     protected $userScreenNames = array();
-
     protected $userKeys = array(
         'screenName',
-        'activationKey',
         'password',
     );
-    
     protected $contactKeys = array(
         'firstName',
         'lastName',
@@ -44,44 +37,36 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
         $this->generateData();
     }
 
-    public function testNumUserData () {
+    public function testNumUserData() {
         return $this->assertCount(8, $this->data);
     }
 
-    public function testDbConnection () {
+    public function testDbConnection() {
         $dbAdapter = $this->userService->getDb();
         $this->assertInstanceOf('Zend\Db\Adapter\Adapter', $dbAdapter);
         $schema = $dbAdapter->getDriver()->getConnection()->getCurrentSchema();
         $this->assertEquals('edm-0.4.0', $schema);
     }
-    
-    public function testCreateAndDeleteUsers ()  {
+
+    public function testCreateAndDeleteUsers() {
         // Create Users
         for ($i = 0; $i < $this->numUsers; $i += 1) {
             $user = $this->data[$i];
             $this->userIds[] = $this->userService->createUser($user);
-//            $rslt = $this->userService->getById($this->userIds[$i]);
-//            $this->userScreenNames[] = $rslt['screenName'];
+            $this->userService->getById($this->userIds[$i]);
         }
-        
+
         // Dump created users
         var_dump($this->userService->read(array(
             'fetchMode' => AbstractService::FETCH_RESULT_SET_TO_ARRAY  )));
-        
         $this->assertCount(8, $this->userIds, 'user ids length check: Good!.');
-//        $this->assertCount(8, $this->userScreenNames, 'Screen Names check: Good.');
-        
-        // Delete users
-        foreach ($this->userIds as $i) {
-            $this->userService->deleteUser($i);
-        }
     }
-    
-    public function testGetByScreenName () {
-        $rslt = $this->userService->getByScreenName($this->userScreenNames[0]);
-        return $this->assertNotEmpty($rslt, 'User Screen Name: ' . $rslt['screenName']);
+
+    public function testGetByScreenName() {
+        $rslt = $this->userService->getByScreenName($this->data[0]['user']['screenName'], AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+        return $this->assertNotEmpty($rslt, 'User Screen Name: ' . $rslt->screenName);
     }
-    
+
     protected function generateData() {
         for ($i = 0; $i < $this->numUsers; $i += 1) {
             $this->data[] = array(
@@ -89,7 +74,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
                 'user' => $this->generateUserData($i));
         }
     }
-    
+
     protected function generateContactData($i) {
         $contact = array();
         foreach ($this->contactKeys as $key) {
@@ -105,7 +90,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
                     break;
                 default:
                     $value = '';
-                break;
+                    break;
             }
             if (preg_match('/_id$/', $key) > 0) {
                 continue;
@@ -119,7 +104,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
         $user = array();
         foreach ($this->userKeys as $key) {
             switch ($key) {
-                case 'screenName' : 
+                case 'screenName' :
                     $value = '';
                     break;
                 case 'password' :
@@ -127,7 +112,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
                     break;
                 default:
                     $value = null;
-                break;
+                    break;
             }
             $user[$key] = $value;
         }
@@ -135,6 +120,10 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     protected function tearDown() {
+        // Delete users
+        foreach ($this->userIds as $i) {
+            $this->userService->deleteUser($i);
+        }
     }
 
 }

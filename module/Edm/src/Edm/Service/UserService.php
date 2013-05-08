@@ -75,7 +75,7 @@ implements \Edm\UserAware,
         // times within a function
         $user = (object) $data['user'];
         $contact = (object) $data['contact'];
-        $key = isset($user->activatioKey) ? $user->activationKey : '';
+        $key = isset($user->activationKey) ? $user->activationKey : '';
         $userKeyValid = $this->is_activationKeyValid($key, $contact);
 
         // If no screen name generate one
@@ -113,7 +113,7 @@ implements \Edm\UserAware,
         unset($contact->name);
 
         // Remove parent id if not valid
-        if (!is_numeric($contact->parent_id)) {
+        if (isset($contact->parent_id) && !is_numeric($contact->parent_id)) {
             unset($contact->parent_id);
         }
 
@@ -430,7 +430,7 @@ implements \Edm\UserAware,
      * @return boolean 
      */
     public function checkScreenNameExistsInDb($screenName) {
-        $rslt = $this->userContactRelTable->select(
+        $rslt = $this->getUserContactRelTable()->select(
                         array('screenName' => $screenName))->current();
         if (!empty($rslt)) {
             return true;
