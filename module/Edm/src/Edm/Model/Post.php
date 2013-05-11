@@ -11,6 +11,12 @@ use Zend\InputFilter\Factory as InputFactory,
 
 class Post extends AbstractModel implements InputFilterAwareInterface {
     
+    public $content = '';
+    
+    public $excerpt = '';
+    
+    public $userParams = '';
+    
     /**
      * Valid keys for model
      * @var array

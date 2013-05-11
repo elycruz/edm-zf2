@@ -77,7 +77,7 @@ class PostForm extends EdmForm {
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'post-category',
                 'defaultOption' => array(
-                    'value' => '0',
+                    'value' => null,
                     'label' => '-- Select a Post Category --'
                 ),
                 'optionValueAndLabelKeys' => array(
@@ -91,7 +91,7 @@ class PostForm extends EdmForm {
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'commenting',
                 'defaultOption' => array(
-                    'value' => '0',
+                    'value' => 'disabled',
                     'label' => '-- Select a Commenting Status --'
                 ),
                 'optionValueAndLabelKeys' => array(

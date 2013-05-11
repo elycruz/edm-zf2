@@ -70,8 +70,6 @@ implements \Edm\UserAware,
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
         
-        var_dump($cleanPost);
-
         // Begin transaction
         $conn->beginTransaction();
         try {
@@ -101,30 +99,44 @@ implements \Edm\UserAware,
      * @param Post $post
      * @return mixed boolean | Exception
      */
-    public function updatePost($id, Post $post) {
-
+    public function updatePost(Post $post) {
+        
+        $id = $post->post_id;
+        Debug::dump($post);
+        
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
-        $post = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($post->toArray()));
-        $postTermRel = $dbDataHelper->escapeTuple(
+        $postData = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($post->toArray()));
+        $postTermRelData = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($post->getPostTermRelProto()->toArray()));
-
+       
+        if (empty($post->userParams)) {
+            $postData['userParams'] = '';
+        }
+       
+        if (empty($post->excerpt)) {
+            $postData['excerpt'] = '';
+        }
+       
+        if (empty($post->content)) {
+            $postData['content'] = '';
+        }
+        
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
-
+        
         // Begin transaction
         $conn->beginTransaction();
-
         try {
 
             // Update postTermRel
-            if (is_array($postTermRel) && count($postTermRel) > 0) {
+            if (is_array($postTermRelData) && count($postTermRelData) > 0) {
                 $this->getPostTermRelTable()
-                        ->update($postTermRel, array('post_id' => $id));
+                        ->update($postTermRelData, array('post_id' => $id));
             }
 
             // Update post
-            $this->getPostTable()->update($post, array('post_id' => $id));
+            $this->getPostTable()->update($postData, array('post_id' => $id));
 
             // Commit and return true
             $conn->commit();
@@ -248,7 +260,7 @@ implements \Edm\UserAware,
     public function ensureOkForUpdate(array $data) {
         foreach ($this->notAllowedForUpdate as $key) {
             if (array_key_exists($key, $data) ||
-                    (array_key_exists($key, $data) && empty($data[$key]))) {
+                    (array_key_exists($key, $data) && !isset($data[$key]))) {
                 unset($data[$key]);
             }
         }

@@ -4,21 +4,22 @@
  * @todo modify term taxonomy service to include term term taxonomy
  * @todo Unable to update term taxonomies name error is sent in flash message
  */
+
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\PostForm,
     Edm\Model\Post,
+    Edm\Service\AbstractService,
     Edm\Service\PostServiceAware,
     Edm\Service\PostServiceAwareTrait,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect,
-        Zend\Debug\Debug;
+    Zend\Debug\Debug;
 
-class PostController extends AbstractController 
-implements PostServiceAware {
+class PostController extends AbstractController implements PostServiceAware {
 
     use PostServiceAwareTrait;
 
@@ -33,13 +34,13 @@ implements PostServiceAware {
 
         // Items per page
         $itemCountPerPage = $this->getAndSetParam('itemsPerPage', 5);
-        
+
         // Sort
         $sort = $this->getAndSetParam('sort', 'ASC');
-        
+
         // Sort by
         $sortBy = $this->getAndSetParam('sortBy', 'alias');
-        
+
         // Term tax service
         $postService = $this->getPostService();
 
@@ -60,7 +61,7 @@ implements PostServiceAware {
         if (!empty($accessGroup) && $accessGroup != '*') {
             $where['accessGroup'] = $accessGroup;
         }
-        
+
         // Category
         $category = $this->getAndSetParam('category', '*');
         if (!empty($category) && $category != '*') {
@@ -77,14 +78,13 @@ implements PostServiceAware {
         if (count($where) > 0) {
             $select->where($where);
         }
-        
+
         // Order by
         $select->order($sortBy . ' ' . $sort);
-        
+
         // Paginator $postService->getDb()
         $paginator = new Paginator(
-                new DbSelect($select, 
-                    $postService->getPostTable()->getAdapter()));
+                new DbSelect($select, $postService->getPostTable()->getAdapter()));
         $paginator->setItemCountPerPage($itemCountPerPage)
                 ->setCurrentPageNumber($pageNumber);
 
@@ -111,7 +111,7 @@ implements PostServiceAware {
 
         // Setup form
         $form = new PostForm('post-form', array(
-            'serviceLocator' => $this->getServiceLocator() ));
+            'serviceLocator' => $this->getServiceLocator()));
         $form->setAttribute('action', '/edm-admin/post/create');
         $view->form = $form;
 
@@ -139,18 +139,17 @@ implements PostServiceAware {
         $data = $form->getData();
         $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset']);
         $postData = new Post($mergedData);
-        
-        Debug::dump($postData->toArray());
-        Debug::dump($postData->getPostTermRelProto()->toArray());
-        
+
+//        Debug::dump($postData->toArray());
+//        Debug::dump($postData->getPostTermRelProto()->toArray());
         // Check if term taxonomy already exists
         $postCheck = $postService->getByAlias($postData->alias);
         if (!empty($postCheck)) {
-            $fm->setNamespace('error')->addMessage('Post "'. $postData->title .'" already ' .
+            $fm->setNamespace('error')->addMessage('Post "' . $postData->title . '" already ' .
                     'exists in the database.  Click here to edit it.');
             return $view;
         }
-        
+
         // Create term taxonomy
         $rslt = $postService->createPost($postData);
 
@@ -164,7 +163,7 @@ implements PostServiceAware {
             $fm->setNamespace('error')
                     ->addMessage('Post "' . $postData->title . '" failed to be added.');
         }
-        
+
         // Return message to view
         return $view;
     }
@@ -172,9 +171,7 @@ implements PostServiceAware {
     public function updateAction() {
         // Set up prelims and populate $this -> view for 
         // init flash messenger
-        $view =
-                $this->view =
-                new ViewModel();
+        $view = $this->view = new ViewModel();
         $view->setTerminal(true);
         $fm = $this->initFlashMessenger();
 
@@ -192,8 +189,8 @@ implements PostServiceAware {
         $view->form = $form;
 
         // Check if term already exists if not bail
-        $existingTermTax = new Post($postService->getById($id));
-        if (empty($existingTermTax)) {
+        $existingPost = $postService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+        if (empty($existingPost)) {
             $fm->setNamespace('error')->addMessage('Post with id "'
                     . $id . '" doesn\'t exist in database.');
             return $view;
@@ -201,15 +198,18 @@ implements PostServiceAware {
 
         // Set data
         $form->setData(array(
-            'post-term-rel' => array(
-                'taxonomy' => $existingTermTax->taxonomy,
-                'parent_id' => $existingTermTax->parent_id,
-                'description' => $existingTermTax->description
+            'post-term-rel-fieldset' => array(
+                'term_taxonomy_id' => $existingPost->getPostTermRelProto()->term_taxonomy_id,
             ),
-            'term' => array(
-                'name' => $existingTermTax->term_name,
-                'alias' => $existingTermTax->term_alias,
-                'term_group_alias' => $existingTermTax->term_group_alias
+            'post-fieldset' => array(
+                'title' => $existingPost->title,
+                'alias' => $existingPost->alias,
+                'content' => $existingPost->content,
+                'excerpt' => $existingPost->excerpt,
+                'commenting' => $existingPost->commenting,
+                'status' => $existingPost->status,
+                'accessGroup' => $existingPost->accessGroup,
+                'type' => $existingPost->type,
             )
         ));
 
@@ -228,45 +228,31 @@ implements PostServiceAware {
                     'Please review values and try again.');
             return $view;
         }
-
+ 
         // Set data
         $data = $view->form->getData();
-        
+
         // Allocoate updates
-        $post = (object) $data['post-term-rel'];
-        $term = (object) $data['term'];
-        
+        $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset'], array('post_id' => $id));
+        $postData = new Post($mergedData);
+
         // Update term in db
-        $rslt = $postService->updateItem($id, $data);
-        
+        $rslt = $postService->updatePost($postData);
+
         // Send success message to user
-        if (is_numeric($rslt)) {
+        if ($rslt === true && $rslt instanceof \Exception === false) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Post "' 
-                            . $term->name . ' > ' . $post->taxonomy 
+                    ->addMessage('Post "'
+                            . $postData->title . '" in category "' . $postData->term_taxonomy_id
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Post "' 
-                            . $term->name . ' > ' . $post->taxonomy 
+                    ->addMessage('Post "'
+                            . $postData->title . '" in category "' . $postData->term_taxonomy_id
                             . '" failed to be updated.');
         }
-
-//        // Make form blank
-//        $view->form->setData(array(
-//            'post-term-rel' => array(
-//                'taxonomy' => '',
-//                'parent_id' => '',
-//                'description' => ''
-//            ),
-//            'term' => array(
-//                'name' => '',
-//                'alias' => '',
-//                'term_group_alias' => ''
-//            )
-//        ));
 
         // Return message to view
         return $view;
@@ -306,22 +292,23 @@ implements PostServiceAware {
 
         // Post object
         $post = new Post($postRslt);
-        
+        $postTermRel = $post->getPostTermRelProto();
+
         // Delete term in db
-        $rslt = $postService->deleteItem($post->term_taxonomy_id);
+        $rslt = $postService->deletePost($post->post_id);
 
         // Send success message to user
         if ($rslt) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Post "' 
-                            . $post->term_name . ' > ' . $post->term_alias 
+                    ->addMessage('Post "'
+                            . $post->title . '" in category "' . $postTermRel->term_taxonomy_id
                             . '" deleted successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Post "' 
-                            . $post->term_name . ' > ' . $post->term_alias 
+                    ->addMessage('Post "'
+                            . $post->title . '" in category "' . $postTermRel->term_taxonomy_id
                             . '" failed to be deleted.');
         }
 
@@ -329,58 +316,65 @@ implements PostServiceAware {
         return $view;
     }
 
-    public function setListOrderAction () {
+    public function setListOrderAction() {
         $view =
-            $this->view =
+                $this->view =
                 new JsonModel();
 
         // Let view be terminal in this action
         $view->setTerminal(true);
-        
+
         // Get id of item to update
         $id = $this->getParam('itemId');
         $listOrder = $this->getParam('listOrder');
-        
+
         // Get term tax
         $postService = $this->getPostService();
-        $post = new Post ($postService->getById($id));
+        $post = new Post($postService->getById($id));
         $fm = $this->initFlashMessenger();
-        
+
         // Set error message if term tax not found
         if (empty($post)) {
             $fm->setNamespace('error')
                     ->addMessage('Post id "' . $id
-                            . '" not found in database.  '.
+                            . '" not found in database.  ' .
                             'List order change failed.');
             return $view;
         }
 
         // Update listorder
         $rslt = $postService->setListOrderForId($id, $listOrder);
-        
+
         // Send success message to user
         if (!empty($rslt)) {
             $fm->setNamespace('highlight')
-                    ->addMessage('Post "' 
-                            . $post->term_name . ' > ' . $post->taxonomy 
+                    ->addMessage('Post "'
+                            . $post->term_name . ' > ' . $post->taxonomy
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('Post "' 
-                            . $post->term_name . ' > ' . $post->taxonomy 
+                    ->addMessage('Post "'
+                            . $post->term_name . ' > ' . $post->taxonomy
                             . '" failed to be updated.');
         }
 
         // Return message to view
         return $view;
     }
-    
-    public function setStatusAction () {
+
+    public function setStatusAction() {
+        
     }
-    
-    public function setAccessGroupAction () {
+
+    public function setAccessGroupAction() {
+        
     }
+
+    public function setTypeAction() {
+        
+    }
+
 }
 
