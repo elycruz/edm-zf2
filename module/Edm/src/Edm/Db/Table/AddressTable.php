@@ -6,21 +6,21 @@ use Edm\Db\Table\AbstractTable,
 //    Zend\Db\Adapter\Adapter,
 //    Zend\Db\ResultSet\ResultSetInterface,
 //    Zend\Db\Sql\Sql
-    Edm\Model\TermTaxonomy,
+    Edm\Model\Address,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;;
 
-class TermTaxonomyTable extends AbstractTable {
+class AddressTable extends AbstractTable {
 
     protected $alias = 'address';
     
     public function __construct() {
-        $this->table = 'term_taxonomies';
+        $this->table = 'addresses';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
-        $resultSetProto->setArrayObjectPrototype(new TermTaxonomy());
+        $resultSetProto->setArrayObjectPrototype(new Address());
         $this->resultSetPrototype = $resultSetProto;
         $this->initialize();
     }
@@ -30,11 +30,11 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function updateItem($id, array $data) {
-        return $this->update($data, array('term_taxonomy_id' => $id));
+        return $this->update($data, array('address_id' => $id));
     }
 
     public function deleteItem($id) {
-        return $this->delete(array('term_taxonomy_id' => $id));
+        return $this->delete(array('address_id' => $id));
     }
 
     public function read() {
@@ -42,7 +42,7 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('term_taxonomy_id' => $id));
+        return $this->getBy(array('address_id' => $id));
     }
     
 }
