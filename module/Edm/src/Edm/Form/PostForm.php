@@ -31,7 +31,8 @@ class PostForm extends EdmForm {
         $postTermRelFieldset = new PostTermRelFieldset('post-term-rel-fieldset');
         
         // Add Status values
-        $postFieldset->get('status')->setValueOptions(
+        $postStatus = $postFieldset->get('status');
+        $postStatus->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'post-status',
                 'defaultOption' => array(
@@ -43,9 +44,12 @@ class PostForm extends EdmForm {
                     'label' => 'term_name'
                 )
         )));
+        // Default the form elements value
+        $postStatus->setValue('published');
         
         // Add Access Group values
-        $postFieldset->get('accessGroup')->setValueOptions(
+        $accessGroup = $postFieldset->get('accessGroup');
+        $accessGroup->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'user-group',
                 'defaultOption' => array(
@@ -58,8 +62,12 @@ class PostForm extends EdmForm {
                 )
         )));
         
+        // Default the access group to guest
+        $accessGroup->setValue('guest');
+        
         // Add Type values
-        $postFieldset->get('type')->setValueOptions(
+        $postType = $postFieldset->get('type');
+        $postType->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'post-type',
                 'defaultOption' => array(
@@ -72,8 +80,12 @@ class PostForm extends EdmForm {
                 )
         )));
         
+        // Default the post to type of blog
+        $postType->setValue('blog');
+        
         // Add Post Category values
-        $postTermRelFieldset->get('term_taxonomy_id')->setValueOptions(
+        $category = $postTermRelFieldset->get('term_taxonomy_id');
+        $category->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'post-category',
                 'defaultOption' => array(
@@ -87,7 +99,8 @@ class PostForm extends EdmForm {
         )));
         
         // Add Commenting values
-        $postFieldset->get('commenting')->setValueOptions(
+        $commenting = $postFieldset->get('commenting');
+        $commenting->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'commenting',
                 'defaultOption' => array(
@@ -99,6 +112,9 @@ class PostForm extends EdmForm {
                     'label' => 'term_name'
                 )
         )));
+        
+        // Default commenting to enabled
+        $commenting->setValue('enabled');
         
         // Add Post Fieldset
         $this->add($postFieldset);

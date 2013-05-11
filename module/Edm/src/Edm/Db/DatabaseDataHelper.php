@@ -62,9 +62,7 @@ implements DbDataHelper {
     public function reverse_mega_escape_string($in_string, $in_markup = FALSE) {
         if ($in_string === NULL)
             return '';
-
         $str = str_replace('\\', '', $in_string);
-
         if ($in_markup == TRUE) {
             $str = html_entity_decode($str, ENT_NOQUOTES, "UTF-8");
         }
@@ -118,13 +116,9 @@ implements DbDataHelper {
      */
     public function reverseEscapeTuples(array $tuples) {
         $new_array = array();
-        /**
-         * Loop through rows and escape them for our view
-         */
+        // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {
-            $new_array[] = $this->reverseEscapeTuple(
-                            $tuple
-            );
+            $new_array[] = $this->reverseEscapeTuple($tuple);
         }
         return $new_array;
     }
@@ -136,14 +130,11 @@ implements DbDataHelper {
      * @return String /^[\-\_a-z\d]{5,255}$/ to lower case
      */
     public function getValidAlias($str) {
-        if (strlen($str) < 255 && strlen($str) > 0) {
-            $str = trim($str);
-            $str = preg_replace('/[^\-\w\d_]/i', '-', $str);
-            $str = strtolower($str);
-            return $str;
+        if (strlen($str) <= 200 && strlen($str) > 0) {
+            return preg_replace('/[^\-a-z\d_]/i', '-', strtolower(trim($str)));
         } else {
-            throw new \Exception('Valid `Aliases` must be less than 255 ' .
-                    'Characters in length.');
+            throw new \Exception('Valid `Aliases` must be less than ' .
+                'or equal to 200 Characters in length.');
         }
     }
 }

@@ -32,7 +32,8 @@ class PostTermRelFieldset extends Fieldset {
                 'placeholder' => 'Category'
             ),
             'attributes' => array(
-                'id' => 'term_taxonomy_id'
+                'id' => 'term_taxonomy_id',
+                'required' => true,
             )
         ));
     }

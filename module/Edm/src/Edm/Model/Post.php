@@ -102,7 +102,7 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(
             self::getDefaultInputOptionsByKey('alias', array(
                     'name' => 'alias',
-                    'required' => true
+                    'required' => false
         ))));
         
         // Content

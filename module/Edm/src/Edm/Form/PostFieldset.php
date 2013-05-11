@@ -41,11 +41,12 @@ class PostFieldset extends Fieldset {
             'name' => 'alias',
             'type' => 'Text',
             'options' => array(
-                'label' => 'Alias'
+                'label' => 'Alias',
+                'required' => false,
             ),
             'attributes' => array(
                 'id' => 'alias',
-                'required' => true
+                'required' => false,
             )
         ));
         
@@ -97,14 +98,14 @@ class PostFieldset extends Fieldset {
             'name' => 'status',
             'type' => 'Zend\Form\Element\Select',
             'options' => array(
-                'label' => 'Status',
+                'label' => 'Post Status',
                 'value_options' => array(
-                    '*' => '-- Select a Status --'
+                    'published' => 'Published'
                 )
             ),
             'attributes' => array(
                 'id' => 'status',
-                'required' => true
+                'required' => false
             )
         ));
         
@@ -115,12 +116,12 @@ class PostFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Commenting',
                 'value_options' => array(
-                    'disabled' => '-- Select a Commenting Status --'
+                    'enabled' => 'Enabled'
                 )
             ),
             'attributes' => array(
                 'id' => 'commenting',
-                'required' => true
+                'required' => false
             )
         ));
 
@@ -131,12 +132,12 @@ class PostFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Access Group',
                 'value_options' => array(
-                    '*' => '-- Select a Access Group --'
+                    'guest' => 'Guest'
                 )
             ),
             'attributes' => array(
                 'id' => 'accessGroup',
-                'required' => true
+                'required' => false
             )
         ));
 
@@ -145,14 +146,14 @@ class PostFieldset extends Fieldset {
             'name' => 'type',
             'type' => 'Zend\Form\Element\Select',
             'options' => array(
-                'label' => 'Type',
+                'label' => 'Post Type',
                 'value_options' => array(
-                    '*' => '-- Select a Type --'
+                    'blog' => 'Blog'
                 )
             ),
             'attributes' => array(
                 'id' => 'type',
-                'required' => true
+                'required' => false
             )
         ));
 

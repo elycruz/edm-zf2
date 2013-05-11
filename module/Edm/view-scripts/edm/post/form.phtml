@@ -11,9 +11,9 @@ echo <<<HTML
         <fieldset>
             <legend>Post</legend>
             {$this->edmFormElement($post->get('title'))}
-            {$this->edmFormElement($post->get('alias'))}
-            {$this->edmFormElement($post->get('content'))}
-            {$this->edmFormElement($post->get('excerpt'))}
+            {$this->edmFormElement($post->get('alias'))}<br class="cb" />
+            {$this->edmFormElement($post->get('content'))}<br class="cb" />
+            {$this->edmFormElement($post->get('excerpt'))}<br class="cb" />
             {$this->edmFormElement($post->get('commenting'))}
             {$this->edmFormElement($post->get('status'))}
             {$this->edmFormElement($post->get('accessGroup'))}

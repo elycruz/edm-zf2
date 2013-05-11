@@ -56,7 +56,7 @@ class PostTermRel extends AbstractModel implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(
                 self::getDefaultInputOptionsByKey('id', array(
                     'name' => 'term_taxonomy_id',
-                    'required' => false
+                    'required' => true
                 )
         )));
         

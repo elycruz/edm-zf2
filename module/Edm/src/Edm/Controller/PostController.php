@@ -27,7 +27,7 @@ class PostController extends AbstractController implements PostServiceAware {
         // View
         $view =
                 $this->view =
-                    new JsonModel();
+                new JsonModel();
 
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
@@ -128,7 +128,7 @@ class PostController extends AbstractController implements PostServiceAware {
         if (!$view->form->isValid()) {
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
-            Debug::dump($form->getMessages());
+            // Debug::dump($form->getMessages());
             return $view;
         }
 
@@ -140,12 +140,17 @@ class PostController extends AbstractController implements PostServiceAware {
         $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset']);
         $postData = new Post($mergedData);
 
+        // If emtpy alias populate it
+        if (empty($postData->alias)) {
+            $postData->alias = $this->getDbDataHelper()->getValidAlias($postData->title);
+        }
+        
 //        Debug::dump($postData->toArray());
 //        Debug::dump($postData->getPostTermRelProto()->toArray());
         // Check if term taxonomy already exists
         $postCheck = $postService->getByAlias($postData->alias);
         if (!empty($postCheck)) {
-            $fm->setNamespace('error')->addMessage('Post "' . $postData->title . '" already ' .
+            $fm->setNamespace('error')->addMessage('Post with alias "' . $postData->alias . '" already ' .
                     'exists in the database.  Click here to edit it.');
             return $view;
         }
@@ -228,7 +233,7 @@ class PostController extends AbstractController implements PostServiceAware {
                     'Please review values and try again.');
             return $view;
         }
- 
+
         // Set data
         $data = $view->form->getData();
 

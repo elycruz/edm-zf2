@@ -50,6 +50,9 @@ implements \Edm\UserAware,
             return false;
         }
         
+        // Get some help for cleaning data to be submitted to db
+        $dbDataHelper = $this->getDbDataHelper();
+        
         // Post Term Rel
         $postTermRel = $post->getPostTermRelProto();
         
@@ -61,11 +64,16 @@ implements \Edm\UserAware,
         $post->createdById = $user->user_id;
         $post->userParams = '';
 
+        // If empty alias
+        if (empty($post->alias)) {
+            $post->alias = $dbDataHelper->getValidAlias($post->title);
+        }
+        
         // Escape tuples 
-        $dbDataHelper = $this->getDbDataHelper();
         $cleanPost = $dbDataHelper->escapeTuple($post->toArray());
         $cleanPostTermRel = $dbDataHelper->escapeTuple($postTermRel->toArray());
 
+        
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
@@ -103,9 +111,15 @@ implements \Edm\UserAware,
         
         $id = $post->post_id;
 //        Debug::dump($post);
+        // Get Db Data Helper
+        $dbDataHelper = $this->getDbDataHelper();
+        
+        // If empty alias
+        if (empty($post->alias)) {
+            $post->alias = $dbDataHelper->getValidAlias($post->title);
+        }
         
         // Escape tuples 
-        $dbDataHelper = $this->getDbDataHelper();
         $postData = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($post->toArray()));
         $postTermRelData = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($post->getPostTermRelProto()->toArray()));
