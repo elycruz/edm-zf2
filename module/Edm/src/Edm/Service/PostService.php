@@ -102,7 +102,7 @@ implements \Edm\UserAware,
     public function updatePost(Post $post) {
         
         $id = $post->post_id;
-        Debug::dump($post);
+//        Debug::dump($post);
         
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();

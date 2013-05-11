@@ -129,6 +129,7 @@ return array(
                                     '[/itemsPerPage/:itemsPerPage]' .
                                     '[/sort/:sort][/sortBy/:sortBy]' .
                                     '[/taxonomy/:taxonomy]' .
+                                    '[/term_taxonomy_id/:term_taxonomy_id]' .
                                     '[/accessGroup/:accessGroup]' .
                                     '[/role/:role]' .
                                     '[/status/:status]' .
@@ -137,16 +138,18 @@ return array(
                                     '[/filter/:filter][/filterBy/:filterBy]',
                                     'constraints' => array(
                                         'page' => '\d*',
+                                        'itemsPerPage' => '\d*',
                                         'sort' => '[a-zA-Z0-1]*',
                                         'sortBy' => '[a-zA-Z\d_\-]*',
                                         'filter' => '[a-zA-Z\d_\-]*',
                                         'filterBy' => '[a-zA-Z0-9\d_\-]*',
+                                        'term_taxonomy_id' => '[\d*\*]*',
                                         'taxonomy' => '[a-zA-Z0-9\d_\-\*]*',
                                         'accessGroup' => '[a-zA-Z0-9\d_\-\*]*',
                                         'role' => '[a-zA-Z0-9\d_\-\*]*',
                                         'status' => '[a-zA-Z0-9\d_\-\*]*',
                                         'parent_id' => '[a-zA-Z0-9_\-]*',
-                                        'itemsPerPage' => '\d*',
+                                        // @todo fix this so that it is either or
                                     ),
                                     'defaults' => array(
                                         'page' => 1,

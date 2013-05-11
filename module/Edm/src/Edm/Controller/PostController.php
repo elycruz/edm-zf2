@@ -27,7 +27,7 @@ class PostController extends AbstractController implements PostServiceAware {
         // View
         $view =
                 $this->view =
-                new JsonModel();
+                    new JsonModel();
 
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
@@ -63,7 +63,7 @@ class PostController extends AbstractController implements PostServiceAware {
         }
 
         // Category
-        $category = $this->getAndSetParam('category', '*');
+        $category = $this->getAndSetParam('term_taxonomy_id', '*');
         if (!empty($category) && $category != '*') {
             $where['term_taxonomy_id'] = $category;
         }

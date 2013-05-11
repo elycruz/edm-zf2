@@ -14,8 +14,8 @@ echo <<<HTML
         action="{$form->getAttribute('action')}">
         <fieldset class="controls">
             <legend>Login form</legend>
-            {$this->edmFormElement($form->get('screenName'))}
-            {$this->edmFormElement($form->get('password'))}
+            {$this->edmFormElement($form->get('screenName'))}<br class="cb" />
+            {$this->edmFormElement($form->get('password'))}<br class="cb" />
             <div class="form-item">
             {$this->formElement($submitAndReset->get('submit'))}
             {$this->formElement($submitAndReset->get('reset'))}
