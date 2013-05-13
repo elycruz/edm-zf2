@@ -11,6 +11,11 @@ use Zend\InputFilter\Factory as InputFactory,
 
 class User extends AbstractModel implements InputFilterAwareInterface {
 
+    // Defaults
+    public $role = 'cms-manager';
+    public $status = 'pending-activation';
+    public $accessGroup = 'cms-manager';
+    
     /**
      * Valid keys for model
      * @var array

@@ -81,7 +81,5 @@ return array(
             'all' => array(
                 'cms-user' => 'allow')
         ),
-        
-
     )
 );

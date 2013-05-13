@@ -44,37 +44,17 @@ implements \Edm\UserAware,
     /**
      * Creates a user and it's constituants 
      *  (contact and user contact relationship)
-     * @param array $data
+     * @param User $user
      * @return mixed int | boolean
      * @throws Exception
      * @todo make our service use model objects for CRUD operations; I.e.
      * $service->createItem (array $data) should be 
      * $service->createItem (Model $model);
      */
-    public function createUser(array $data) {
-
-        // If no user key
-        if (!array_key_exists('user', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
-            ' requires the data param to contain a user key.');
-        }
-
-        // If no contact key
-        if (!array_key_exists('contact', $data)) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
-            ' requires the data param to contain a contact key.');
-        }
-
-        // If no contact key
-        if (!array_key_exists('email', $data['contact'])) {
-            throw new Exception(__CLASS__ . '.' . __FUNCTION__ .
-            ' requires the data param to contain a contact key with an email key.');
-        }
-
+    public function createUser(User $user) {
         // @todo use only arrays to eliminate multi casting variables multiple
         // times within a function
-        $user = (object) $data['user'];
-        $contact = (object) $data['contact'];
+        $contact = $user->getContactProto();
         $key = isset($user->activationKey) ? $user->activationKey : '';
         $userKeyValid = $this->is_activationKeyValid($key, $contact);
 
@@ -88,48 +68,14 @@ implements \Edm\UserAware,
                     $contact->firstName, $contact->lastName, $contact->email);
         }
 
-        // Set status to "pending-activation"
-        if (empty($user->status) || !$userKeyValid) {
-            $user->status = 'pending-activation';
-        }
-
-        // If no user.role set user.role to "user"
-        if (empty($user->role)) {
-            $user->role = 'user';
-        }
-
-        // If no access group
-        if (empty($user->accessGroup)) {
-            $user->accessGroup = 'cms-manager';
-        }
-
         // If user has a password
         if (!empty($user->password)) {
             $user->password = $this->encodePassword($user->password);
         }
 
-        // Make sure these are not set
-        unset($contact->contact_id);
-        unset($contact->name);
-
         // Remove parent id if not valid
         if (isset($contact->parent_id) && !is_numeric($contact->parent_id)) {
             unset($contact->parent_id);
-        }
-
-        // If no contact.type set contact.type to "user"
-        if (empty($contact->type)) {
-            $contact->type = 'user';
-        }
-
-        // Contact params default value
-        if (empty($contact->userParams)) {
-            $contact->userParams = '';
-        }
-
-        // Contact description default value
-        if (empty($contact->description)) {
-            $contact->description = '';
         }
 
         // Set registeredDate
@@ -138,34 +84,41 @@ implements \Edm\UserAware,
 
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
-        $cleanUser = $dbDataHelper->escapeTuple((array) $user);
-        $cleanContact = $dbDataHelper->escapeTuple((array) $contact);
+        $cleanUser = $dbDataHelper->escapeTuple(
+                $this->ensureOkForUpdate($user->toArray()));
+        $cleanContact = $dbDataHelper->escapeTuple(
+                $this->ensureOkForUpdate($contact->toArray()));
+        
+        // User contact rel
         $userContactRel = array(
             'email' => $cleanContact['email'],
             'screenName' => $cleanUser['screenName']);
-
+            
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
+            // Create contact
+            $this->getContactTable()->insert($cleanContact);
+            $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
+
+            // Create user
+            $retVal = $this->getUserTable()->insert($cleanUser);
+
+            // Create user contact rel
+            $this->getUserContactRelTable()->insert($userContactRel);
+            
+            return $retVal;
 
         // Begin transaction
         $conn->beginTransaction();
         try {
-            // Create contact
-            $cleanUser['contact_id'] =
-                    $this->getContactTable()->createItem($cleanContact);
-
-            // Create user
-            $retVal = $this->getUserTable()->createItem($cleanUser);
-
-            // Create user contact rel
-            $this->getUserContactRelTable()->insert($userContactRel);
 
             // Commit and return true
             $conn->commit();
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             $conn->rollback();
-            $retVal = false;
+            $retVal = $e;
         }
         return $retVal;
     }

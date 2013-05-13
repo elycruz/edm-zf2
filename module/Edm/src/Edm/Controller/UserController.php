@@ -14,6 +14,7 @@ use Edm\Controller\AbstractController,
     Edm\Service\AbstractService,
     Edm\Service\UserAware,
     Edm\Service\UserAwareTrait,
+    Edm\Model\User,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
@@ -121,9 +122,9 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         $userService = $this->getUserService();
 
         // Get data
-        $data = (object) $view->form->getData();
-        $userData = (object) $data->user;
-        $contactData = (object) $data->contact;
+        $data = $view->form->getData();
+        $userData = new User(array_merge($data['user'], $data['contact']));
+        $contactData = $userData->getContactProto();
 
         // Check if user exists by email
         $email = $contactData->email;
@@ -144,15 +145,16 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         }
 
         // Create term taxonomy
-        $rslt = $userService->createUser($view->form->getData());
+        $rslt = $userService->createUser($userData);
 
         // Send success message to user
-        if ($rslt) {
+        if (!empty($rslt) && $rslt instanceof \Exception === false) {
             $fm->setNamespace('highlight')
                     ->addMessage('User with email "' . $email . '" added successfully.');
         }
         // send failure message to user 
         else {
+            var_dump($rslt->getMessage()); exit();
             $fm->setNamespace('error')
                     ->addMessage('User with email "' . $email . '" failed to be added.');
         }

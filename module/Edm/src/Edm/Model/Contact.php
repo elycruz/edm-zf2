@@ -15,7 +15,15 @@ class Contact extends AbstractModel implements InputFilterAwareInterface {
      * @var Zend\InputFilter\Filter
      */
     protected $inputFilter = null;
-
+    
+    /**
+     * Contact type
+     * @var string
+     */
+    public $type = 'user';
+    
+    public $userParams = '';
+    
     /**
      * Valid keys for model
      * @var array

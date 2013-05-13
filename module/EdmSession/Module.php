@@ -120,6 +120,7 @@ class Module {
         return array(
             'session' => array(
                 'name' => 'EDM_SESSION',
+                'gc_maxlifetime' => 14400
             ),
         );
     }
