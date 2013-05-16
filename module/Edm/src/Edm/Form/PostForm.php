@@ -2,7 +2,8 @@
 
 namespace Edm\Form;
 
-use Edm\Form\PostTermRelFieldset,
+use Edm\Form\UserParamsFieldset,
+    Edm\Form\PostTermRelFieldset,
     Edm\Form\PostFieldset;
 
 /**
@@ -29,6 +30,9 @@ class PostForm extends EdmForm {
         
         // Post Term Rel Fieldset
         $postTermRelFieldset = new PostTermRelFieldset('post-term-rel-fieldset');
+        
+        // User Params Fieldset
+        $userParamsFieldset = new UserParamsFieldset('user-params-fieldset');
         
         // Add Status values
         $postStatus = $postFieldset->get('status');
@@ -121,6 +125,9 @@ class PostForm extends EdmForm {
         
         // Add Post Term Rel Fieldset
         $this->add($postTermRelFieldset);
+        
+        // Add User Params Fieldset
+        $this->add($userParamsFieldset);
         
         // Submit and Reset Fieldset
         $this->add(new SubmitAndResetFieldset('submit-and-reset'));

@@ -12,9 +12,12 @@ namespace Edm;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface,
     Zend\Mvc\ModuleRouteListener,
-    Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
+    Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
+    Zend\ModuleManager\Feature\FormElementProviderInterface;
 
-class Module implements AutoloaderProviderInterface {
+class Module implements 
+    AutoloaderProviderInterface, 
+        FormElementProviderInterface {
 
 //    public function getServiceConfig() {
 //        return array(
@@ -27,6 +30,10 @@ class Module implements AutoloaderProviderInterface {
 //        );
 //    }
 
+    public function getFormElementConfig () {
+        return include __DIR__ . '/configs/form.element.config.php';
+    }
+    
     public function getAutoloaderConfig() {
         return array(
             'Zend\Loader\ClassMapAutoloader' => array(

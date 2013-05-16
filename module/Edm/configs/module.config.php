@@ -1,5 +1,8 @@
 <?php
 
+// @todo update forms to use the init function for initializing 
+// so that we can have access to the service manager
+
 //-----------------------------------------------------------------------------
 // Defines
 //-----------------------------------------------------------------------------

@@ -1,8 +1,11 @@
 <?php
+
 $form = $this->form;
 
 $post = $form->get('post-fieldset');
 $postTermRel = $form->get('post-term-rel-fieldset');
+$userParams = $form->get('user-params-fieldset');
+//\Zend\Debug\Debug::dump($this->formCollection($userParams->get('userParams')));
 $submitAndReset = $form->get('submit-and-reset');
 echo <<<HTML
     <form id="{$form->getName()}" 
@@ -22,6 +25,10 @@ echo <<<HTML
         <fieldset>
             <legend>Category</legend>
             {$this->edmFormElement($postTermRel->get('term_taxonomy_id'))}
+        </fieldset>
+        <fieldset class="user-params">
+            <legend>User Params</legend>
+            {$this->formCollection($userParams->get('userParams'))}
         </fieldset>
         <fieldset class="controls">
             <div class="form-item">
