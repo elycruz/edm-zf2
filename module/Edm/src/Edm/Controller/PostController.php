@@ -140,6 +140,8 @@ class PostController extends AbstractController implements PostServiceAware {
         $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset']);
         $postData = new Post($mergedData);
 
+//        Debug::dump($data);
+        
         // If emtpy alias populate it
         if (empty($postData->alias)) {
             $postData->alias = $this->getDbDataHelper()->getValidAlias($postData->title);

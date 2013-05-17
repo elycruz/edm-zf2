@@ -1,7 +1,6 @@
 <?php
 
 $form = $this->form;
-
 $post = $form->get('post-fieldset');
 $postTermRel = $form->get('post-term-rel-fieldset');
 $userParams = $form->get('user-params-fieldset');
@@ -28,7 +27,7 @@ echo <<<HTML
         </fieldset>
         <fieldset class="user-params">
             <legend>User Params</legend>
-            {$this->formCollection($userParams->get('userParams'))}
+            {$this->edmFormCollection($userParams->get('userParams'))}
         </fieldset>
         <fieldset class="controls">
             <div class="form-item">

@@ -66,7 +66,8 @@ return array(
     ),
     'view_helpers' => array(
         'invokables' => array(
-            'edmFormElement' => 'Edm\Form\Helper\EdmFormElement'
+            'edmFormElement' => 'Edm\Form\Helper\EdmFormElement',
+            'edmFormCollection' => 'Edm\Form\Helper\EdmFormCollection'
         )
     ),
     'router' => array(
