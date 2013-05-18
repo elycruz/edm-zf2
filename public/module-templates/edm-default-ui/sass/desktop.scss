@@ -12,7 +12,12 @@
 /** Common Classes **/
 @import "partials/base";
 @import "common-classes/960-fluid";
-@import "common-classes/common-classes";
+
+/** Grid modifications
+-------------------------------------------------------------*/
+.container_16 {
+    min-width: 860px;
+}
 
 * {
     -webkit-box-sizing: box-content;
@@ -27,7 +32,7 @@ html, body {
     text-align: center;
     font: normal 96% "Century Gothic", 
         Helvetica, Verdana, Arial, Sans-serif;
-    background: #FFFFFF;
+    background: #EEE;
     color: #555555;
 }
 
@@ -51,11 +56,13 @@ body {
 ------------------------------------------------------------------------------*/
 #wrapper {
     min-height: 960px;
-        
+    > section.main {
+        background: #EEE;
+    }
     > footer .menu,
     > nav .main.menu {
         li {
-            padding: 10px;
+            padding: 1%;
         }
         li a {
             color: #888888;
@@ -68,6 +75,7 @@ body {
 #main {
     background: #FFF;
     min-height: 400px;
+    height: 100%;
     > .articles > article {
         border-bottom: 1px dashed #EEEEEE;
         header {
@@ -86,5 +94,7 @@ body {
 }
 
 /** Common Classes **/
+@import "common-classes/common-classes";
 @import "common-classes/margin-and-padding";
 @import "common-classes/grayscale";
+@import "desktop/view-modules"
