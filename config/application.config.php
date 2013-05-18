@@ -11,7 +11,8 @@ return array(
         'Application',
         'EdmSession',
         'EdmAccessGateway',
-        'Edm'
+        'Edm',
+        'EdmDefault'
     ),
     'module_listener_options' => array(
         'config_glob_paths'    => array(
