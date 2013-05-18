@@ -1,0 +1,154 @@
+/*
+    Document   : common-classes
+    Created on : May 18, 2013, 4:07:34 PM
+    Author     : ElyDeLaCruz
+    Description:
+    Purpose of the stylesheet follows.
+    Syntax recommendation http://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html
+*/
+
+/** Position
+--------------------------------------------------**/
+.pos-rel {position: relative;}
+.pos-abs {position: absolute;}
+.pos-fix {position: fixed;}
+
+/** Display
+--------------------------------------------------**/
+.none {
+    display: none;
+}
+.block {
+    display: block;
+}
+.inline {
+    display: inline;
+}
+.inline-block {
+    display: inline-block;
+}
+
+/** Dimensions
+--------------------------------------------------**/
+.w100p {
+    width: 100%;
+}
+.w96p {
+    width: 96%;
+}
+.w94p {
+    width: 94%;
+}
+.w92p {
+    width: 92%;
+}
+.w80p {
+    width: 80%;
+}
+.h100p {
+    height: 100%;
+}
+.hAuto {
+    height: auto;
+}
+
+/** Floats
+--------------------------------------------------**/
+.fL {
+    float: left;
+}
+.fR {
+    float: right;
+}
+.cL {
+    clear: left;
+}
+.cR {
+    clear: right;
+}
+.cB {
+    clear: both;
+}
+
+/** Text
+-------------------------------------------------------------*/
+.tL {
+    text-align: left;
+}
+.tC {
+    text-align: center;
+}
+.tJ {
+    text-align: justify;
+}
+
+/** Font
+-------------------------------------------------------------*/
+.tSml {
+    line-height: 10px;
+    font-size: 10px;
+}
+.tBld {
+    font-weight: bold;
+}
+.tNml {
+    font-weight: bold;
+}
+
+/** Grid modifications
+-------------------------------------------------------------*/
+.container_16 {
+    min-width: 960px;
+}
+
+/** Modules
+-------------------------------------------------------------*/
+.module,
+.module > header,
+.module > .header,
+.module > .body,
+.module > section,
+.module > div,
+.module > .footer,
+.module > div > header,
+.module > div > .header,
+.module > div > .body,
+.module > div > section,
+.module > div > div,
+.module > div > .footer,
+.module > div > footer {
+   position: relative;;
+   width: 100%;
+   height: auto;
+}
+
+/** Menus
+-------------------------------------------------------------*/
+ul.horiz-menu-left,
+ul.horiz-menu-left ul,
+ul.vert-menu-left,
+ul.vert-menu-left ul,
+ul.vert-menu-left li {
+    margin: 0;
+    padding: 0;
+    float: left;    
+    clear: both;
+    width: 100%;
+}
+ul.horiz-menu-left > li {
+    float: left;
+    clear: none;
+}
+ul.horiz-menu-left > ul li {
+    clear: both;
+}
+ul.horiz-menu-left li, 
+ul.horiz-menu-left li a span,
+ul.vert-menu-left li,
+ul.vert-menu-left li a span {
+    display: block;
+}
+
+.number {
+    font-family: Georgia, "Times New Roman", Serif;
+}

@@ -1,0 +1,24 @@
+/*
+    Document   : functions
+    Created on : May 18, 2013, 2:29:04 PM
+    Author     : ElyDeLaCruz
+    Description:
+    Purpose of the stylesheet follows.
+*/
+
+/*
+    TODO customize this sample style
+    Syntax recommendation http://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html
+*/
+
+@function edm-fib($start: 0, $end: 960, $startInc: 1) {
+    $a: $start;
+    $b: $startInc;
+    $retVal: 0;
+    @while $a < $end {
+        $a: $a + $b;
+        $b: $a + $b;
+        $retVal: append($retVal, $b);
+    }
+    @return $retVal;
+}

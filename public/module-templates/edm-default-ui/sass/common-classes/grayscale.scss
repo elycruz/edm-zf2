@@ -1,0 +1,20 @@
+/*
+    Document   : grayscale
+    Created on : May 18, 2013, 12:18:29 PM
+    Author     : ElyDeLaCruz
+    Description:
+    Simple Grayscale colors from #000000 to #FFFFFF
+    Syntax recommendation http://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html
+*/
+/* Generate numerical section */
+@for $i from 0 through 9 {
+    .c-#{$i} {color: #{'#'}#{$i}#{$i}#{$i}#{$i}#{$i}#{$i};}
+    .bg-#{$i} {background-color: #{'#'}#{$i}#{$i}#{$i}#{$i}#{$i}#{$i};}
+}
+
+/* Generate alpha section */
+$alpha-chars: A B C D E F;
+@each $i in $alpha-chars {
+    .c-#{$i} {color: #{'#'}#{$i}#{$i}#{$i}#{$i}#{$i}#{$i};}
+    .bg-#{$i} {background-color: #{'#'}#{$i}#{$i}#{$i}#{$i}#{$i}#{$i};}
+}
