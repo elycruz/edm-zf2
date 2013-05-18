@@ -84,7 +84,8 @@ class AbstractModel {
     }
     
     /**
-     * Returns model as array
+     * Returns model as array with only set values.
+     * Any fields which do not have set values won't be returned in the array.
      * @param bool $omitNull default true
      * @return array
      */

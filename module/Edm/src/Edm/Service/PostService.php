@@ -124,15 +124,15 @@ implements \Edm\UserAware,
         $postTermRelData = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($post->getPostTermRelProto()->toArray()));
        
-        if (empty($post->userParams)) {
+        if (!isset($post->userParams)) {
             $postData['userParams'] = '';
         }
        
-        if (empty($post->excerpt)) {
+        if (!isset($post->excerpt)) {
             $postData['excerpt'] = '';
         }
        
-        if (empty($post->content)) {
+        if (!isset($post->content)) {
             $postData['content'] = '';
         }
         

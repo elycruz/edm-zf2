@@ -31,6 +31,7 @@ class UserLoginForm extends EdmForm  {
                 'label' => 'Screen Name',
             ),
             'attributes' => array(
+                'autofocus' => true,
                 'required' => true,
                 'size' => '46%',
                 'maxlength' => 32,
