@@ -82,7 +82,7 @@ class Module {
             setcookie('user_agent', $hash, 0);
 
             // Throw exception
-            throw new Exception(
+            throw new \Exception(
                     '<p>Your session has ended.  Please visit the' .
                     'link below to start a new session.</p><br />' .
                     '<a href="/">Site root</a>'
