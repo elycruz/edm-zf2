@@ -4,6 +4,8 @@ namespace Edm\Service;
 
 use Edm\Service\AbstractService,
     Edm\Model\Post,
+    Edm\Service\TermTaxonomyServiceAware,
+    Edm\Service\TermTaxonomyServiceAwareTrait,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
@@ -13,15 +15,19 @@ use Edm\Service\AbstractService,
 
 /**
  * @todo fix composite data column aware interface and trait to use the 
+ * @todo start using the db\table->alias for aliases to avoid conflicts and 
+ * maintain readability
  * "tuple" language instead of the array language
  * @author ElyDeLaCruz
  */
 class PostService extends AbstractService 
 implements \Edm\UserAware,
-        \Edm\Db\CompositeDataColumnAware {
+        \Edm\Db\CompositeDataColumnAware,
+        TermTaxonomyServiceAware {
     
     use \Edm\UserAwareTrait,
-            \Edm\Db\CompositeDataColumnAwareTrait;
+        \Edm\Db\CompositeDataColumnAwareTrait,
+        TermTaxonomyServiceAwareTrait;
 
     protected $postTable;
     protected $postTermRelTable;
@@ -224,12 +230,22 @@ implements \Edm\UserAware,
     public function getSelect($sql = null) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
+        $termTaxService = $this->getTermTaxService();
         // @todo implement return values only for current role level
         return $select
                 ->from(array('post' => $this->getPostTable()->table))
                 ->join(array('postTermRel' => 
                     $this->getPostTermRelTable()->table), 
-                        'postTermRel.post_id=post.post_id');
+                        'postTermRel.post_id=post.post_id')
+        
+            // Term Taxonomy
+            ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
+                    'termTax.term_taxonomy_id=postTermRel.term_taxonomy_id',
+                    array('term_alias'))
+            ->join(array('term' => $termTaxService->getTermTable()->table), 
+                    'term.alias=termTax.term_alias', array('term_name' => 'name'));
+        
+        // @todo Join the category here
     }
 
     public function getPostTable() {
@@ -280,6 +296,52 @@ implements \Edm\UserAware,
             }
         }
         return $data;
+    }
+    
+    public function setListOrderForPost (Post $post) {
+        if (!is_numeric($post->listOrder) || !is_numeric($post->post_id)) {
+            throw new \Exception('Only numeric values are accepted for ' .
+                    __CLASS__ .' -> '. __FUNCTION__ . '.');
+        }
+        return $this->getPostTable()->update(
+                array('listOrder' => $post->listOrder), 
+                array('post_id' => $post->post_id));
+    }
+    
+    public function setTermTaxonomyForPost (Post $post, $taxonomyAlias, $value) {
+        
+        // If input filter is not valid (data in post is not valid) then
+        // throw an exception
+        if (!$post->getInputFilter()->isValid()) {
+            throw new \Exception('Post object received in ' .
+                    __CLASS__ .'->'. __FUNCTION__ . ' is invalid.');
+            // @todo spit out error messages here
+        }
+        
+        // If taxonomy alias is not valid
+        if (!in_array($taxonomyAlias, $post->getValidKeys())) {
+            throw new \Exception('"'. $taxonomyAlias . '" is not a valid ' .
+                    'field of the post model in "' . 
+                    __CLASS__ . '->' . __FUNCTION__ . '"');
+        }
+        
+        // If post id is not set
+        if (!is_numeric($post->post_id)) {
+            throw new \Exception('Only numeric values are accepted for ' .
+                    __CLASS__ .'->'. __FUNCTION__ . '\'s $post->post_id param.');
+        }
+
+        // Check if taxonomy alias indeed has $value else throw error
+        $allowedCheck = $this->getTermTaxService()->getByAlias($value, $taxonomyAlias);
+        if (empty($allowedCheck)) {
+            throw new \Exception('One of the values passed into "' .
+                    __CLASS__ .'->'. __FUNCTION__ . '" are not allowed.');
+        }
+        
+        // Update term taxonomy value and return outcome
+        return $this->getPostTable()->update(
+                array($taxonomyAlias => $value), 
+                array('post_id' => $post->post_id));
     }
 
 }

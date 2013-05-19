@@ -11,5 +11,7 @@ namespace Edm\Db;
  */
 interface CompositeDataColumnAware {
     public function serializeAndEscapeArray (array $data);
-    public function unSerializeAndUnEscapeArray (array $data);
+    public function serializeAndEscapeTuples (array $data);
+    public function unSerializeAndUnEscapeArray ($data);
+    public function unSerializeAndUnEscapeTuples ($data);
 }

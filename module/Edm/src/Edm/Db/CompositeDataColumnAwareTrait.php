@@ -13,7 +13,7 @@ trait CompositeDataColumnAwareTrait {
      * @param string $data
      * @return array $user
      */
-    public function unSerializeAndUnEscapeArray(array $data) {
+    public function unSerializeAndUnescapeArray($data) {
         return $this->getDbDataHelper()->reverseEscapeTuple(
                     unserialize($data));
     }
@@ -23,7 +23,7 @@ trait CompositeDataColumnAwareTrait {
      * @param array $data
      * @return array
      */
-    public function unSerializeAndUnEscapeTuples(array $data) {
+    public function unSerializeAndUnEscapeTuples($data) {
         return $this->getDbDataHelper()->reverseEscapeTuples(
                     unserialize($data));
     }

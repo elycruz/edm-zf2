@@ -201,6 +201,13 @@ class PostController extends AbstractController implements PostServiceAware {
                     . $id . '" doesn\'t exist in database.');
             return $view;
         }
+        
+        $userParamsFieldset = null;
+        // Resolve user params field
+        if (!empty($existingPost->userParams)) {
+            $userParamsFieldset = $postService->unSerializeAndUnEscapeTuples(
+                    $existingPost->userParams);
+        }
 
         // Set data
         $form->setData(array(
@@ -217,10 +224,11 @@ class PostController extends AbstractController implements PostServiceAware {
                 'accessGroup' => $existingPost->accessGroup,
                 'type' => $existingPost->type,
             ),
-            'user-params-fieldset' => $postService->unescapeAndUnserializeTuples(
-                    $existingPost->userParams)
+            'user-params-fieldset' => array(
+                'userParams' => $userParamsFieldset
+                )
         ));
-
+        
         // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -241,7 +249,13 @@ class PostController extends AbstractController implements PostServiceAware {
         $data = $view->form->getData();
 
         // Allocoate updates
-        $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset'], array('post_id' => $id));
+        $mergedData = array_merge(
+                $data['post-fieldset'], 
+                $data['post-term-rel-fieldset'], 
+                array('post_id' => $id),
+                $data['user-params-fieldset']);
+        
+        // Create new post model obj
         $postData = new Post($mergedData);
 
         // Update term in db
@@ -349,9 +363,12 @@ class PostController extends AbstractController implements PostServiceAware {
                             'List order change failed.');
             return $view;
         }
+        
+        // Set list order
+        $post->listOrder = $listOrder;
 
         // Update listorder
-        $rslt = $postService->setListOrderForId($id, $listOrder);
+        $rslt = $postService->setListOrderForPost($post);
 
         // Send success message to user
         if (!empty($rslt)) {
