@@ -172,8 +172,8 @@ return array(
             'Edm' => __DIR__ . '/../view-scripts',
         ),
         'template_map' => array(
-            'layout/layout'     => APP_PATH .'/public/module-templates/edm-ko-ui/login.phtml',
-            'layout/ajax-ui'  => APP_PATH . '/public/module-templates/edm-ko-ui/index.phtml'
+            'layout/edm-admin-login'     => APP_PATH .'/public/module-templates/edm-ko-ui/login.phtml',
+            'layout/edm-admin-ajax-ui'  => APP_PATH . '/public/module-templates/edm-ko-ui/index.phtml'
         )
     ),
 );

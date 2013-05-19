@@ -18,7 +18,7 @@ class AjaxUiController extends AbstractActionController
     {
         $this->view = new ViewModel(array('key' => 'value'));
         $this->view->setTerminal(true);
-        $this->view->setTemplate('layout/ajax-ui');
+        $this->view->setTemplate('layout/edm-admin-ajax-ui');
         return $this->view;
     }
 }

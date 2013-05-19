@@ -42,11 +42,10 @@ return array(
     ),
     'view_manager' => array(
         'template_path_stack' => array(
-            'Edm' => __DIR__ . '/../view-scripts',
+            'EdmDefault' => __DIR__ . '/../view-scripts',
         ),
         'template_map' => array(
-            'layout/layout'     => APP_PATH .'/public/module-templates/edm-default-ui/index.phtml',
-            'layout/edm-default-ui'  => APP_PATH . '/public/module-templates/edm-default-ui/index.phtml'
+            'layout/edm-default-ui'     => APP_PATH .'/public/module-templates/edm-default-ui/index.phtml',
         )
     ),
 );

@@ -79,8 +79,21 @@ class Module implements
         // to the view attempting to render)
         $this->registerGlobalDbAdapter($e);
         $eventManager->attach('render', array($this, 'registerJsonStrategy'), 100);
-
+        $eventManager->attach('dispatch', array($this, 'setTemplate'), -100);
         $moduleRouteListener->attach($eventManager);
+    }
+    
+    public function setTemplate ($e) {
+        $matches    = $e->getRouteMatch();
+        $controller = $matches->getParam('controller');
+        if (false === strpos($controller, 'Index') || false === strpos($controller, __NAMESPACE__)) {
+            // not a controller from this module
+            return;
+        }
+
+        // Set the layout template
+        $viewModel = $e->getViewModel();
+        $viewModel->setTemplate('layout/edm-admin-login');
     }
 
 }

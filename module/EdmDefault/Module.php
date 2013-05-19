@@ -65,8 +65,20 @@ class Module implements
         // Register a "render" event, at high priority (so it executes prior
         // to the view attempting to render)
         $eventManager->attach('render', array($this, 'registerJsonStrategy'), 100);
-
+        $eventManager->attach('dispatch', array($this, 'setTemplate'), -100);
         $moduleRouteListener->attach($eventManager);
+    }
+    
+    public function setTemplate ($e) {
+        $matches    = $e->getRouteMatch();
+        $controller = $matches->getParam('controller');
+        if (false === strpos($controller, __NAMESPACE__)) {
+            // not a controller from this module
+            return;
+        }
+        // Set the layout template
+        $viewModel = $e->getViewModel();
+        $viewModel->setTemplate('layout/edm-default-ui');
     }
 
 }
