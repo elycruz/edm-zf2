@@ -9,9 +9,11 @@ use Edm\Service\AbstractService,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
     Zend\Stdlib\DateTime,
-        Zend\Debug\Debug;
+    Zend\Debug\Debug;
 
 /**
+ * @todo fix composite data column aware interface and trait to use the 
+ * "tuple" language instead of the array language
  * @author ElyDeLaCruz
  */
 class PostService extends AbstractService 
@@ -62,7 +64,11 @@ implements \Edm\UserAware,
         
         // Created by
         $post->createdById = $user->user_id;
-        $post->userParams = '';
+        
+        // If empty user params
+        if (empty($post->userParams)) {
+            $post->userParams = '';
+        }
 
         // If empty alias
         if (empty($post->alias)) {
@@ -72,8 +78,10 @@ implements \Edm\UserAware,
         // Escape tuples 
         $cleanPost = $dbDataHelper->escapeTuple($post->toArray());
         $cleanPostTermRel = $dbDataHelper->escapeTuple($postTermRel->toArray());
+        if (is_array($cleanPost['userParams'])) {
+            $cleanPost['userParams'] = $this->serializeAndEscapeTuples($cleanPost['userParams']);
+        }
 
-        
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();

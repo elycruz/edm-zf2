@@ -75,10 +75,19 @@ implements DbDataHelper {
      * @return array
      */
     public function escapeTuple(array $tuple) {
+        $new_array = array();
         foreach ($tuple as $key => $val) {
-            $tuple[$key] = $this->mega_escape_string($val);
+            if (is_array($key)) {
+                $new_array[] = $this->escapeTuple($key);
+            }
+            else if (is_array($val) && !is_array($key)) {
+                $new_array[$key] = $this->escapeTuple($val);
+            }
+            else {
+                $new_array[$key] = $this->mega_escape_string($val);
+            }
         }
-        return $tuple;
+        return $new_array;
     }
 
     /**
@@ -88,11 +97,9 @@ implements DbDataHelper {
      */
     public function escapeTuples(array $tuples) {
         $new_array = array();
-        /**
-         * Loop through rows and escape them for our view
-         */
-        foreach ($tuples as $key => $tuple) {
-            $new_array[$key] = $this->escapeTuple($tuple);
+        // Loop through rows and escape them for our view
+        foreach ($tuples as $tuple) {
+            $new_array[] = $this->escapeTuple($tuple);
         }
         return $new_array;
     }
@@ -103,10 +110,19 @@ implements DbDataHelper {
      * @return array
      */
     public function reverseEscapeTuple(array $tuple) {
+        $new_array = array();
         foreach ($tuple as $key => $val) {
-            $tuple[$key] = $this->reverse_mega_escape_string($val);
+            if (is_array($key)) {
+                $new_array[] = $this->reverseEscapeTuple($key);
+            }
+            else if (is_array($val) && !is_array($key)) {
+                $new_array[key] = $this->reverseEscapeTuple($val);
+            }
+            else {
+                $new_array[$key] = $this->reverse_mega_escape_string($val);
+            }
         }
-        return $tuple;
+        return $new_array;
     }
 
     /**

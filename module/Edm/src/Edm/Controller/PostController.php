@@ -137,18 +137,17 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // Get data
         $data = $form->getData();
-        $mergedData = array_merge($data['post-fieldset'], $data['post-term-rel-fieldset']);
+        $mergedData = array_merge(
+                $data['post-fieldset'], 
+                $data['post-term-rel-fieldset'],
+                $data['user-params-fieldset']);
+        
         $postData = new Post($mergedData);
-
-//        Debug::dump($data);
         
         // If emtpy alias populate it
         if (empty($postData->alias)) {
             $postData->alias = $this->getDbDataHelper()->getValidAlias($postData->title);
         }
-        
-//        Debug::dump($postData->toArray());
-//        Debug::dump($postData->getPostTermRelProto()->toArray());
         // Check if term taxonomy already exists
         $postCheck = $postService->getByAlias($postData->alias);
         if (!empty($postCheck)) {
