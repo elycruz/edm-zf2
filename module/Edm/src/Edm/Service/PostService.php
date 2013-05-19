@@ -66,7 +66,7 @@ implements \Edm\UserAware,
         $post->createdById = $user->user_id;
         
         // If empty user params
-        if (empty($post->userParams)) {
+        if (!isset($post->userParams)) {
             $post->userParams = '';
         }
 
@@ -131,17 +131,10 @@ implements \Edm\UserAware,
         $postData = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($post->toArray()));
         $postTermRelData = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($post->getPostTermRelProto()->toArray()));
-       
-        if (!isset($post->userParams)) {
-            $postData['userParams'] = '';
-        }
-       
-        if (!isset($post->excerpt)) {
-            $postData['excerpt'] = '';
-        }
-       
-        if (!isset($post->content)) {
-            $postData['content'] = '';
+        
+        // If is array user params serialize it to string
+        if (is_array($postData['userParams'])) {
+            $postData['userParams'] = $this->serializeAndEscapeTuples($postData['userParams']);
         }
         
         // Get database platform object

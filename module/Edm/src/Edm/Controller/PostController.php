@@ -216,7 +216,9 @@ class PostController extends AbstractController implements PostServiceAware {
                 'status' => $existingPost->status,
                 'accessGroup' => $existingPost->accessGroup,
                 'type' => $existingPost->type,
-            )
+            ),
+            'user-params-fieldset' => $postService->unescapeAndUnserializeTuples(
+                    $existingPost->userParams)
         ));
 
         // If not post bail
