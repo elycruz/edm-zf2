@@ -6,6 +6,7 @@ use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
 use Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
+use Zend\Db\Adapter\Adapter as DbAdapter;
 use RuntimeException;
 
 error_reporting(E_ALL | E_STRICT);
@@ -59,6 +60,8 @@ class Bootstrap
 
         static::$serviceManager = $serviceManager;
         static::$config = $config;
+        static::initDbAdapter();
+
     }
 
     public static function getServiceManager()
@@ -72,14 +75,14 @@ class Bootstrap
     }
     
     public static function initDbAdapter () {
-        GlobalAdapterFeature::setStaticAdapter(
-            new \Zend\Db\Adapter\Adapter(array(
-                'driver' => 'Mysqli',
-                'dbname' => 'edm-0.4.0',
-                'username' => 'root',
-                'password' => '07-bienven',
-                'host' => 'localhost'
-            )));
+//        GlobalAdapterFeature::setStaticAdapter(
+//            new DbAdapter(array(
+//                'driver' => 'Mysqli',
+//                'dbname' => 'edm-0.4.0',
+//                'username' => 'root',
+//                'password' => '07-bienven',
+//                'host' => 'localhost'
+//            )));
     }
 
     protected static function initAutoloader()
@@ -105,9 +108,7 @@ class Bootstrap
                     __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,
                 ),
             ),
-        ));
-        
-        self::initDbAdapter();
+        ));        
     }
 
     protected static function findParentPath($path)

@@ -31,6 +31,7 @@ return array(
             // Service invokables
             'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
+            'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
             'Edm\Service\PostService'           => 'Edm\Service\PostService',
 
             // Db invokables
@@ -59,6 +60,7 @@ return array(
             'Edm\Controller\Index'        => 'Edm\Controller\IndexController',
             'Edm\Controller\Term'         => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
+            'Edm\Controller\ViewModule'   => 'Edm\Controller\ViewModuleController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
             'Edm\Controller\Post'         => 'Edm\Controller\PostController',
             'Edm\Controller\AjaxUi'       => 'Edm\Controller\AjaxUiController',
@@ -83,7 +85,7 @@ return array(
                         // Change this value to reflect the namespace in which
                         // the controllers for your module are found
                         '__NAMESPACE__' => 'Edm\Controller',
-                        'controller' => 'index',
+                        'controller' => 'Edm\Controller\Index',
                         'action' => 'index',
                     ),
                 ),

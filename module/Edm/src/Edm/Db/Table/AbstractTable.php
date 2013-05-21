@@ -1,5 +1,6 @@
 <?php
 
+// @todo refactor edm\db\table to not be abstract and to not use service locator or db data helper 
 namespace Edm\Db\Table;
 
 use Zend\Db\TableGateway\TableGateway,

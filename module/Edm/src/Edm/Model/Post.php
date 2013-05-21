@@ -15,7 +15,7 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
     
     public $excerpt = '';
     
-//    public $userParams = '';
+    public $userParams = '';
     
     /**
      * Valid keys for model

@@ -12,3 +12,6 @@ Term Taxonomy Layer
   -  Add a dashboard view to the term taxonomy's page so user can see the 
      associated item count and child count via a 
      diagram/histogram/interactive graph etc.
+
+Edm Module Installer
+--------------------------------------------------------------------------------
