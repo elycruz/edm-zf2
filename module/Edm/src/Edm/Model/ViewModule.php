@@ -14,7 +14,7 @@ use Zend\InputFilter\Factory as InputFactory,
  *
  * @author ElyDeLaCruz
  */
-class ViewModel extends AbstractModel implements InputFilterAwareInterface {
+class ViewModule extends AbstractModel implements InputFilterAwareInterface {
 
     public $userParams = '';
     

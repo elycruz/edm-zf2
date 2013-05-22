@@ -176,13 +176,14 @@ class ViewModuleFieldset extends Fieldset {
             'name' => 'allowedOnPages',
             'type' => 'Zend\Form\Element\Collection',
             'options' => array(
-                'count' => 2,
+                'count' => 0,
                 'allow_add' => true,
                 'should_create_template' => true,
                 'target_element' => array(
-                    'type' => 'Edm\Form\KeyValuePairFieldset',
+                    'type' => 'checkbox',
                     'options' => array(
-                        'label' => 'Key value pair'
+                        'value' => '*',
+                        'label' => 'Select All'
                     )),
                 
             ),
