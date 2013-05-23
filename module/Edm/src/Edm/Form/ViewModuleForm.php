@@ -35,7 +35,7 @@ class ViewModuleForm extends EdmForm {
         $userParamsFieldset = new UserParamsFieldset('user-params-fieldset');
         
         // Add Status values
-        $status = $viewModuleFieldset->get('status');
+        $status = $mixedTermRelFieldset->get('status');
         $status->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'post-status',
@@ -52,7 +52,7 @@ class ViewModuleForm extends EdmForm {
         $status->setValue('published');
         
         // Add Access Group values
-        $accessGroup = $viewModuleFieldset->get('accessGroup');
+        $accessGroup = $mixedTermRelFieldset->get('accessGroup');
         $accessGroup->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'user-group',

@@ -166,6 +166,8 @@ class ViewModuleFieldset extends Fieldset {
             ),
             'attributes' => array(
                 'id' => 'partialScript',
+                'size' => 72,
+                'maxlength' => 255,
                 'required' => true
             )
         ));
