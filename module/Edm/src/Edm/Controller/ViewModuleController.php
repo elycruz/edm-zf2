@@ -217,19 +217,34 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
                     $existingViewModule->userParams);
         }
 
+        $allowedOnPages = null;
+        // Resolve allowed on pages field
+        if (!empty($existingViewModule->allowedOnPages)) {
+            $allowedOnPages = $viewModuleService->unSerializeAndUnEscapeArray(
+                    $existingViewModule->allowedOnPages);
+        }
+        
+//        Debug::dump($allowedOnPages);
+//        Debug::dump($existingViewModule->toArray());
+//        exit();
+        
+        // Mixed Term Rel Proto
+        $mixedTermRel = $existingViewModule->getMixedTermRelProto();
+
         // Set data
         $form->setData(array(
-            'post-term-rel-fieldset' => array(
-                'term_taxonomy_id' => $existingViewModule->getMixedTermRelProto()->term_taxonomy_id,
-                'status' => $existingViewModule->status,
-                'accessGroup' => $existingViewModule->accessGroup,
+            'mixed-term-rel-fieldset' => array(
+                'term_taxonomy_id' => $mixedTermRel->term_taxonomy_id,
+                'status' => $mixedTermRel->status,
+                'accessGroup' => $mixedTermRel->accessGroup,
             ),
-            'post-fieldset' => array(
+            'view-module-fieldset' => array(
                 'title' => $existingViewModule->title,
                 'alias' => $existingViewModule->alias,
                 'type' => $existingViewModule->type,
+                'partialScript' => $existingViewModule->partialScript,
                 'content' => $existingViewModule->content,
-                'excerpt' => $existingViewModule->excerpt,
+                'allowedOnPages' => $allowedOnPages
             ),
             'user-params-fieldset' => array(
                 'userParams' => $userParamsFieldset
@@ -257,7 +272,10 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
 
         // Allocoate updates
         $mergedData = array_merge(
-                $data['post-fieldset'], $data['post-term-rel-fieldset'], array('post_id' => $id), $data['user-params-fieldset']);
+                $data['view-module-fieldset'], 
+                $data['mixed-term-rel-fieldset'], 
+                array('view_module_id' => $id), 
+                $data['user-params-fieldset']);
 
         // Create new post model obj
         $viewModuleData = new ViewModule($mergedData);

@@ -6,8 +6,8 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel,
-    Edm\Model\ViewModuleProtoAwareTrait;
+    Edm\Model\AbstractModel;
+//    Edm\Model\ViewModuleProtoAwareTrait;
 
 /**
  * Description of Menu
@@ -15,7 +15,7 @@ use Zend\InputFilter\Factory as InputFactory,
  */
 class Menu extends AbstractModel implements InputFilterAwareInterface {
 
-    use ViewModuleProtoAwareTrait;
+//    use ViewModuleProtoAwareTrait;
 
     protected $validKeys = array(
         'menu_id',

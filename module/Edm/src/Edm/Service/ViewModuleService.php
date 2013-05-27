@@ -8,6 +8,7 @@ use Edm\Service\AbstractService,
     Edm\Service\TermTaxonomyServiceAwareTrait,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
+    Zend\Db\TableGateway\TableGateway,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
     Zend\Stdlib\DateTime,
@@ -38,15 +39,20 @@ implements \Edm\UserAware,
         'object_id',
         'objectType'
     );
-    protected $viewModuleAlias;
-    protected $mixedTermRelAlias;
-    protected $termAlias;
-    protected $termTaxAlias;
-
+    
+    protected $secondaryTable = null;
+    protected $secondaryTableName = null;
+    protected $secondaryTableAlias = null;
+    
+    protected $typeAliasesAndTables = null;
+    
     public function __construct() {
         $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new ViewModule());
+        $this->typeAliasesAndTables = 
+                include APP_PATH . 
+                    '/module/Edm/configs/view-module-table-aliases.php';
     }
 
     /**
@@ -83,15 +89,6 @@ implements \Edm\UserAware,
             $viewModule->alias = $dbDataHelper->getValidAlias($viewModule->title);
         }
         
-        // Allowed on pages
-        if (is_array($viewModule->allowedOnPages)) {
-            $viewModule->allowedOnPages = 
-                    $this->serializeAndEscapeTuples($viewModule->allowedOnPages);
-        }
-        else {
-            $viewModule->allowedOnPages = '';
-        }
-        
         // Escape tuples 
         $cleanViewModule = $dbDataHelper->escapeTuple($viewModule->toArray(), 
                 array('allowedOnPages'));
@@ -102,7 +99,8 @@ implements \Edm\UserAware,
         }
         
         // Set allowed pages
-        $cleanViewModule['allowedOnPages'] = $viewModule->allowedOnPages;
+        $cleanViewModule['allowedOnPages'] = 
+                $this->serializeAndEscapeArray($viewModule->allowedOnPages);
         
         // Get database platform object
         $driver = $this->getDb()->getDriver();
@@ -250,7 +248,7 @@ implements \Edm\UserAware,
         $termTaxService = $this->getTermTaxService();
         
         // @todo implement return values only for current role level
-        return $select
+        $select
                 
             // View Module 
             ->from(array('viewModule' => $this->getViewModuleTable()->getTable()))
@@ -267,6 +265,14 @@ implements \Edm\UserAware,
             // Term
             ->join(array('term' => $termTaxService->getTermTable()->getTable()), 
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
+        
+        // Secondary Table
+        if ($this->secondaryTable instanceof TableGateway) {
+            $select->join(array('secTable' => $this->secondaryTable->getName()),
+                    'secTable.view_module_id=viewModule.view_module_id');
+        }
+        
+        return $select;
     }
 
     public function getViewModuleTable() {
@@ -292,7 +298,29 @@ implements \Edm\UserAware,
         }
         return $this->mixedTermRelTable;
     }
+    
+    public function getSecondaryTable($tableName) {
+        if (empty($this->secondaryModelTable)) {
+            $feature = new FeatureSet();
+            $feature->addFeature(new GlobalAdapterFeature());
+            $this->secondaryModelTable =
+                    new \Zend\Db\TableGateway\TableGateway(
+                    $tableName, $this->getServiceLocator()
+                            ->get('Zend\Db\Adapter\Adapter'), $feature);
+        }
+        return $this->secondaryModelTable;
+    }
 
+    public function setSecondaryTableAlias($alias) {
+        $this->secondaryTableAlias = $alias;
+        return $this;
+    }
+    
+    public function setSecondaryTableName ($name) {
+        $this->secondaryTableName = $name;
+        return $this;
+    }
+    
     /**
      * Checks if an alias already exists for a viewModule
      * @param string $alias
@@ -367,6 +395,17 @@ implements \Edm\UserAware,
         return $this->getViewModuleTable()->update(
                 array($taxonomyAlias => $value), 
                 array('view_module_id' => $viewModule->view_module_id));
+    }
+    
+    /**
+     * Clear any state that is kept inside of this service
+     * @return Edm\Service\ViewModuleService
+     */
+    public function reset () {
+        unset($this->secondaryTable);
+        unset($this->secondaryTableName);
+        unset($this->secondaryTableAlias);
+        return $this;
     }
 
 }

@@ -1,4 +1,3 @@
 edmzf2
-======
-
-Edms - Extensible Data Management System
+===========================================
+Edm - The Extensible Data Management System
