@@ -37,6 +37,10 @@ implements \Edm\UserAware,
         'object_id',
         'objectType'
     );
+    protected $viewModuleAlias;
+    protected $mixedTermRelAlias;
+    protected $termAlias;
+    protected $termTaxAlias;
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
@@ -88,7 +92,8 @@ implements \Edm\UserAware,
         }
         
         // Escape tuples 
-        $cleanViewModule = $dbDataHelper->escapeTuple($viewModule->toArray(), array('allowedOnPages'));
+        $cleanViewModule = $dbDataHelper->escapeTuple($viewModule->toArray(), 
+                array('allowedOnPages'));
         $cleanMixedTermRel = $dbDataHelper->escapeTuple($mixedTermRel->toArray());
         if (is_array($cleanViewModule['userParams'])) {
             $cleanViewModule['userParams'] = 
@@ -110,6 +115,8 @@ implements \Edm\UserAware,
             $retVal = $view_module_id = $driver->getLastGeneratedValue();
             
             // Create viewModule mixedTermRel rel
+            $cleanMixedTermRel['object_id'] = $view_module_id;
+            $cleanMixedTermRel['objectType'] = 'view-module';
             $this->getMixedTermRelTable()->insert($cleanMixedTermRel);
 
             // Commit and return true
@@ -117,7 +124,6 @@ implements \Edm\UserAware,
         } 
         catch (\Exception $e) {
             $conn->rollback();
-            Debug::dump($e->getMessage());
             $retVal = $e;
         }
         return $retVal;
@@ -241,6 +247,7 @@ implements \Edm\UserAware,
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
         $termTaxService = $this->getTermTaxService();
+        
         // @todo implement return values only for current role level
         return $select
                 

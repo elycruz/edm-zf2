@@ -129,11 +129,8 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
             Debug::dump($form->getMessages());
-            Debug::dump($view->form->getData());
             return $view;
         }
-        
-        Debug::dump($view->form->getData()); 
         
         // Get ViewModule service
         $viewModuleService = $this->getViewModuleService();
@@ -198,14 +195,15 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         $viewModuleService = $this->getViewModuleService();
 
         // Setup form
-        $form = new ViewModuleForm('post-form', array(
+        $form = new ViewModuleForm('view-module-form', array(
             'serviceLocator' => $this->getServiceLocator()
         ));
         $form->setAttribute('action', '/edm-admin/view-module/update/id/' . $id);
         $view->form = $form;
 
         // Check if term already exists if not bail
-        $existingViewModule = $viewModuleService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+        $existingViewModule = 
+                $viewModuleService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
         if (empty($existingViewModule)) {
             $fm->setNamespace('error')->addMessage('ViewModule with id "'
                     . $id . '" doesn\'t exist in database.');
@@ -223,16 +221,15 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         $form->setData(array(
             'post-term-rel-fieldset' => array(
                 'term_taxonomy_id' => $existingViewModule->getMixedTermRelProto()->term_taxonomy_id,
+                'status' => $existingViewModule->status,
+                'accessGroup' => $existingViewModule->accessGroup,
             ),
             'post-fieldset' => array(
                 'title' => $existingViewModule->title,
                 'alias' => $existingViewModule->alias,
+                'type' => $existingViewModule->type,
                 'content' => $existingViewModule->content,
                 'excerpt' => $existingViewModule->excerpt,
-                'commenting' => $existingViewModule->commenting,
-                'status' => $existingViewModule->status,
-                'accessGroup' => $existingViewModule->accessGroup,
-                'type' => $existingViewModule->type,
             ),
             'user-params-fieldset' => array(
                 'userParams' => $userParamsFieldset
@@ -396,17 +393,4 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         return $view;
     }
 
-    public function setStatusAction() {
-        
-    }
-
-    public function setAccessGroupAction() {
-        
-    }
-
-    public function setTypeAction() {
-        
-    }
-
 }
-

@@ -26,7 +26,11 @@ use Zend\InputFilter\Factory as InputFactory,
  */
 class MixedTermRel extends AbstractModel 
 implements InputFilterAwareInterface {
-
+    
+    public $status = 'published';
+    
+    public $accessGroup = 'guest';
+    
     protected $validKeys = array(
         'object_id',
         'objectType',

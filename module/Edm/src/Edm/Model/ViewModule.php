@@ -15,14 +15,16 @@ use Zend\InputFilter\Factory as InputFactory,
  * @author ElyDeLaCruz
  */
 class ViewModule extends AbstractModel implements InputFilterAwareInterface {
-
+    
     public $content = '';
     
     public $userParams = '';
     
     public $allowedOnPages = '';
     
-    public $objectType = 'view-module';
+    public $type = 'view-module';
+    
+    public $helperType = 'view';
     
     /**
      * Mixed Term Rel Proto
