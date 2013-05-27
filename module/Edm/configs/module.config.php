@@ -149,7 +149,7 @@ return array(
                                         'sortBy' => '[a-zA-Z\d_\-]*',
                                         'filter' => '[a-zA-Z\d_\-]*',
                                         'filterBy' => '[a-zA-Z0-9\d_\-]*',
-                                        'term_taxonomy_id' => '[\d*\*]*',
+                                        'term_taxonomy_id' => '[\d\*]*',
                                         'taxonomy' => '[a-zA-Z0-9\d_\-\*]*',
                                         'accessGroup' => '[a-zA-Z0-9\d_\-\*]*',
                                         'role' => '[a-zA-Z0-9\d_\-\*]*',

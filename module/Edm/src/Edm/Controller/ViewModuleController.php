@@ -59,13 +59,13 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         // Access Group
         $accessGroup = $this->getAndSetParam('accessGroup', '*');
         if (!empty($accessGroup) && $accessGroup != '*') {
-            $where['accessGroup'] = $accessGroup;
+            $where['mixedTermRel.accessGroup'] = $accessGroup;
         }
 
         // Term Taxonomy Id
         $termTaxId = $this->getAndSetParam('term_taxonomy_id', '*');
         if (!empty($termTaxId) && $termTaxId != '*') {
-            $where['term_taxonomy_id'] = $termTaxId;
+            $where['mixedTermRel.term_taxonomy_id'] = $termTaxId;
         }
 
         // Parent Id

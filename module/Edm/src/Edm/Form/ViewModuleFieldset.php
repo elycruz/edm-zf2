@@ -85,7 +85,7 @@ class ViewModuleFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Type',
                 'value_options' => array(
-                    'html' => 'Html'
+                    'view-module' => 'View Module'
                 )
             ),
             'attributes' => array(
@@ -136,7 +136,7 @@ class ViewModuleFieldset extends Fieldset {
             'attributes' => array(
                 'id' => 'helperName',
                 'required' => true,
-                'value' => 'Html'
+                'value' => 'ViewModule'
             )
         ));        
         

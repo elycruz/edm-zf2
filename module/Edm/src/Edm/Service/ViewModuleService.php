@@ -29,6 +29,7 @@ implements \Edm\UserAware,
         \Edm\Db\CompositeDataColumnAwareTrait,
         TermTaxonomyServiceAwareTrait;
 
+    
     protected $viewModuleTable;
     protected $mixedTermRelTable;
     protected $resultSet;
