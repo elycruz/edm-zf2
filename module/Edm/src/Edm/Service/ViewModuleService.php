@@ -78,18 +78,30 @@ implements \Edm\UserAware,
             $viewModule->alias = $dbDataHelper->getValidAlias($viewModule->title);
         }
         
+        // Allowed on pages
+        if (is_array($viewModule->allowedOnPages)) {
+            $viewModule->allowedOnPages = 
+                    $this->serializeAndEscapeTuples($viewModule->allowedOnPages);
+        }
+        else {
+            $viewModule->allowedOnPages = '';
+        }
+        
         // Escape tuples 
-        $cleanViewModule = $dbDataHelper->escapeTuple($viewModule->toArray());
+        $cleanViewModule = $dbDataHelper->escapeTuple($viewModule->toArray(), array('allowedOnPages'));
         $cleanMixedTermRel = $dbDataHelper->escapeTuple($mixedTermRel->toArray());
         if (is_array($cleanViewModule['userParams'])) {
             $cleanViewModule['userParams'] = 
                     $this->serializeAndEscapeTuples($cleanViewModule['userParams']);
         }
-
+        
+        // Set allowed pages
+        $cleanViewModule['allowedOnPages'] = $viewModule->allowedOnPages;
+        
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-        
+
         // Begin transaction
         $conn->beginTransaction();
         try {
@@ -98,12 +110,12 @@ implements \Edm\UserAware,
             $retVal = $view_module_id = $driver->getLastGeneratedValue();
             
             // Create viewModule mixedTermRel rel
-            $cleanMixedTermRel['view_module_id'] = $view_module_id;
             $this->getMixedTermRelTable()->insert($cleanMixedTermRel);
 
             // Commit and return true
             $conn->commit();
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             $conn->rollback();
             Debug::dump($e->getMessage());
             $retVal = $e;
@@ -233,19 +245,19 @@ implements \Edm\UserAware,
         return $select
                 
             // View Module 
-            ->from(array('viewModule' => $this->getViewModuleTable()->getTable(table)))
+            ->from(array('viewModule' => $this->getViewModuleTable()->getTable()))
 
             // Mixed Term Rel
-            ->join(array('mixedTermRel' => $this->getMixedTermRelTable()->table), 
-                    'mixedTermRel.view_module_id=viewModule.view_module_id')
+            ->join(array('mixedTermRel' => $this->getMixedTermRelTable()->getTable()), 
+                    'mixedTermRel.object_id=viewModule.view_module_id')
 
             // Term Taxonomy
-            ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
+            ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->getTable()),
                     'termTax.term_taxonomy_id=mixedTermRel.term_taxonomy_id',
                     array('term_alias'))
 
             // Term
-            ->join(array('term' => $termTaxService->getTermTable()->table), 
+            ->join(array('term' => $termTaxService->getTermTable()->getTable()), 
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
     }
 

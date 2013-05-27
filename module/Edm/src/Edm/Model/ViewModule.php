@@ -16,9 +16,13 @@ use Zend\InputFilter\Factory as InputFactory,
  */
 class ViewModule extends AbstractModel implements InputFilterAwareInterface {
 
+    public $content = '';
+    
     public $userParams = '';
     
-    public $content = '';
+    public $allowedOnPages = '';
+    
+    public $objectType = 'view-module';
     
     /**
      * Mixed Term Rel Proto
@@ -32,6 +36,7 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
      */
     protected $validKeys = array(
         'view_module_id',
+        'parent_id',
         'title',
         'alias',
         'content',
@@ -223,13 +228,35 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         return $retVal;
     }
 
+       
+    /**
+     * Exchange array overriden to divide data between user data and mixedTermRel data
+     * @param array $data
+     * @return \Edm\Model\AbstractModel
+     */
+    public function exchangeArray(array $data) {
+        $mixedTermRel = $this->getMixedTermRelProto();
+        $mixedTermRelValidKeys = $mixedTermRel->getValidKeys();
+        foreach ($data as $key => $val) {
+            if (in_array($key, $this->validKeys)) {
+                $this->{$key} = $val;
+            }
+            else if (in_array($key, $mixedTermRelValidKeys)) {
+                $mixedTermRel->{$key} = $val;
+            }
+        }
+        $this->mixedTermRelProto = $mixedTermRel;
+        return $this;
+    }
+ 
+    
     /** 
      * Mixed Term Rel Proto
      * @return Edm\Model\MixedTermRel
      */
-    public function getMixedTermRelProto() {
+    public function getMixedTermRelProto($data = null) {
         if (empty($this->mixedTermRelProto)) {
-            $this->mixedTermRelProto = new MixedTermRel();
+            $this->mixedTermRelProto = new MixedTermRel($data);
         }
         return $this->mixedTermRelProto;
     }

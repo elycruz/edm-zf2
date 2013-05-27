@@ -19,11 +19,10 @@ use Edm\Controller\AbstractController,
     Zend\Paginator\Adapter\DbSelect,
     Zend\Debug\Debug;
 
-class ViewModuleController extends AbstractController 
-implements ViewModuleServiceAware {
-    
+class ViewModuleController extends AbstractController implements ViewModuleServiceAware {
+
     use ViewModuleServiceAwareTrait;
-    
+
     public function indexAction() {
         // View
         $view =
@@ -129,10 +128,13 @@ implements ViewModuleServiceAware {
         if (!$view->form->isValid()) {
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
-            // Debug::dump($form->getMessages());
+            Debug::dump($form->getMessages());
+            Debug::dump($view->form->getData());
             return $view;
         }
-
+        
+        Debug::dump($view->form->getData()); 
+        
         // Get ViewModule service
         $viewModuleService = $this->getViewModuleService();
 
@@ -140,15 +142,15 @@ implements ViewModuleServiceAware {
         $data = $form->getData();
         $mergedData = array_merge(
                 $data['view-module-fieldset'], 
-                $data['mixed-term-rel-fieldset'],
+                $data['mixed-term-rel-fieldset'], 
                 $data['user-params-fieldset']);
-        
+
         // Get view module data
         $viewModuleData = new ViewModule($mergedData);
-        
+
         // If emtpy alias populate it
         if (empty($viewModuleData->alias)) {
-            $viewModuleData->alias = 
+            $viewModuleData->alias =
                     $this->getDbDataHelper()->getValidAlias($viewModuleData->title);
         }
         // Check if term taxonomy already exists
@@ -165,12 +167,17 @@ implements ViewModuleServiceAware {
         // Send success message to user
         if (is_numeric($rslt) && !empty($rslt) && $rslt instanceof \Exception === false) {
             $fm->setNamespace('highlight')
-                    ->addMessage('View Module "' . $viewModuleData->title . '" added successfully.');
+                    ->addMessage('View Module "' . $viewModuleData->title . 
+                            '" added successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('View Module "' . $viewModuleData->title . '" failed to be added.');
+                    ->addMessage('View Module "' . $viewModuleData->title . 
+                            '" failed to be added.  Errors: <br />' 
+                            . '<pre>' . $rslt->getTraceAsString() 
+                            . '</pre><br />'
+                            . $rslt->getMessage());
         }
 
         // Return message to view
@@ -204,7 +211,7 @@ implements ViewModuleServiceAware {
                     . $id . '" doesn\'t exist in database.');
             return $view;
         }
-        
+
         $userParamsFieldset = null;
         // Resolve user params field
         if (!empty($existingViewModule->userParams)) {
@@ -229,9 +236,9 @@ implements ViewModuleServiceAware {
             ),
             'user-params-fieldset' => array(
                 'userParams' => $userParamsFieldset
-                )
+            )
         ));
-        
+
         // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -253,11 +260,8 @@ implements ViewModuleServiceAware {
 
         // Allocoate updates
         $mergedData = array_merge(
-                $data['post-fieldset'], 
-                $data['post-term-rel-fieldset'], 
-                array('post_id' => $id),
-                $data['user-params-fieldset']);
-        
+                $data['post-fieldset'], $data['post-term-rel-fieldset'], array('post_id' => $id), $data['user-params-fieldset']);
+
         // Create new post model obj
         $viewModuleData = new ViewModule($mergedData);
 
@@ -366,7 +370,7 @@ implements ViewModuleServiceAware {
                             'List order change failed.');
             return $view;
         }
-        
+
         // Set list order
         $viewModule->listOrder = $listOrder;
 

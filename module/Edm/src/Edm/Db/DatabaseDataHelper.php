@@ -72,11 +72,18 @@ implements DbDataHelper {
     /**
      * Escapes a tuple for insertion into db
      * @param array $tuple
+     * @param array $skipFields
      * @return array
      */
-    public function escapeTuple(array $tuple) {
+    public function escapeTuple(array $tuple, $skipFields = null) {
         $new_array = array();
         foreach ($tuple as $key => $val) {
+            // Check if field needs to be skipped
+            if (is_array($skipFields)) {
+                if (in_array($key, $skipFields)) {
+                    continue;
+                }
+            }
             if (is_array($key)) {
                 $new_array[] = $this->escapeTuple($key);
             }
@@ -95,11 +102,14 @@ implements DbDataHelper {
      * @param array $tuples
      * @return array
      */
-    public function escapeTuples(array $tuples) {
+    public function escapeTuples(array $tuples, $skipFields = null) {
         $new_array = array();
         // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {
-            $new_array[] = $this->escapeTuple($tuple);
+            if (!is_array($tuple)) {
+                continue;
+            }
+            $new_array[] = $this->escapeTuple($tuple, $skipFields);
         }
         return $new_array;
     }

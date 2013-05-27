@@ -71,7 +71,7 @@ implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(
                 self::getDefaultInputOptionsByKey('id', array(
                     'name' => 'object_id',
-                    'required' => true
+                    'required' => false
                 )
         )));
 
@@ -79,7 +79,7 @@ implements InputFilterAwareInterface {
         $retVal->add($factory->createInput(
             self::getDefaultInputOptionsByKey('short-alias', array(
                     'name' => 'objectType',
-                    'required' => true
+                    'required' => false
         ))));
         
         // Term Taxonomy Id

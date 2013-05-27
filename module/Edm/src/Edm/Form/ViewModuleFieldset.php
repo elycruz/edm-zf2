@@ -51,17 +51,17 @@ class ViewModuleFieldset extends Fieldset {
         ));
         
         // Parent Id
-        $this->add(array(
-            'name' => 'parent_id',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Parent',
-                'placeholder' => 'Parent'
-            ),
-            'attributes' => array(
-                'id' => 'parent_id'
-            )
-        ));
+//        $this->add(array(
+//            'name' => 'parent_id',
+//            'type' => 'Zend\Form\Element\Select',
+//            'options' => array(
+//                'label' => 'Parent',
+//                'placeholder' => 'Parent'
+//            ),
+//            'attributes' => array(
+//                'id' => 'parent_id'
+//            )
+//        ));
 
         // Content
         $this->add(array(
@@ -168,7 +168,7 @@ class ViewModuleFieldset extends Fieldset {
                 'id' => 'partialScript',
                 'size' => 72,
                 'maxlength' => 255,
-                'required' => true
+                'required' => false
             )
         ));
         
@@ -178,11 +178,12 @@ class ViewModuleFieldset extends Fieldset {
             'name' => 'allowedOnPages',
             'type' => 'Zend\Form\Element\Collection',
             'options' => array(
-                'count' => 0,
+                'count' => 3,
                 'allow_add' => true,
                 'should_create_template' => true,
                 'target_element' => array(
                     'type' => 'checkbox',
+                    'name' => 'keyName',
                     'options' => array(
                         'value' => '*',
                         'label' => 'Select All'

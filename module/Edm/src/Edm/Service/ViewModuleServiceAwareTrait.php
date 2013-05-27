@@ -1,6 +1,4 @@
 <?
-
-
 namespace Edm\Service;
 
 use Edm\Service\AbstractService;
@@ -16,17 +14,24 @@ use Edm\Service\AbstractService;
  * @author ElyDeLaCruz
  */
 trait ViewModuleServiceAwareTrait {
-    protected $viewModule;
+    
+    /**
+     * View Module Service
+     * @var Edm\Service\ViewModuleService
+     */
+    protected $viewModuleService;
     
     public function getViewModuleService() {
-        return $this->viewModule;
+        if (empty($this->viewModuleService)) {
+            $this->viewModuleService = $this->getServiceLocator()
+                    ->get('Edm\Service\ViewModuleService');
+        }
+        return $this->viewModuleService;
     }
-
+    
     public function setViewModuleService (AbstractService $viewModule) {
-        $this->viewModule = $viewModule;
+        $this->viewModuleService = $viewModule;
     }
-
-
     
 }
 
