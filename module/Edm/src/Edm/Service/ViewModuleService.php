@@ -39,10 +39,10 @@ implements \Edm\UserAware,
         'object_id',
         'objectType'
     );
-    
+
     protected $secondaryTable = null;
     protected $secondaryTableName = null;
-    protected $secondaryTableAlias = null;
+    protected $secondaryTableAlias = 'secTable';
     
     protected $typeAliasesAndTables = null;
     
@@ -268,7 +268,7 @@ implements \Edm\UserAware,
         
         // Secondary Table
         if ($this->secondaryTable instanceof TableGateway) {
-            $select->join(array('secTable' => $this->secondaryTable->getName()),
+            $select->join(array('secTable' => $this->secondaryTable->getTable()),
                     'secTable.view_module_id=viewModule.view_module_id');
         }
         
@@ -298,7 +298,7 @@ implements \Edm\UserAware,
         }
         return $this->mixedTermRelTable;
     }
-    
+
     public function getSecondaryTable($tableName) {
         if (empty($this->secondaryModelTable)) {
             $feature = new FeatureSet();
@@ -311,9 +311,17 @@ implements \Edm\UserAware,
         return $this->secondaryModelTable;
     }
 
+    public function getSecondaryTableAlias() {
+        return $this->secondaryTableAlias;
+    }
+    
     public function setSecondaryTableAlias($alias) {
         $this->secondaryTableAlias = $alias;
         return $this;
+    }
+
+    public function getSecondaryTableName() {
+        return $this->secondaryTableName;
     }
     
     public function setSecondaryTableName ($name) {
@@ -405,7 +413,14 @@ implements \Edm\UserAware,
         unset($this->secondaryTable);
         unset($this->secondaryTableName);
         unset($this->secondaryTableAlias);
+        $this->resultSet->setArrayObjectPrototype(new ViewModule());
         return $this;
+    }
+    
+    public function setSecondaryModelProtoName ($name) {
+        $viewModule = new ViewModule();
+        $viewModule->setSecondaryModelName($name);
+        $this->resultSet->setArrayObjectPrototype($viewModule);
     }
 
 }

@@ -15,29 +15,25 @@ use Zend\InputFilter\Factory as InputFactory,
  * @author ElyDeLaCruz
  */
 class ViewModule extends AbstractModel implements InputFilterAwareInterface {
-    
+
     public $content = '';
-    
     public $userParams = '';
-    
     public $allowedOnPages = '';
-    
     public $type = 'view-module';
-    
     public $helperType = 'view';
-    
+
     /**
      * Mixed Term Rel Proto
      * @var Edm\Model\AbstractModel
      */
     protected $mixedTermRelProto = null;
-    
+
     /**
      * Secondary Model Proto
      * @var Edm\Model\AbstractModel
      */
     protected $secondaryModelProto = null;
-    
+
     /**
      * Secondary Model Name
      * @var string
@@ -242,7 +238,6 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         return $retVal;
     }
 
-       
     /**
      * Exchange array overriden to divide data between user data and mixedTermRel data
      * @param array $data
@@ -255,11 +250,9 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         foreach ($data as $key => $val) {
             if (in_array($key, $this->validKeys)) {
                 $this->{$key} = $val;
-            }
-            else if (in_array($key, $mixedTermRelValidKeys)) {
+            } else if (in_array($key, $mixedTermRelValidKeys)) {
                 $mixedTermRel->{$key} = $val;
-            }
-            else if (!empty($secondaryModel) && 
+            } else if (!empty($secondaryModel) &&
                     in_array($key, $secondaryModel->getValidKeys())) {
                 $secondaryModel->{$key} = $val;
             }
@@ -267,8 +260,8 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         $this->mixedTermRelProto = $mixedTermRel;
         return $this;
     }
-    
-    /** 
+
+    /**
      * Mixed Term Rel Proto
      * @return Edm\Model\MixedTermRel
      */
@@ -278,19 +271,26 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         }
         return $this->mixedTermRelProto;
     }
-    
+
     /**
      * Returns Secondary Model Proto
      * @param type $data
      * @return AbstractModel
      */
-    public function getSecondaryModelProto ($data = null) {
-        if (empty($this->secondaryModelProto) 
-                && is_string($this->secondaryModelName) 
-                && !empty($this->secondaryModelName)) {
+    public function getSecondaryModelProto($data = null) {
+        if (empty($this->secondaryModelProto) && is_string($this->secondaryModelName) && !empty($this->secondaryModelName)) {
             $this->secondaryModelProto = new $this->secondaryModelName($data);
         }
         return $this->secondaryModelProto;
+    }
+
+    public function getSecondaryModelName() {
+        return $this->secondaryModelName;
+    }
+
+    public function setSecondaryModelName($secondaryModelName) {
+        $this->secondaryModelName = $secondaryModelName;
+        return $this;
     }
 
 }

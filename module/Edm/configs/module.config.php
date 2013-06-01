@@ -61,6 +61,7 @@ return array(
             'Edm\Controller\Term'         => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
             'Edm\Controller\ViewModule'   => 'Edm\Controller\ViewModuleController',
+            'Edm\Controller\Menu'   => 'Edm\Controller\MenuController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
             'Edm\Controller\Post'         => 'Edm\Controller\PostController',
             'Edm\Controller\AjaxUi'       => 'Edm\Controller\AjaxUiController',

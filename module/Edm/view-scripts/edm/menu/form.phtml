@@ -1,8 +1,8 @@
 <?php
-
 $form = $this->form;
 $viewModule = $form->get('view-module-fieldset');
 $mixedTermRel = $form->get('mixed-term-rel-fieldset');
+$menu = $form->get('menu-fieldset');
 $userParams = $form->get('user-params-fieldset');
 $submitAndReset = $form->get('submit-and-reset');
 //\Zend\Debug\Debug::dump($userParams->get('userParams')); exit();
@@ -21,7 +21,19 @@ echo <<<HTML
             {$this->edmFormElement($viewModule->get('content'))}
         </fieldset>
         <fieldset>
-            <legend>Category</legend>
+            <legend>Menu</legend>
+            {$this->edmFormElement($menu->get('minDepth'))}
+            {$this->edmFormElement($menu->get('maxDepth'))}
+            {$this->edmFormElement($menu->get('onlyActiveBranch'))}
+            {$this->edmFormElement($menu->get('renderParents'))}
+            {$this->edmFormElement($menu->get('isMainMenu'))}
+            {$this->edmFormElement($menu->get('useModuleHelper'))}
+            {$this->edmFormElement($menu->get('ulClass'))}
+            {$this->edmFormElement($menu->get('menuPartialScript'))}
+            {$this->edmFormElement($menu->get('menuHelper'))}
+        </fieldset>
+        <fieldset>
+            <legend>Position</legend>
             {$this->edmFormElement($mixedTermRel->get('term_taxonomy_id'))}
             {$this->edmFormElement($mixedTermRel->get('status'))}
             {$this->edmFormElement($mixedTermRel->get('accessGroup'))}
