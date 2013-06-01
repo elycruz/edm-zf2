@@ -22,6 +22,12 @@ use Edm\Controller\AbstractController,
 class ViewModuleController extends AbstractController implements ViewModuleServiceAware {
 
     use ViewModuleServiceAwareTrait;
+    
+    /**
+     * The Secondary Fieldset's alias name
+     * @var string 
+     */
+    protected $secondaryFieldsetAlias = 'secondary-fieldset';
 
     public function indexAction() {
         // View
@@ -103,7 +109,10 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         // init flash messenger
         $view =
                 $this->view =
-                new ViewModel();
+                    new ViewModel();
+        
+        // Get View Module Type to extend the view module with
+        $viewModuleType = $this->getAndSetParam('view-module-type', null);
 
         // Let view be terminal in this action
         $view->setTerminal(true);
@@ -114,6 +123,17 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
             'serviceLocator' => $this->getServiceLocator()));
         $form->setAttribute('action', '/edm-admin/view-module/create');
         $view->form = $form;
+        
+        // If view module type
+        if (isset($viewModuleType)) {
+            $classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
+            $secondaryFieldsetName = '\\Edm\\Form\\' . $classFormattedName . 'Fieldset';
+            $secondaryModelName = '\\Edm\\Model\\' . $classFormattedName;
+            
+            // Add Secondary Fieldset
+            $view->form->add(new $secondaryFieldsetName(
+                    $this->secondaryFieldsetAlias));
+        }
 
         // If not post bail
         $request = $this->getRequest();
@@ -134,6 +154,7 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         
         // Get ViewModule service
         $viewModuleService = $this->getViewModuleService();
+        $viewModuleService->reset();
 
         // Get data
         $data = $form->getData();
@@ -141,9 +162,19 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
                 $data['view-module-fieldset'], 
                 $data['mixed-term-rel-fieldset'], 
                 $data['user-params-fieldset']);
+        
+        // Get a View Module Model Object
+        $viewModuleData = new ViewModule();
+        
+        // View Module
+        if (isset($viewModuleType)) {
+            $mergedData = array_merge($mergedData, $data[$this->secondaryFieldsetAlias]);
+            $viewModuleData->setSecondaryProtoName($secondaryModelName);
+            $viewModuleService->setSecondaryProtoName($secondaryModelName);
+        }
 
-        // Get view module data
-        $viewModuleData = new ViewModule($mergedData);
+        // Set view module data
+        $viewModuleData->exchangeArray($mergedData);
 
         // If emtpy alias populate it
         if (empty($viewModuleData->alias)) {
@@ -410,5 +441,53 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         // Return message to view
         return $view;
     }
-
+    
+    /**
+     * Returns an alias as a class formatted string. Strings should follow
+     * the EDM ALIAS PATTER; I.e., ^[a-z_]*[a-z\d\-_]{1,200}$/i .  This funciton
+     * also only splits strings on '-'.  If no '-' a class safe alias is returned
+     * @param string $alias
+     * @return string
+     * @throws \Exception
+     */
+    protected function normalizeAliasToClassCase ($alias) {
+        
+        // Return if not a string
+        if (!is_string($alias)) {
+            throw new \Exception(__CLASS__ . '->' . __FUNCTION__ .
+                    ' requires a string for it\'s param.  Value received: ' .
+                    $alias);
+        }
+        
+        // Check if value matches the alias pattern
+        if (preg_match(EDM_ALIAS_PATTERN, $alias) < 0) {
+            throw new \Exception (__CLASS__ . '->' . __FUNCTION__ .
+                    ' requires alias to match the pattern ' .
+                    EDM_ALIAS_PATTERN .
+                    ' Value received: ' . $alias);
+        }
+        
+        // Return value
+        $retVal = $alias;
+        
+        // Replace dashes
+        if (strpos($alias, '-')) {
+            $parts = explode('-', $alias);
+            $newParts = array();
+            
+            // Loop through parts and upper case first letter
+            foreach ($parts as $part) {
+                $newParts[] = ucfirst($part);
+            }
+            
+            // Merge Into Camel Cased class name
+            $retVal = implode('', $newParts);
+        }
+        else {
+            // Upper case first letter
+            $retVal = ucfirst($alias);
+        }
+        
+        return $retVal;
+    }
 }

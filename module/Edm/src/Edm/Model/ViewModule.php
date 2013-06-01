@@ -32,14 +32,20 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
      * Secondary Model Proto
      * @var Edm\Model\AbstractModel
      */
-    protected $secondaryModelProto = null;
+    protected $secondaryProto = null;
 
     /**
      * Secondary Model Name
      * @var string
      */
-    protected $secondaryModelName = null;
-
+    protected $secondaryProtoName = null;
+    
+    /**
+     * Input filter
+     * @var Zend\InputFilter\InputFilter
+     */
+    protected $inputFilter = null;
+    
     /**
      * Valid keys for this model
      * @var array
@@ -64,12 +70,6 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         'allowedOnPages',
         'userParams'
     );
-
-    /**
-     * Input filter
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected $inputFilter = null;
 
     public function __construct($data = null) {
         if (is_array($data)) {
@@ -246,15 +246,15 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
     public function exchangeArray(array $data) {
         $mixedTermRel = $this->getMixedTermRelProto();
         $mixedTermRelValidKeys = $mixedTermRel->getValidKeys();
-        $secondaryModel = $this->getSecondaryModelProto();
+        $secondaryProto = $this->getSecondaryProto();
         foreach ($data as $key => $val) {
             if (in_array($key, $this->validKeys)) {
                 $this->{$key} = $val;
             } else if (in_array($key, $mixedTermRelValidKeys)) {
                 $mixedTermRel->{$key} = $val;
-            } else if (!empty($secondaryModel) &&
-                    in_array($key, $secondaryModel->getValidKeys())) {
-                $secondaryModel->{$key} = $val;
+            } else if (!empty($secondaryProto) &&
+                    in_array($key, $secondaryProto->getValidKeys())) {
+                $secondaryProto->{$key} = $val;
             }
         }
         $this->mixedTermRelProto = $mixedTermRel;
@@ -277,19 +277,19 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
      * @param type $data
      * @return AbstractModel
      */
-    public function getSecondaryModelProto($data = null) {
-        if (empty($this->secondaryModelProto) && is_string($this->secondaryModelName) && !empty($this->secondaryModelName)) {
-            $this->secondaryModelProto = new $this->secondaryModelName($data);
+    public function getSecondaryProto($data = null) {
+        if (empty($this->secondaryProto) && is_string($this->secondaryProtoName) && !empty($this->secondaryProtoName)) {
+            $this->secondaryProto = new $this->secondaryProtoName($data);
         }
-        return $this->secondaryModelProto;
+        return $this->secondaryProto;
     }
 
-    public function getSecondaryModelName() {
-        return $this->secondaryModelName;
+    public function getSecondaryProtoName() {
+        return $this->secondaryProtoName;
     }
 
-    public function setSecondaryModelName($secondaryModelName) {
-        $this->secondaryModelName = $secondaryModelName;
+    public function setSecondaryProtoName($secondaryProtoName) {
+        $this->secondaryProtoName = $secondaryProtoName;
         return $this;
     }
 

@@ -5,11 +5,22 @@ $viewModule = $form->get('view-module-fieldset');
 $mixedTermRel = $form->get('mixed-term-rel-fieldset');
 $userParams = $form->get('user-params-fieldset');
 $submitAndReset = $form->get('submit-and-reset');
-//\Zend\Debug\Debug::dump($userParams->get('userParams')); exit();
+$viewModuleType = $this->{'view-module-type'};
+
+// If View Module Type is set render it's secondary fieldset partial
+if (isset($viewModuleType)) {
+    $viewModuleType = 
+        $this->partial('edm/' . $viewModuleType . 
+            '/as-secondary-fieldset.phtml', 
+            array('form' => $form));
+}
+
+// Echo form markup
 echo <<<HTML
     <form id="{$form->getName()}" 
         method="{$form->getAttribute('method')}" 
         action="{$form->getAttribute('action')}">
+        {$viewModuleType}
         <fieldset>
             <legend>View Module</legend>
             {$this->edmFormElement($viewModule->get('title'))}

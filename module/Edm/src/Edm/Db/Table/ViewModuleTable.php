@@ -20,7 +20,7 @@ class ViewModuleTable extends AbstractTable {
     protected $alias = 'viewModule';
 
     public function __construct() {
-        $this->table = 'contacts';
+        $this->table = 'view_modules';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();

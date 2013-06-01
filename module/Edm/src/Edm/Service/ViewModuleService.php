@@ -39,7 +39,7 @@ implements \Edm\UserAware,
         'object_id',
         'objectType'
     );
-
+ 
     protected $secondaryTable = null;
     protected $secondaryTableName = null;
     protected $secondaryTableAlias = 'secTable';
@@ -417,7 +417,7 @@ implements \Edm\UserAware,
         return $this;
     }
     
-    public function setSecondaryModelProtoName ($name) {
+    public function setSecondaryProtoName ($name) {
         $viewModule = new ViewModule();
         $viewModule->setSecondaryModelName($name);
         $this->resultSet->setArrayObjectPrototype($viewModule);

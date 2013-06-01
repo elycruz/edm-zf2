@@ -23,6 +23,10 @@ defined('EDM_PEPPER') ||
 defined('EDM_TOKEN_SEED') ||
     define('EDM_TOKEN_SEED', 'tokenseedtextgoeshere');
 
+// Edm Alias Pattern
+defined('EDM_ALIAS_PATTERN') ||
+    define('EDM_ALIAS_PATTERN', '/^[a-z_]*[a-z\d\-_]{2,200}/i');
+
 // Module Configuration
 return array(
     'service_manager' => array(
@@ -106,6 +110,15 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
+                            'viewModuleRoute' => array(
+                                'type' => 'Segment',
+                                'options' => array(
+                                    'route' => '[/view-module-type/:view-module-type]',
+                                    'constraints' => array(
+                                        'view-module-type' => '[a-zA-Z\d\_\-]+'
+                                    ),
+                                )
+                            ),
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
                                 'options' => array(

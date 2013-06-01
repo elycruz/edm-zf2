@@ -10,7 +10,10 @@ use Zend\Db\TableGateway\TableGateway,
     Edm\TraitPartials\DbDataHelperAwareTrait;
 
 abstract class AbstractTable extends TableGateway 
-implements DbDataHelperAware, ServiceLocatorAwareInterface {
+implements 
+        DbDataHelperAware, 
+        ServiceLocatorAwareInterface,
+        TableInterface {
     
     use DbDataHelperAwareTrait,
     ServiceLocatorAwareTrait;
@@ -34,5 +37,16 @@ implements DbDataHelperAware, ServiceLocatorAwareInterface {
 //        }
 //        return $row;
     }
+    
+    public function getAlias() {
+        return $this->alias;
+    }
+
+    public function setAlias($alias) {
+        $this->alias = $alias;
+        return $this;
+    }
+
+
 }
 

@@ -36,7 +36,7 @@ return array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[a-z\d\-_]{2,200}$/i'
+                    'pattern' => EDM_ALIAS_PATTERN
                 )
             )
         ),
@@ -46,14 +46,14 @@ return array(
     ),
     
     /**
-     * Short Alias
+     * Short Alias (same as EDM_ALIAS_PATTERN except limited to 55 characters)
      * @var varchar(55)
      */
     'short-alias' => array(
         'validators' => array(
             array('name' => 'Regex',
                 'options' => array(
-                    'pattern' => '/^[a-z\d\-_]{2,55}$/i'
+                    'pattern' => '/^[a-z_]*[a-z\d\-_]{2,55}$/i'
                 )
             )
         ),
