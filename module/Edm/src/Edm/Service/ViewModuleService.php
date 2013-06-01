@@ -267,8 +267,8 @@ implements \Edm\UserAware,
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
         
         // Secondary Table
-        if ($this->secondaryTable instanceof TableGateway) {
-            $select->join(array('secTable' => $this->secondaryTable->getTable()),
+        if (is_string($this->secondaryTableName)) {
+            $select->join(array('secTable' => $this->getSecondaryTable()->getTable()),
                     'secTable.view_module_id=viewModule.view_module_id');
         }
         
@@ -299,16 +299,16 @@ implements \Edm\UserAware,
         return $this->mixedTermRelTable;
     }
 
-    public function getSecondaryTable($tableName) {
-        if (empty($this->secondaryModelTable)) {
+    public function getSecondaryTable() {
+        if (empty($this->secondaryTable)) {
             $feature = new FeatureSet();
             $feature->addFeature(new GlobalAdapterFeature());
-            $this->secondaryModelTable =
+            $this->secondaryTable =
                     new \Zend\Db\TableGateway\TableGateway(
-                    $tableName, $this->getServiceLocator()
+                    $this->getSecondaryTableName(), $this->getServiceLocator()
                             ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
-        return $this->secondaryModelTable;
+        return $this->secondaryTable;
     }
 
     public function getSecondaryTableAlias() {
@@ -419,7 +419,7 @@ implements \Edm\UserAware,
     
     public function setSecondaryProtoName ($name) {
         $viewModule = new ViewModule();
-        $viewModule->setSecondaryModelName($name);
+        $viewModule->setSecondaryProtoName($name);
         $this->resultSet->setArrayObjectPrototype($viewModule);
     }
 

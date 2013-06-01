@@ -113,6 +113,8 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         
         // Get View Module Type to extend the view module with
         $viewModuleType = $this->getAndSetParam('view-module-type', null);
+        
+        $formAction = '/edm-admin/view-module/create';
 
         // Let view be terminal in this action
         $view->setTerminal(true);
@@ -121,7 +123,6 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         // Setup form
         $form = new ViewModuleForm('view-module-form', array(
             'serviceLocator' => $this->getServiceLocator()));
-        $form->setAttribute('action', '/edm-admin/view-module/create');
         $view->form = $form;
         
         // If view module type
@@ -129,12 +130,16 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
             $classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
             $secondaryFieldsetName = '\\Edm\\Form\\' . $classFormattedName . 'Fieldset';
             $secondaryModelName = '\\Edm\\Model\\' . $classFormattedName;
+            $formAction .= '\\view-module-type\\'. $viewModuleType;
             
             // Add Secondary Fieldset
             $view->form->add(new $secondaryFieldsetName(
                     $this->secondaryFieldsetAlias));
         }
 
+        // Set form action
+        $form->setAttribute('action', $formAction);
+                
         // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -171,10 +176,13 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
             $mergedData = array_merge($mergedData, $data[$this->secondaryFieldsetAlias]);
             $viewModuleData->setSecondaryProtoName($secondaryModelName);
             $viewModuleService->setSecondaryProtoName($secondaryModelName);
+            $viewModuleService->setSecondaryTableName('menus');
         }
 
         // Set view module data
         $viewModuleData->exchangeArray($mergedData);
+        
+Debug::dump($mergedData);
 
         // If emtpy alias populate it
         if (empty($viewModuleData->alias)) {
