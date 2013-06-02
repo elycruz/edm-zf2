@@ -15,6 +15,13 @@ use Zend\InputFilter\Factory as InputFactory,
  */
 class Menu extends AbstractModel implements InputFilterAwareInterface {
 
+    public $minDepth = 0;
+    public $maxDepth = 0;
+    public $onlyActiveBranch = 0;
+    public $renderParents = 0;
+    public $isMainMenu = 0;
+    public $useModuleHelper = 0;
+    
 //    use ViewModuleProtoAwareTrait;
 
     protected $validKeys = array(

@@ -13,15 +13,21 @@ use Edm\Controller\AbstractController,
     Edm\Service\AbstractService,
     Edm\Service\ViewModuleServiceAware,
     Edm\Service\ViewModuleServiceAwareTrait,
+    Edm\Service\TermTaxonomyServiceAware,
+    Edm\Service\TermTaxonomyServiceAwareTrait,
     Zend\View\Model\ViewModel,
     Zend\View\Model\JsonModel,
     Zend\Paginator\Paginator,
     Zend\Paginator\Adapter\DbSelect,
     Zend\Debug\Debug;
 
-class ViewModuleController extends AbstractController implements ViewModuleServiceAware {
+class ViewModuleController extends AbstractController 
+    implements 
+        ViewModuleServiceAware,
+        TermTaxonomyServiceAware {
 
-    use ViewModuleServiceAwareTrait;
+    use ViewModuleServiceAwareTrait,
+        TermTaxonomyServiceAwareTrait;
     
     /**
      * The Secondary Fieldset's alias name
@@ -159,7 +165,7 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         
         // Get ViewModule service
         $viewModuleService = $this->getViewModuleService();
-        $viewModuleService->reset();
+        $viewModuleService->clearSecondaryTableRelationship();
 
         // Get data
         $data = $form->getData();
@@ -173,17 +179,25 @@ class ViewModuleController extends AbstractController implements ViewModuleServi
         
         // View Module
         if (isset($viewModuleType)) {
+            
+            // Get table name and alias according to view module type
+            $termTaxService = $this->getTermTaxService();
+            
+            // Fetch table
+            $rslt = $termTaxService->getByAlias($viewModuleType . '-alias', 
+                    'table-name-by-alias');
+            
             $mergedData = array_merge($mergedData, $data[$this->secondaryFieldsetAlias]);
             $viewModuleData->setSecondaryProtoName($secondaryModelName);
             $viewModuleService->setSecondaryProtoName($secondaryModelName);
-            $viewModuleService->setSecondaryTableName('menus');
+            $viewModuleService->setSecondaryTableName($rslt['term_name']);
+//            Debug::dump($viewModuleService->getSecondaryTableName());
+//            Debug::dump($rslt); exit();
         }
 
         // Set view module data
         $viewModuleData->exchangeArray($mergedData);
         
-Debug::dump($mergedData);
-
         // If emtpy alias populate it
         if (empty($viewModuleData->alias)) {
             $viewModuleData->alias =

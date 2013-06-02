@@ -28,9 +28,10 @@ class MenuFieldset extends Fieldset {
             'name' => 'minDepth',
             'type' => 'text',
             'options' => array(
-                'label' => 'Minimum Depth'
+                'label' => 'Minimum Depth',
             ),
             'attributes' => array(
+                'value' => 0,
                 'id' => 'minDepth',
                 'required' => false,
             )
@@ -44,6 +45,7 @@ class MenuFieldset extends Fieldset {
                 'label' => 'Maximum Depth'
             ),
             'attributes' => array(
+                'value' => 0,
                 'id' => 'maxDepth',
                 'required' => false,
             )
@@ -57,6 +59,7 @@ class MenuFieldset extends Fieldset {
                 'label' => 'Only Active Branch'
             ),
             'attributes' => array(
+                'value' => 0,
                 'id' => 'onlyActiveBranch',
                 'required' => false,
             )
@@ -70,6 +73,7 @@ class MenuFieldset extends Fieldset {
                 'label' => 'Render Parents'
             ),
             'attributes' => array(
+                'value' => 0,
                 'id' => 'renderParents',
                 'required' => false,
             )
@@ -83,6 +87,7 @@ class MenuFieldset extends Fieldset {
                 'label' => 'Is Main Menu'
             ),
             'attributes' => array(
+                'value' => 0,
                 'id' => 'isMainMenu',
                 'required' => false,
             )
@@ -96,6 +101,7 @@ class MenuFieldset extends Fieldset {
                 'label' => 'Use Module Helper'
             ),
             'attributes' => array(
+                'value' => 0,
                 'id' => 'useModuleHelper',
                 'required' => false,
             )

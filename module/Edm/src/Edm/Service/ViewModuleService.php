@@ -42,7 +42,8 @@ implements \Edm\UserAware,
  
     protected $secondaryTable = null;
     protected $secondaryTableName = null;
-    protected $secondaryTableAlias = 'secTable';
+    protected $secondaryTableAlias = null;
+    protected $defaultSecondaryTableAlias = 'secTable';
     
     protected $typeAliasesAndTables = null;
     
@@ -90,9 +91,12 @@ implements \Edm\UserAware,
         }
         
         // Escape tuples 
-        $cleanViewModule = $dbDataHelper->escapeTuple($viewModule->toArray(), 
-                array('allowedOnPages'));
-        $cleanMixedTermRel = $dbDataHelper->escapeTuple($mixedTermRel->toArray());
+        $cleanViewModule = $dbDataHelper
+                ->escapeTuple($viewModule->toArray(), array('allowedOnPages'));
+        
+        $cleanMixedTermRel = $dbDataHelper
+                ->escapeTuple($mixedTermRel->toArray());
+        
         if (is_array($cleanViewModule['userParams'])) {
             $cleanViewModule['userParams'] = 
                     $this->serializeAndEscapeTuples($cleanViewModule['userParams']);
@@ -102,13 +106,22 @@ implements \Edm\UserAware,
         $cleanViewModule['allowedOnPages'] = 
                 $this->serializeAndEscapeArray($viewModule->allowedOnPages);
         
+        
+        // Secondary data
+        if (!empty($this->secondaryTableName)) {
+            $cleanSecondaryData = $dbDataHelper->escapeTuple(
+                    $viewModule->getSecondaryProto()->toArray());
+            Debug::dump($cleanSecondaryData);
+        }
+            
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-
+            
         // Begin transaction
         $conn->beginTransaction();
         try {
+
             // Create viewModule
             $this->getViewModuleTable()->insert($cleanViewModule);
             $retVal = $view_module_id = $driver->getLastGeneratedValue();
@@ -117,6 +130,12 @@ implements \Edm\UserAware,
             $cleanMixedTermRel['object_id'] = $view_module_id;
             $cleanMixedTermRel['objectType'] = 'view-module';
             $this->getMixedTermRelTable()->insert($cleanMixedTermRel);
+            
+            // Secondary
+            if (!empty($cleanSecondaryData)) {
+                $cleanSecondaryData['view_module_id'] = $view_module_id;
+                $this->getSecondaryTable()->insert($cleanSecondaryData);
+            }
 
             // Commit and return true
             $conn->commit();
@@ -267,7 +286,7 @@ implements \Edm\UserAware,
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
         
         // Secondary Table
-        if (is_string($this->secondaryTableName)) {
+        if (!empty($this->secondaryTableName)) {
             $select->join(array('secTable' => $this->getSecondaryTable()->getTable()),
                     'secTable.view_module_id=viewModule.view_module_id');
         }
@@ -279,10 +298,8 @@ implements \Edm\UserAware,
         if (empty($this->viewModuleTable)) {
             $feature = new FeatureSet();
             $feature->addFeature(new GlobalAdapterFeature());
-            $this->viewModuleTable =
-                    new \Zend\Db\TableGateway\TableGateway(
-                    'view_modules', $this->getServiceLocator()
-                            ->get('Zend\Db\Adapter\Adapter'), $feature);
+            $this->viewModuleTable = new TableGateway(
+                    'view_modules', $this->getDb(), $feature);
         }
         return $this->viewModuleTable;
     }
@@ -291,10 +308,8 @@ implements \Edm\UserAware,
         if (empty($this->mixedTermRelTable)) {
             $feature = new FeatureSet();
             $feature->addFeature(new GlobalAdapterFeature());
-            $this->mixedTermRelTable =
-                    new \Zend\Db\TableGateway\TableGateway(
-                    'mixed_term_relationships', $this->getServiceLocator()
-                            ->get('Zend\Db\Adapter\Adapter'), $feature);
+            $this->mixedTermRelTable = new TableGateway(
+                    'mixed_term_relationships', $this->getDb(), $feature);
         }
         return $this->mixedTermRelTable;
     }
@@ -303,15 +318,16 @@ implements \Edm\UserAware,
         if (empty($this->secondaryTable)) {
             $feature = new FeatureSet();
             $feature->addFeature(new GlobalAdapterFeature());
-            $this->secondaryTable =
-                    new \Zend\Db\TableGateway\TableGateway(
-                    $this->getSecondaryTableName(), $this->getServiceLocator()
-                            ->get('Zend\Db\Adapter\Adapter'), $feature);
+            $this->secondaryTable = new TableGateway(
+                    $this->getSecondaryTableName(), $this->getDb(), $feature);
         }
         return $this->secondaryTable;
     }
 
     public function getSecondaryTableAlias() {
+        if (empty($this->secondaryTableAlias)) {
+            $this->secondaryTableAlias = $this->defaultSecondaryTableAlias;
+        }
         return $this->secondaryTableAlias;
     }
     
@@ -406,21 +422,29 @@ implements \Edm\UserAware,
     }
     
     /**
-     * Clear any state that is kept inside of this service
+     * Clear all secondary table relationships within this service
+     * and Set the result set object of this service to it's default
      * @return Edm\Service\ViewModuleService
      */
-    public function reset () {
+    public function clearSecondaryTableRelationship () {
         unset($this->secondaryTable);
         unset($this->secondaryTableName);
         unset($this->secondaryTableAlias);
         $this->resultSet->setArrayObjectPrototype(new ViewModule());
         return $this;
     }
-    
+
+    /**
+     * Sets the result set object's prototype object.  
+     * Expects a class string; I.e., Edm\Model\HelloWorld
+     * @param type $name
+     * @return \Edm\Service\ViewModuleService
+     */
     public function setSecondaryProtoName ($name) {
         $viewModule = new ViewModule();
         $viewModule->setSecondaryProtoName($name);
         $this->resultSet->setArrayObjectPrototype($viewModule);
+        return $this;
     }
 
 }
