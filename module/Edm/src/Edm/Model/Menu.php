@@ -6,14 +6,17 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
+    Edm\Model\FieldsInFormAwareTrait,
+    Edm\Model\FieldsInFormAwareInterface,
     Edm\Model\AbstractModel;
-//    Edm\Model\ViewModuleProtoAwareTrait;
 
 /**
  * Description of Menu
  * @author ElyDeLaCruz
  */
-class Menu extends AbstractModel implements InputFilterAwareInterface {
+class Menu extends AbstractModel implements InputFilterAwareInterface, FieldsInFormAwareInterface {
+
+    use FieldsInFormAwareTrait;
 
     public $minDepth = 0;
     public $maxDepth = 0;
@@ -21,9 +24,6 @@ class Menu extends AbstractModel implements InputFilterAwareInterface {
     public $renderParents = 0;
     public $isMainMenu = 0;
     public $useModuleHelper = 0;
-    
-//    use ViewModuleProtoAwareTrait;
-
     protected $validKeys = array(
         'menu_id',
         'view_module_id',
@@ -49,6 +49,19 @@ class Menu extends AbstractModel implements InputFilterAwareInterface {
         if (is_array($data)) {
             $this->exchangeArray($data);
         }
+        
+        // Set fields in form
+        $this->setFieldsInForm(array(
+            'minDepth',
+            'maxDepth',
+            'onlyActiveBranch',
+            'renderParents',
+            'isMainMenu',
+            'useModuleHelper',
+            'ulClass',
+            'menuPartialScript',
+            'menuHelperName'
+        ));
     }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
