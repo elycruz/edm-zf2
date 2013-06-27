@@ -25,7 +25,7 @@ defined('EDM_TOKEN_SEED') ||
 
 // Edm Alias Pattern
 defined('EDM_ALIAS_PATTERN') ||
-    define('EDM_ALIAS_PATTERN', '/^[a-z_]*[a-z\d\-_]{2,200}/i');
+    define('EDM_ALIAS_PATTERN', '/^[a-z_]+[a-z\d\-_]*/i');
 
 // Module Configuration
 return array(
@@ -65,7 +65,7 @@ return array(
             'Edm\Controller\Term'         => 'Edm\Controller\TermController',
             'Edm\Controller\TermTaxonomy' => 'Edm\Controller\TermTaxonomyController',
             'Edm\Controller\ViewModule'   => 'Edm\Controller\ViewModuleController',
-            'Edm\Controller\Menu'   => 'Edm\Controller\MenuController',
+            'Edm\Controller\Menu'         => 'Edm\Controller\MenuController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
             'Edm\Controller\Post'         => 'Edm\Controller\PostController',
             'Edm\Controller\AjaxUi'       => 'Edm\Controller\AjaxUiController',
@@ -110,22 +110,15 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
-                            'viewModuleRoute' => array(
-                                'type' => 'Segment',
-                                'options' => array(
-                                    'route' => '[/view-module-type/:view-module-type]',
-                                    'constraints' => array(
-                                        'view-module-type' => '[a-zA-Z\d\_\-]+'
-                                    ),
-                                )
-                            ),
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
                                 'options' => array(
-                                    'route' => '[/id/:itemId]',
+                                    'route' => '[/id/:itemId]' + 
+                                        '[type=:type]',
                                     'constraints' => array(
-                                        'itemId' => '[a-zA-Z\d\_\-]+'
-                                    ),
+                                        'itemId' => '[a-zA-Z\d\_\-]+',
+                                        'type' => '[a-zA-Z_]+'
+                                    )
                                 )
                             ),
                             'updateListOrder' => array(

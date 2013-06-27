@@ -21,14 +21,12 @@ use Edm\Controller\AbstractController,
     Zend\Paginator\Adapter\DbSelect,
     Zend\Debug\Debug;
 
-class ViewModuleController extends AbstractController 
-    implements 
-        ViewModuleServiceAware,
-        TermTaxonomyServiceAware {
+class ViewModuleController extends AbstractController implements
+ViewModuleServiceAware, TermTaxonomyServiceAware {
 
     use ViewModuleServiceAwareTrait,
         TermTaxonomyServiceAwareTrait;
-    
+
     /**
      * The Secondary Fieldset's alias name
      * @var string 
@@ -115,11 +113,12 @@ class ViewModuleController extends AbstractController
         // init flash messenger
         $view =
                 $this->view =
-                    new ViewModel();
-        
+                        new ViewModel();
+
         // Get View Module Type to extend the view module with
-        $viewModuleType = $this->getAndSetParam('view-module-type', null);
-        
+        $viewModuleType = $this->getAndSetParam('type', null);
+
+        // Form Action
         $formAction = '/edm-admin/view-module/create';
 
         // Let view be terminal in this action
@@ -130,14 +129,14 @@ class ViewModuleController extends AbstractController
         $form = new ViewModuleForm('view-module-form', array(
             'serviceLocator' => $this->getServiceLocator()));
         $view->form = $form;
-        
+
         // If view module type
         if (isset($viewModuleType)) {
             $classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
             $secondaryFieldsetName = '\\Edm\\Form\\' . $classFormattedName . 'Fieldset';
             $secondaryModelName = '\\Edm\\Model\\' . $classFormattedName;
-            $formAction .= '\\view-module-type\\'. $viewModuleType;
-            
+            $formAction .= '/type/' . $viewModuleType;
+
             // Add Secondary Fieldset
             $view->form->add(new $secondaryFieldsetName(
                     $this->secondaryFieldsetAlias));
@@ -145,7 +144,7 @@ class ViewModuleController extends AbstractController
 
         // Set form action
         $form->setAttribute('action', $formAction);
-                
+
         // If not post bail
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -159,10 +158,10 @@ class ViewModuleController extends AbstractController
         if (!$view->form->isValid()) {
             $fm->setNamespace('error')->addMessage('Form validation failed.' .
                     '  Please try again.');
-            Debug::dump($form->getMessages());
+            // Debug::dump($form->getMessages());
             return $view;
         }
-        
+
         // Get ViewModule service
         $viewModuleService = $this->getViewModuleService();
         $viewModuleService->clearSecondaryTableRelationship();
@@ -173,31 +172,28 @@ class ViewModuleController extends AbstractController
                 $data['view-module-fieldset'], 
                 $data['mixed-term-rel-fieldset'], 
                 $data['user-params-fieldset']);
-        
+
         // Get a View Module Model Object
         $viewModuleData = new ViewModule();
-        
+
         // View Module
         if (isset($viewModuleType)) {
-            
+
             // Get table name and alias according to view module type
             $termTaxService = $this->getTermTaxService();
-            
+
             // Fetch table
-            $rslt = $termTaxService->getByAlias($viewModuleType . '-alias', 
-                    'table-name-by-alias');
-            
+            $rslt = $termTaxService->getByAlias($viewModuleType . '-alias', 'table-name-by-alias');
+
             $mergedData = array_merge($mergedData, $data[$this->secondaryFieldsetAlias]);
             $viewModuleData->setSecondaryProtoName($secondaryModelName);
             $viewModuleService->setSecondaryProtoName($secondaryModelName);
             $viewModuleService->setSecondaryTableName($rslt['term_name']);
-//            Debug::dump($viewModuleService->getSecondaryTableName());
-//            Debug::dump($rslt); exit();
         }
 
         // Set view module data
         $viewModuleData->exchangeArray($mergedData);
-        
+
         // If emtpy alias populate it
         if (empty($viewModuleData->alias)) {
             $viewModuleData->alias =
@@ -217,15 +213,15 @@ class ViewModuleController extends AbstractController
         // Send success message to user
         if (is_numeric($rslt) && !empty($rslt) && $rslt instanceof \Exception === false) {
             $fm->setNamespace('highlight')
-                    ->addMessage('View Module "' . $viewModuleData->title . 
+                    ->addMessage('View Module "' . $viewModuleData->title .
                             '" added successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('error')
-                    ->addMessage('View Module "' . $viewModuleData->title . 
-                            '" failed to be added.  Errors: <br />' 
-                            . '<pre>' . $rslt->getTraceAsString() 
+                    ->addMessage('View Module "' . $viewModuleData->title .
+                            '" failed to be added.  Errors: <br />'
+                            . '<pre>' . $rslt->getTraceAsString()
                             . '</pre><br />'
                             . $rslt->getMessage());
         }
@@ -244,6 +240,9 @@ class ViewModuleController extends AbstractController
         // Id
         $id = $this->getParam('itemId');
 
+        // View Module Type
+        $viewModuleType = $this->getParam('type');
+
         // Put data into model
         $viewModuleService = $this->getViewModuleService();
 
@@ -253,10 +252,28 @@ class ViewModuleController extends AbstractController
         ));
         $form->setAttribute('action', '/edm-admin/view-module/update/id/' . $id);
         $view->form = $form;
+        
+        // Blank Data For 
+        $dataForForm = array();
 
+        // If view module type
+        if (isset($viewModuleType)) {
+            $classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
+            $secondaryFieldsetName = '\\Edm\\Form\\' . $classFormattedName . 'Fieldset';
+            $secondaryModelName = '\\Edm\\Model\\' . $classFormattedName;
+            $formAction .= '/type/' . $viewModuleType;
+
+            // Add Secondary Fieldset
+            $view->form->add(new $secondaryFieldsetName(
+                    $this->secondaryFieldsetAlias));
+        }
+
+        // Get Existing View Module
+        $existingViewModule =
+                $viewModuleService->getById($id, 
+                        AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+        
         // Check if term already exists if not bail
-        $existingViewModule = 
-                $viewModuleService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
         if (empty($existingViewModule)) {
             $fm->setNamespace('error')->addMessage('ViewModule with id "'
                     . $id . '" doesn\'t exist in database.');
@@ -276,16 +293,12 @@ class ViewModuleController extends AbstractController
             $allowedOnPages = $viewModuleService->unSerializeAndUnEscapeArray(
                     $existingViewModule->allowedOnPages);
         }
-        
-//        Debug::dump($allowedOnPages);
-//        Debug::dump($existingViewModule->toArray());
-//        exit();
-        
+
         // Mixed Term Rel Proto
         $mixedTermRel = $existingViewModule->getMixedTermRelProto();
 
-        // Set data
-        $form->setData(array(
+        // Data for Form
+        $dataForForm = array_merge($dataForForm, array(
             'mixed-term-rel-fieldset' => array(
                 'term_taxonomy_id' => $mixedTermRel->term_taxonomy_id,
                 'status' => $mixedTermRel->status,
@@ -303,6 +316,16 @@ class ViewModuleController extends AbstractController
                 'userParams' => $userParamsFieldset
             )
         ));
+        
+        // Merge Secondary Data if any
+        $secondaryProto = $existingViewModule->getSecondaryProto();
+        if ($secondaryProto) {
+            $dataForForm[$secondaryFieldsetName] = 
+                    $secondaryProto->getFieldsInFormToArray();
+        }
+        
+        // Set data
+        $form->setData($dataForForm);
 
         // If not post bail
         $request = $this->getRequest();
@@ -463,7 +486,7 @@ class ViewModuleController extends AbstractController
         // Return message to view
         return $view;
     }
-    
+
     /**
      * Returns an alias as a class formatted string. Strings should follow
      * the EDM ALIAS PATTER; I.e., ^[a-z_]*[a-z\d\-_]{1,200}$/i .  This funciton
@@ -472,44 +495,63 @@ class ViewModuleController extends AbstractController
      * @return string
      * @throws \Exception
      */
-    protected function normalizeAliasToClassCase ($alias) {
-        
+    protected function normalizeAliasToClassCase($alias) {
+
         // Return if not a string
         if (!is_string($alias)) {
             throw new \Exception(__CLASS__ . '->' . __FUNCTION__ .
-                    ' requires a string for it\'s param.  Value received: ' .
-                    $alias);
+            ' requires a string for it\'s param.  Value received: ' .
+            $alias);
         }
-        
+
         // Check if value matches the alias pattern
         if (preg_match(EDM_ALIAS_PATTERN, $alias) < 0) {
-            throw new \Exception (__CLASS__ . '->' . __FUNCTION__ .
-                    ' requires alias to match the pattern ' .
-                    EDM_ALIAS_PATTERN .
-                    ' Value received: ' . $alias);
+            throw new \Exception(__CLASS__ . '->' . __FUNCTION__ .
+            ' requires alias to match the pattern ' .
+            EDM_ALIAS_PATTERN .
+            ' Value received: ' . $alias);
         }
-        
+
         // Return value
         $retVal = $alias;
-        
+
         // Replace dashes
         if (strpos($alias, '-')) {
             $parts = explode('-', $alias);
             $newParts = array();
-            
+
             // Loop through parts and upper case first letter
             foreach ($parts as $part) {
                 $newParts[] = ucfirst($part);
             }
-            
+
             // Merge Into Camel Cased class name
             $retVal = implode('', $newParts);
-        }
-        else {
+        } else {
             // Upper case first letter
             $retVal = ucfirst($alias);
         }
-        
+
         return $retVal;
     }
+
+    protected function getSecondaryModelPresetByType($viewModuleType) {
+        $out = new stdClass();
+        // If view module type
+        $out->classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
+        $out->secondaryFieldsetName = '\\Edm\\Form\\' . $out->classFormattedName . 'Fieldset';
+        $out->secondaryModelName = '\\Edm\\Model\\' . $out->classFormattedName;
+        $out->formAction .= '/type/' . $viewModuleType;
+        $out->secondaryFieldset = new $secondaryFieldsetName($this->secondaryFieldsetAlias);
+        return $out;
+    }
+    
+    protected function getSecondaryModelFieldsetData () {
+        
+    }
+    
+    protected function setupViewModuleServiceByType ($viewModuleType) {
+        
+    }
+
 }

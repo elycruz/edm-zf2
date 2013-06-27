@@ -21,7 +21,7 @@ return array(
 
     'resources_and_privileges' => array(
         
-        'terms' => array(
+        'term' => array(
             'index' => array(
                 'cms-author' => 'allow'),
             'create' => array(
@@ -32,9 +32,11 @@ return array(
                 'cms-publisher' => 'allow')
         ),
         
-        'term_taxonomies' => 'terms',
+        'term-taxonomy' => 'term',
         
-        'users' => array(
+        'view-module' => 'term',
+        
+        'user' => array(
             'index' => array(
                 'cms-admin' => 'allow'),
             'create' => array(
@@ -45,7 +47,7 @@ return array(
                 'cms-manager' => 'allow')
         ),
         
-        'posts' => array(
+        'post' => array(
             'index' => array(
                 'cms-user' => 'allow'),
             'create' => array(

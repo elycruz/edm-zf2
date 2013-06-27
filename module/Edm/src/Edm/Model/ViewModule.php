@@ -278,7 +278,8 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
      * @return AbstractModel
      */
     public function getSecondaryProto($data = null) {
-        if (empty($this->secondaryProto) && is_string($this->secondaryProtoName) && !empty($this->secondaryProtoName)) {
+        if (empty($this->secondaryProto) && is_string($this->secondaryProtoName)
+                && !empty($this->secondaryProtoName)) {
             $this->secondaryProto = new $this->secondaryProtoName($data);
         }
         return $this->secondaryProto;
