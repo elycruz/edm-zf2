@@ -287,8 +287,9 @@ implements \Edm\UserAware,
         
         // Secondary Table
         if (!empty($this->secondaryTableName)) {
-            $select->join(array('secTable' => $this->getSecondaryTable()->getTable()),
-                    'secTable.view_module_id=viewModule.view_module_id');
+            $secondaryAlias = $this->getSecondaryTableAlias();
+            $select->join(array($secondaryAlias => $this->getSecondaryTable()->getTable()),
+                    $secondaryAlias . '.view_module_id=viewModule.view_module_id');
         }
         
         return $select;
@@ -430,6 +431,7 @@ implements \Edm\UserAware,
         unset($this->secondaryTable);
         unset($this->secondaryTableName);
         unset($this->secondaryTableAlias);
+        $this->secondaryTableAlias = $this->defaultSecondaryTableAlias;
         $this->resultSet->setArrayObjectPrototype(new ViewModule());
         return $this;
     }
