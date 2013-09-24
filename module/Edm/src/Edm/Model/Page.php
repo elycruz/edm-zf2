@@ -6,16 +6,13 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel,
-    Edm\Model\ViewModuleProtoAwareTrait;
+    Edm\Model\AbstractModel;
 
 /**
  * Description of Page
  * @author ElyDeLaCruz
  */
 class Page extends AbstractModel implements InputFilterAwareInterface {
-
-    use ViewModuleProtoAwareTrait;
 
     protected $validKeys = array(
         'page_id',

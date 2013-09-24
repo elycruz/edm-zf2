@@ -11,6 +11,7 @@ use Zend\InputFilter\Factory as InputFactory,
 class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
 
     protected $inputFilter = null;
+    
     protected $validKeys = array(
         'term_taxonomy_id',
         'term_alias',

@@ -212,12 +212,13 @@ class TermTaxonomyService extends AbstractService {
 
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
-
+            
         // Begin transaction
         $conn->beginTransaction();
 
         // Try db updates
         try {
+
             // Process Term and rollback if failure
             $termRslt = $this->getTermFromData($term);
 
