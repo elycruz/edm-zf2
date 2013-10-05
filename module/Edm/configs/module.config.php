@@ -132,6 +132,17 @@ return array(
                                     ),
                                 )
                             ),
+                            'createSubObject' => array(
+                                'type' => 'Segment',
+                                'options' => array(
+                                    'route' => '[/id/:itemId]' .
+                                    '[/type/:type]',
+                                    'constraints' => array(
+                                        'itemId' => '[a-zA-Z\d\_\-]+',
+                                        'type' => '[a-zA-Z\d\_\-]+',
+                                    ),
+                                )
+                            ),
                             // @todo figure out a more compact way of doing this
                             // @todo maybe generate it dynamically at the top if no other solution
                             'paginator' => array(

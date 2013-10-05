@@ -247,10 +247,11 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
         $viewModuleService = $this->getViewModuleService();
 
         // Setup form
+        $formAction = '/edm-admin/view-module/update/id/' . $id;
         $form = new ViewModuleForm('view-module-form', array(
             'serviceLocator' => $this->getServiceLocator()
         ));
-        $form->setAttribute('action', '/edm-admin/view-module/update/id/' . $id);
+        $form->setAttribute('action', $formAction);
         $view->form = $form;
         
         // Blank Data For 

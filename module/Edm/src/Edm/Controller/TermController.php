@@ -1,13 +1,6 @@
 <?php
 
 /**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/Edm for the canonical source repository
- * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- */
-/**
  * @todo Implement DatabaseDataHelper
  */
 
@@ -29,12 +22,10 @@ class TermController extends AbstractController {
 
     public function indexAction() {
         // View
-        $view =
-                $this->view =
-                new JsonModel();
+        $view = $this->view =  new JsonModel();
 
         // Model
-        $model = $this->getTermModel();
+        $model = $this->getTermTable();
 
         // Page number
         $pageNumber = $this->getAndSetParam('page', 1);
@@ -93,7 +84,7 @@ class TermController extends AbstractController {
         }
 
         // Put data into model
-        $termTable = $this->getTermModel();
+        $termTable = $this->getTermTable();
         $term->exchangeArray($view->form->getData());
 
         // Check if term already exists
@@ -144,7 +135,7 @@ class TermController extends AbstractController {
         $id = $this->getParam('itemId');
 
         // Put data into model
-        $termTable = $this->getTermModel();
+        $termTable = $this->getTermTable();
 
         // Check if term already exists
         try {
@@ -241,7 +232,7 @@ class TermController extends AbstractController {
         }
 
         // Get term table
-        $termTable = $this->getTermModel();
+        $termTable = $this->getTermTable();
 
         try {
             // Check if term already exists
@@ -283,7 +274,7 @@ class TermController extends AbstractController {
         $view = new JsonModel();
         $view->subView = $renderer->render($subView);
 
-        $termTable = $this->getTermModel();
+        $termTable = $this->getTermTable();
         $fm = $this->initFlashMessenger();
 
         // Check if term already exists
@@ -303,7 +294,7 @@ class TermController extends AbstractController {
      * Gets our Term model
      * @return Edm\Db\Table\TermTable
      */
-    public function getTermModel() {
+    public function getTermTable() {
         if (empty($this->termTable)) {
             $locator = $this->getServiceLocator();
             $this->termTable = $this->getServiceLocator()
