@@ -30,7 +30,8 @@ $host = $_SERVER['HTTP_HOST'];
 if (preg_match('/edm\.elycruz\.com/', $host) == 1) {
     $zf2Path = '/home/admin/downloads/ZendFramework-minimal-2.1.4/library';
 } 
-else if (preg_match('/edmzf2/', $host) == 1) {
+else {
+    //if (preg_match('/edmzf2/', $host) == 1) {
     // Support for ZF2_PATH environment variable or git submodule
     if (getenv('ZF2_PATH')) {
         $zf2Path = getenv('ZF2_PATH');
@@ -40,8 +41,10 @@ else if (preg_match('/edmzf2/', $host) == 1) {
     } elseif (is_dir('vendor/ZF2/library')) {
         $zf2Path = 'vendor/ZF2/library';
     }
+    else {
+        $zf2Path = "D:\Program Files\Php\libs\ZendFramework-2.2.4\library";
+    }
 }
-
 
 if ($zf2Path) {
     if (isset($loader)) {

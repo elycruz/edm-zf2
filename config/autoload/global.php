@@ -13,8 +13,8 @@
  */
 return array(
     'db' => array(
-        'driver' => 'Pdo',
-        'dsn' => 'mysql:dbname=edm-0.4.0;host=127.0.0.1',
+        'driver' => 'Pdo_Mysql',
+        'dsn' => 'mysql:dbname=edm;host=127.0.0.1',
         'driver_options' => array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
         ),

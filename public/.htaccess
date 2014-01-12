@@ -1,4 +1,4 @@
-SetEnv ZF2_PATH "C:\Users\ElyDeLaCruz\Downloads\Zend\ZendFramework-minimal-2.1.5\library"
+SetEnv ZF2_PATH "D:\Program Files\Php\libs\ZendFramework-2.2.4\library"
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} -s [OR]
 RewriteCond %{REQUEST_FILENAME} -l [OR]

@@ -7,3 +7,9 @@
 [submodule "public/libraries/jquery"]
 	path = public/libraries/jquery
 	url = git://github.com/jquery/jquery.git
+[submodule ".\\public\\module-templates\\edm-ko-ui-2"]
+	path = .\\public\\module-templates\\edm-ko-ui-2
+	url = git@github.com:elycruz/edm-ko-ui.git
+[submodule ".\\public\\module-templates\\edm-ko-ui"]
+	path = .\\public\\module-templates\\edm-ko-ui
+	url = git@github.com:elycruz/edm-ko-ui.git
