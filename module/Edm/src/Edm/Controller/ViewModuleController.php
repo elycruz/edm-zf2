@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @todo modify term taxonomy service to include term term taxonomy
- * @todo Unable to update term taxonomies name error is sent in flash message
- */
-
 namespace Edm\Controller;
 
 use Edm\Controller\AbstractController,
     Edm\Form\ViewModuleForm,
     Edm\Model\ViewModule,
+    Edm\Controller\SecondaryFieldsetAwareTrait,
     Edm\Service\AbstractService,
     Edm\Service\ViewModuleServiceAware,
     Edm\Service\ViewModuleServiceAwareTrait,
@@ -25,7 +21,8 @@ class ViewModuleController extends AbstractController implements
 ViewModuleServiceAware, TermTaxonomyServiceAware {
 
     use ViewModuleServiceAwareTrait,
-        TermTaxonomyServiceAwareTrait;
+        TermTaxonomyServiceAwareTrait,
+        SecondaryFieldsetAwareTrait;
 
     /**
      * The Secondary Fieldset's alias name
@@ -132,14 +129,12 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // If view module type
         if (isset($viewModuleType)) {
-            $classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
-            $secondaryFieldsetName = '\\Edm\\Form\\' . $classFormattedName . 'Fieldset';
-            $secondaryModelName = '\\Edm\\Model\\' . $classFormattedName;
-            $formAction .= '/type/' . $viewModuleType;
+            
+            $viewModuleTypeData = $this->getSecondaryFieldsetDataModel($viewModuleType);
+            $formAction .= $viewModuleTypeData->getFormActionTypeAppendage();
 
             // Add Secondary Fieldset
-            $view->form->add(new $secondaryFieldsetName(
-                    $this->secondaryFieldsetAlias));
+            $view->form->add($viewModuleTypeData->getFieldset());
         }
 
         // Set form action
@@ -185,9 +180,9 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
             // Fetch table
             $rslt = $termTaxService->getByAlias($viewModuleType . '-alias', 'table-name-by-alias');
 
-            $mergedData = array_merge($mergedData, $data[$this->secondaryFieldsetAlias]);
-            $viewModuleData->setSecondaryProtoName($secondaryModelName);
-            $viewModuleService->setSecondaryProtoName($secondaryModelName);
+            $mergedData = array_merge($mergedData, $data[$viewModuleTypeData->getFieldsetAlias()]);
+            $viewModuleData->setSecondaryProtoName($viewModuleTypeData->getModelClassName());
+            $viewModuleService->setSecondaryProtoName($viewModuleTypeData->getModelClassName());
             $viewModuleService->setSecondaryTableName($rslt['term_name']);
         }
 
@@ -247,10 +242,11 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
         $viewModuleService = $this->getViewModuleService();
 
         // Setup form
+        $formAction = '/edm-admin/view-module/update/id/' . $id;
         $form = new ViewModuleForm('view-module-form', array(
             'serviceLocator' => $this->getServiceLocator()
         ));
-        $form->setAttribute('action', '/edm-admin/view-module/update/id/' . $id);
+        $form->setAttribute('action', $formAction);
         $view->form = $form;
         
         // Blank Data For 
@@ -485,73 +481,6 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // Return message to view
         return $view;
-    }
-
-    /**
-     * Returns an alias as a class formatted string. Strings should follow
-     * the EDM ALIAS PATTER; I.e., ^[a-z_]*[a-z\d\-_]{1,200}$/i .  This funciton
-     * also only splits strings on '-'.  If no '-' a class safe alias is returned
-     * @param string $alias
-     * @return string
-     * @throws \Exception
-     */
-    protected function normalizeAliasToClassCase($alias) {
-
-        // Return if not a string
-        if (!is_string($alias)) {
-            throw new \Exception(__CLASS__ . '->' . __FUNCTION__ .
-            ' requires a string for it\'s param.  Value received: ' .
-            $alias);
-        }
-
-        // Check if value matches the alias pattern
-        if (preg_match(EDM_ALIAS_PATTERN, $alias) < 0) {
-            throw new \Exception(__CLASS__ . '->' . __FUNCTION__ .
-            ' requires alias to match the pattern ' .
-            EDM_ALIAS_PATTERN .
-            ' Value received: ' . $alias);
-        }
-
-        // Return value
-        $retVal = $alias;
-
-        // Replace dashes
-        if (strpos($alias, '-')) {
-            $parts = explode('-', $alias);
-            $newParts = array();
-
-            // Loop through parts and upper case first letter
-            foreach ($parts as $part) {
-                $newParts[] = ucfirst($part);
-            }
-
-            // Merge Into Camel Cased class name
-            $retVal = implode('', $newParts);
-        } else {
-            // Upper case first letter
-            $retVal = ucfirst($alias);
-        }
-
-        return $retVal;
-    }
-
-    protected function getSecondaryModelPresetByType($viewModuleType) {
-        $out = new stdClass();
-        // If view module type
-        $out->classFormattedName = $this->normalizeAliasToClassCase($viewModuleType);
-        $out->secondaryFieldsetName = '\\Edm\\Form\\' . $out->classFormattedName . 'Fieldset';
-        $out->secondaryModelName = '\\Edm\\Model\\' . $out->classFormattedName;
-        $out->formAction .= '/type/' . $viewModuleType;
-        $out->secondaryFieldset = new $secondaryFieldsetName($this->secondaryFieldsetAlias);
-        return $out;
-    }
-    
-    protected function getSecondaryModelFieldsetData () {
-        
-    }
-    
-    protected function setupViewModuleServiceByType ($viewModuleType) {
-        
     }
 
 }

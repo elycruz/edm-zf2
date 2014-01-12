@@ -36,6 +36,8 @@ return array(
         
         'view-module' => 'term',
         
+        'menu' => 'view-module',
+        
         'user' => array(
             'index' => array(
                 'cms-admin' => 'allow'),
@@ -55,6 +57,8 @@ return array(
             'update' => array(
                 'cms-author' => 'allow'),
             'delete' => array(
+                'cms-author' => 'allow'),
+            'flash-messages-to-json' => array(
                 'cms-author' => 'allow'),
         ),
 
