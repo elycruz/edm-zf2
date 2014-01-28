@@ -2,6 +2,9 @@
 
 namespace Edm\Service;
 
+// Temporarily include hasher
+require(implode(DIRECTORY_SEPARATOR, array('CrackStation', 'Pbkdf2_Hasher.php')));
+
 use Edm\Service\AbstractService,
     Edm\Model\User,
     Zend\Db\ResultSet\ResultSet,
@@ -34,6 +37,12 @@ implements \Edm\UserAware,
         'user_id',
         'type'
     );
+    
+    /**
+     * Our password hasher.
+     * @var Pbkdf2_Hasher
+     */
+    protected $hasher;
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
@@ -424,7 +433,7 @@ implements \Edm\UserAware,
      * @return alnum md5 hash
      */
     public function encodePassword($password) {
-        return hash('sha256', EDM_SALT . $password . EDM_PEPPER);
+        return $this->getHasher()->create_hash($password); //EDM_SALT . $password . EDM_PEPPER);
     }
 
     /**
@@ -482,4 +491,14 @@ implements \Edm\UserAware,
         return substr($uid, 0, $len);
     }
 
+    /**
+     * Our password and activation key hasher.
+     * @return Pbkdf2_Hasher
+     */
+    public function getHasher () {
+        if (empty($this->hasher)) {
+            $this->hasher = new \Pbkdf2_Hasher();
+        }
+        return $this->hasher;
+    }
 }

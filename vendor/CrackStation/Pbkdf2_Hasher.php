@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Password Hashing With PBKDF2 (http://crackstation.net/hashing-security.htm).
  * Copyright (c) 2013, Taylor Hornby
@@ -37,7 +38,7 @@
 define("PBKDF2_HASH_ALGORITHM", "sha256");
 define("PBKDF2_ITERATIONS", 1000);
 define("PBKDF2_SALT_BYTE_SIZE", 24);
-define("PBKDF2_HASH_BYTE_SIZE", 48);
+define("PBKDF2_HASH_BYTE_SIZE", 24);
 define("HASH_SECTIONS", 4);
 define("HASH_ALGORITHM_INDEX", 0);
 define("HASH_ITERATION_INDEX", 1);
@@ -46,6 +47,8 @@ define("HASH_PBKDF2_INDEX", 3);
 
 class Pbkdf2_Hasher {
    
+    public function __construct() {}
+    
     /**
      * Creates a hash of string passed in the format: algorithm:iterations:salt:hash
      * @param {string} $un_hashed_str

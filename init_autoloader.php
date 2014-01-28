@@ -1,4 +1,5 @@
 <?php
+
 //echo phpinfo();
 //exit();
 
@@ -26,25 +27,25 @@ if (file_exists('vendor/autoload.php')) {
 
 // Resolve Zend Framework path by host name
 $zf2Path = false;
-$host = $_SERVER['HTTP_HOST'];
-if (preg_match('/edm\.elycruz\.com/', $host) == 1) {
-    $zf2Path = '/home/admin/downloads/ZendFramework-minimal-2.1.4/library';
+
+// Support for ZF2_PATH environment variable or git submodule
+if (getenv('ZF2_PATH')) {
+    $zf2Path = getenv('ZF2_PATH');
+    // Support for zf2_path directive value
 } 
-else {
-    //if (preg_match('/edmzf2/', $host) == 1) {
-    // Support for ZF2_PATH environment variable or git submodule
-    if (getenv('ZF2_PATH')) {
-        $zf2Path = getenv('ZF2_PATH');
-        // Support for zf2_path directive value
-    } elseif (get_cfg_var('zf2_path')) {
-        $zf2Path = get_cfg_var('zf2_path');
-    } elseif (is_dir('vendor/ZF2/library')) {
-        $zf2Path = 'vendor/ZF2/library';
-    }
-    else {
-        $zf2Path = "D:\Program Files\Php\libs\ZendFramework-2.2.4\library";
-    }
+else if (get_cfg_var('zf2_path')) {
+    $zf2Path = get_cfg_var('zf2_path');
+} 
+else if (is_dir('vendor/ZF2/library')) {
+    $zf2Path = 'vendor/ZF2/library';
 }
+
+// Hasher path
+$crackStationPath = __DIR__ . implode(DIRECTORY_SEPARATOR, array(
+            '',
+            'vendor',
+            'CrackStation'
+        ));
 
 if ($zf2Path) {
     if (isset($loader)) {
@@ -53,7 +54,10 @@ if ($zf2Path) {
         include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
         Zend\Loader\AutoloaderFactory::factory(array(
             'Zend\Loader\StandardAutoloader' => array(
-                'autoregister_zf' => true
+                'autoregister_zf' => true,
+                'namespaces' => array(
+                    'CrackStation' => $crackStationPath
+                )
             )
         ));
     }
@@ -62,3 +66,18 @@ if ($zf2Path) {
 if (!class_exists('Zend\Loader\AutoloaderFactory')) {
     throw new RuntimeException('Unable to load ZF2. Run `php composer.phar install` or define a ZF2_PATH environment variable.');
 }
+
+ini_set('include_path', ini_get('include_path') . 
+            PATH_SEPARATOR . __DIR__ . DIRECTORY_SEPARATOR . 'vendor');
+//
+//// Register some more namespaces
+//if (!isset($loader)) {
+//    include $zf2Path . implode(DIRECTORY_SEPARATOR, array(
+//        '', 'Zend', 'Loader', 'AutoloaderFactory.php'
+//    ));
+//    $loader = new Zend\Loader\StandardAutoloader();
+//    $loader->registerNamespace('CrackStation', $crackStationPath);
+//    $loader->register();
+//}
+//
+//var_dump($crackStationPath);

@@ -10,7 +10,7 @@ return array(
     'modules' => array(
         'Application',
         'EdmSession',
-        'EdmAccessGateway',
+//        'EdmAccessGateway',
         'Edm',
         'EdmDefault'
     ),
