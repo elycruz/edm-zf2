@@ -17,10 +17,8 @@ use Edm\Service\AbstractService,
 /**
  * @author ElyDeLaCruz
  */
-class UserService extends AbstractService 
-implements \Edm\UserAware,
-            \Edm\Db\CompositeDataColumnAware {
-    
+class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\CompositeDataColumnAware {
+
     use \Edm\UserAwareTrait,
         \Edm\Db\CompositeDataColumnAwareTrait;
 
@@ -37,7 +35,7 @@ implements \Edm\UserAware,
         'user_id',
         'type'
     );
-    
+
     /**
      * Our password hasher.
      * @var Pbkdf2_Hasher
@@ -97,26 +95,26 @@ implements \Edm\UserAware,
                 $this->ensureOkForUpdate($user->toArray()));
         $cleanContact = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($contact->toArray()));
-        
+
         // User contact rel
         $userContactRel = array(
             'email' => $cleanContact['email'],
             'screenName' => $cleanUser['screenName']);
-            
+
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-            // Create contact
-            $this->getContactTable()->insert($cleanContact);
-            $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
+        // Create contact
+        $this->getContactTable()->insert($cleanContact);
+        $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
 
-            // Create user
-            $retVal = $this->getUserTable()->insert($cleanUser);
+        // Create user
+        $retVal = $this->getUserTable()->insert($cleanUser);
 
-            // Create user contact rel
-            $this->getUserContactRelTable()->insert($userContactRel);
-            
-            return $retVal;
+        // Create user contact rel
+        $this->getUserContactRelTable()->insert($userContactRel);
+
+        return $retVal;
 
         // Begin transaction
         $conn->beginTransaction();
@@ -124,8 +122,7 @@ implements \Edm\UserAware,
 
             // Commit and return true
             $conn->commit();
-        } 
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e;
         }
@@ -248,12 +245,11 @@ implements \Edm\UserAware,
 
         // Get auth adapater
         $authService = $this->getAuthService();
-        
+
         // Set auth type
         $authAdapter = new DbTable(
-                        $this->getDb(), 
-                        $this->getUserTable()->table, $credentialColumn, 'password');
-        
+                $this->getDb(), $this->getUserTable()->table, $credentialColumn, 'password');
+
         // Set preliminaries before check
         $authAdapter->setIdentity($user->screenName);
         $authAdapter->setCredential($password);
@@ -265,8 +261,8 @@ implements \Edm\UserAware,
             // store the username, first and last names of the user
             $storage = $authService->getStorage();
             $storage->write($authAdapter->getResultRowObject(array(
-                                'user_id', $credentialColumn, 'lastLogin',
-                                'role', 'registeredDate')));
+                        'user_id', $credentialColumn, 'lastLogin',
+                        'role', 'registeredDate')));
 
             // Update user lastLogin
             $this->getUserTable()
@@ -338,9 +334,21 @@ implements \Edm\UserAware,
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
         // @todo implement return values only for current role level
+        // @todo make password and activationkey optional via flag
         return $select
-                        ->from(array('user' => $this->getUserTable()->table))
-                        ->join(array('contact' => $this->getContactTable()->table), 'contact.contact_id=user.contact_id');
+                        ->from(array('userContactRel' => $this->getUserContactRelTable()->table))
+                        ->join(array('user' => $this->getUserTable()->table), 
+                                'user.screenName=userContactRel.screenName', 
+                                array(
+                                    'user_id', 'password', 'role',
+                                    'accessGroup', 'status', 'lastLogin',
+                                    'activationKey', 'date_info_id'))
+                        ->join(array('contact' => $this->getContactTable()->table), 
+                                'contact.email=userContactRel.email', 
+                                array(
+                                    'contact_id', 'altEmail', 'name',
+                                    'type', 'firstName', 'middleName', 'lastName',
+                                    'userParams'));
     }
 
     public function getUserTable() {
@@ -363,8 +371,7 @@ implements \Edm\UserAware,
         if (empty($this->userContactRelTable)) {
             $feature = new FeatureSet();
             $feature->addFeature(new GlobalAdapterFeature());
-            $this->userContactRelTable =
-                    new \Zend\Db\TableGateway\TableGateway(
+            $this->userContactRelTable = new \Zend\Db\TableGateway\TableGateway(
                     'user_contact_relationships', $this->getServiceLocator()
                             ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
@@ -495,10 +502,11 @@ implements \Edm\UserAware,
      * Our password and activation key hasher.
      * @return Pbkdf2_Hasher
      */
-    public function getHasher () {
+    public function getHasher() {
         if (empty($this->hasher)) {
             $this->hasher = new \Pbkdf2_Hasher();
         }
         return $this->hasher;
     }
+
 }
