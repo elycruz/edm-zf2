@@ -27,6 +27,7 @@ implements \Edm\UserAware,
     
     use \Edm\UserAwareTrait,
         \Edm\Db\CompositeDataColumnAwareTrait,
+        \Edm\Db\Table\DateInfoTableAwareTrait,
         TermTaxonomyServiceAwareTrait;
 
     protected $postTable;
@@ -236,16 +237,22 @@ implements \Edm\UserAware,
                 ->from(array('post' => $this->getPostTable()->table))
                 ->join(array('postTermRel' => 
                     $this->getPostTermRelTable()->table), 
-                        'postTermRel.post_id=post.post_id')
+                        'postTermRel.post_id=post.post_id',
+                        array('term_taxonomy_id'))
         
+            // Date Info Table
+            ->join(array('dateInfo' => $this->getDateInfoTable()->table),
+                'post.date_info_id=dateInfo.date_info_id', array(
+                    'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'))
+                
             // Term Taxonomy
             ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
                     'termTax.term_taxonomy_id=postTermRel.term_taxonomy_id',
                     array('term_alias'))
+                
+            // Term
             ->join(array('term' => $termTaxService->getTermTable()->table), 
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
-        
-        // @todo Join the category here
     }
 
     public function getPostTable() {

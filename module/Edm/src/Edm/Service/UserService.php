@@ -20,7 +20,8 @@ use Edm\Service\AbstractService,
 class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\CompositeDataColumnAware {
 
     use \Edm\UserAwareTrait,
-        \Edm\Db\CompositeDataColumnAwareTrait;
+        \Edm\Db\CompositeDataColumnAwareTrait,
+        \Edm\Db\Table\DateInfoTableAwareTrait;
 
     protected $userTable;
     protected $contactTable;
@@ -336,19 +337,29 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         // @todo implement return values only for current role level
         // @todo make password and activationkey optional via flag
         return $select
-                        ->from(array('userContactRel' => $this->getUserContactRelTable()->table))
-                        ->join(array('user' => $this->getUserTable()->table), 
-                                'user.screenName=userContactRel.screenName', 
-                                array(
-                                    'user_id', 'password', 'role',
-                                    'accessGroup', 'status', 'lastLogin',
-                                    'activationKey', 'date_info_id'))
-                        ->join(array('contact' => $this->getContactTable()->table), 
-                                'contact.email=userContactRel.email', 
-                                array(
-                                    'contact_id', 'altEmail', 'name',
-                                    'type', 'firstName', 'middleName', 'lastName',
-                                    'userParams'));
+            // User Contact Rel Table
+            ->from(array('userContactRel' => $this->getUserContactRelTable()->table))
+
+            // User Table
+            ->join(array('user' => $this->getUserTable()->table), 
+                    'user.screenName=userContactRel.screenName', 
+                    array(
+                        'user_id', 'password', 'role',
+                        'accessGroup', 'status', 'lastLogin',
+                        'activationKey', 'date_info_id'))
+
+            // Contact Table
+            ->join(array('contact' => $this->getContactTable()->table), 
+                    'contact.email=userContactRel.email', 
+                    array(
+                        'contact_id', 'altEmail', 'name',
+                        'type', 'firstName', 'middleName', 'lastName',
+                        'userParams'))
+
+            // Date Info Table
+            ->join(array('dateInfo' => $this->getDateInfoTable()->table),
+                'user.date_info_id=dateInfo.date_info_id', array(
+                    'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'));
     }
 
     public function getUserTable() {
@@ -377,6 +388,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         }
         return $this->userContactRelTable;
     }
+
 
     /**
      * Checks if an email already exists for a user
