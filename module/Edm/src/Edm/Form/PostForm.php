@@ -106,7 +106,7 @@ class PostForm extends EdmForm {
         $commenting = $postFieldset->get('commenting');
         $commenting->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
-                'taxonomy' => 'commenting',
+                'taxonomy' => 'commenting-status',
                 'defaultOption' => array(
                     'value' => 'disabled',
                     'label' => '-- Select a Commenting Status --'

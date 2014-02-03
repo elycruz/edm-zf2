@@ -42,11 +42,46 @@ class DateInfo extends AbstractModel implements InputFilterAwareInterface {
             return $this->inputFilter;
         }
         
-        $inputFilter = new InputFilter();
+        $retVal = new InputFilter();
+        
+        // Last Updated 
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('int', array(
+                    'name' => 'lastUpdated',
+                    'required' => false
+        ))));
+        
+        // Last Updated By Id
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('int', array(
+                    'name' => 'lastUpdatedById',
+                    'required' => false
+        ))));
+        
+        // Checked In Date
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('int', array(
+                    'name' => 'checkedInDate',
+                    'required' => false
+        ))));
+        
+        // Checked Out Date
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('int', array(
+                    'name' => 'checkedOutDate',
+                    'required' => false
+        ))));
+        
+        // Checked Out By Id
+        $retVal->add($factory->createInput(
+            self::getDefaultInputOptionsByKey('int', array(
+                    'name' => 'checkedOutById',
+                    'required' => false
+        ))));
         
         $factory = new InputFactory();
         
-        return $this->inputFilter = $inputFilter;
+        return $this->inputFilter = $retVal;
     }
 
 }
