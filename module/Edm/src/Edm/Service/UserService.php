@@ -11,8 +11,7 @@ use Edm\Service\AbstractService,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Authentication\Adapter\DbTable,
-    Zend\Stdlib\DateTime;
+    Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter as DbTableWithCallback;
 
 /**
  * @author ElyDeLaCruz
@@ -87,7 +86,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         }
 
         // Set registeredDate
-        $today = new DateTime();
+        $today = new \DateTime();
         $user->registeredDate = $today->getTimestamp();
 
         // Escape tuples 
@@ -233,27 +232,73 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         }
         return $retVal;
     }
+    
+    private function _logUserIn (User $user) {
+        $un_hashed_password = $user->password;
+        $fetchedUser = $this->getByScreenName($user->screenName);
+        
+        // Validate
+        if (is_array($fetchedUser) 
+                && count($fetchedUser) > 0
+                && !empty($fetchedUser['screenName'])
+                && !empty($fetchedUser['password'])) {
+                    $validatedUser = new User($fetchedUser);
+            $hashed_password = $validatedUser->password;
+        }
+
+        // Validate user 
+        $rslt = $this->getHasher()
+                ->validate_against_hash($un_hashed_password, $hashed_password);
+        
+        if (!$rslt) {
+            return false;
+        }
+        
+        // store the username, first and last names of the user
+        $authService = $this->getAuthService();
+        $storage = $authService->getStorage();
+        $storage->write(array(
+                    'user_id' => $validatedUser->user_id,
+                    'screeName' => $validatedUser->screenName,
+                    'lastLogin' => $validatedUser->lastLogin,
+                    'role' => $validatedUser->role
+                ));
+
+        // Update user lastLogin
+        $this->getUserTable()
+                ->updateLastLoginForId($validatedUser->user_id);
+        
+        return true;
+
+    }
 
     /**
      * Log user in and validate them by (email|screenName) and password
      * @param User $user
      * @param string $credentialColumn default 'screenName'
+     * @todo figure out what to do about authservice and pbkdf2_hasher (maybe compose a new auth service that uses the pbkdf2 hasher to do it's job
      * @return boolean
      */
-    public function loginUser(User $user, $credentialColumn = 'screenName') {
-        // Encode password
-        $password = $this->encodePassword($user->password);
-
+    public function loginUser(User $user, 
+            $identityColumn = 'screenName', $credentialColumn = 'password') {
+        
         // Get auth adapater
         $authService = $this->getAuthService();
 
         // Set auth type
-        $authAdapter = new DbTable(
-                $this->getDb(), $this->getUserTable()->table, $credentialColumn, 'password');
+        $authAdapter = new DbTableWithCallback(
+                $this->getDb(), 
+                $this->getUserTable()->table, 
+                'screenName', 
+                'password',
+                function ($a, $b) {
+                    $hasher = new \Pbkdf2_Hasher();
+                    return $hasher->validate_against_hash($b, $a);
+                });
 
         // Set preliminaries before check
         $authAdapter->setIdentity($user->screenName);
-        $authAdapter->setCredential($password);
+        $authAdapter->setCredential($user->password);
         $authAdapter->getDbSelect()->where(array('status' => 'activated'));
         $rslt = $authService->authenticate($authAdapter);
 
@@ -262,8 +307,8 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
             // store the username, first and last names of the user
             $storage = $authService->getStorage();
             $storage->write($authAdapter->getResultRowObject(array(
-                        'user_id', $credentialColumn, 'lastLogin',
-                        'role', 'registeredDate')));
+                        'user_id', $identityColumn, 'lastLogin',
+                        'role')));
 
             // Update user lastLogin
             $this->getUserTable()
