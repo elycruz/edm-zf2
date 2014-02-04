@@ -37,6 +37,7 @@ return array(
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
             'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
             'Edm\Service\PostService'           => 'Edm\Service\PostService',
+            'Edm\Service\PageService'           => 'Edm\Service\PageService',
 
             // Db invokables
             'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
@@ -68,6 +69,7 @@ return array(
             'Edm\Controller\Menu'         => 'Edm\Controller\MenuController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
             'Edm\Controller\Post'         => 'Edm\Controller\PostController',
+            'Edm\Controller\Page'         => 'Edm\Controller\PageController',
             'Edm\Controller\AjaxUi'       => 'Edm\Controller\AjaxUiController',
         ),
     ),

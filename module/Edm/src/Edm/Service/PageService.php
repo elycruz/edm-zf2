@@ -250,22 +250,28 @@ implements \Edm\UserAware,
                 ->from(array('page' => $this->getPageTable()->table))
                 ->join(array('mixedTermRel' => 
                     $this->getMixedTermRelTable()->table), 
-                        'mixedTermRel.page_id=page.page_id')
+                        'mixedTermRel.object_id=page.page_id')
         
             // Term Taxonomy
             ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
                     'termTax.term_taxonomy_id=mixedTermRel.term_taxonomy_id',
                     array('term_alias'))
             ->join(array('term' => $termTaxService->getTermTable()->table), 
-                    'term.alias=termTax.term_alias', array('term_name' => 'name'));
-        
-        // @todo Join the category here
+                    'term.alias=termTax.term_alias', array('term_name' => 'name'))
+                
+            // Limit from mixed term rel (allow only "page" types) for our page 
+            // select statement
+            ->where('mixedTermRel.objectType="page"');
     }
 
     public function getPageTable() {
         if (empty($this->pageTable)) {
-            $locator = $this->getServiceLocator();
-            $this->pageTable = $locator->get('Edm\Db\Table\PageTable');
+            $feature = new FeatureSet();
+            $feature->addFeature(new GlobalAdapterFeature());
+            $this->pageTable =
+                    new \Zend\Db\TableGateway\TableGateway(
+                    'pages', $this->getServiceLocator()
+                            ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
         return $this->pageTable;
     }

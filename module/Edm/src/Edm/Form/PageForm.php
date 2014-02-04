@@ -1,9 +1,6 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+namespace Edm\Form;
 
 /**
  * Description of PageForm
@@ -11,6 +8,9 @@
  * @author ElyDeLaCruz
  */
 class PageForm {
-    //put your code here
-}
 
+    public function __construct() {
+
+    }
+
+}
