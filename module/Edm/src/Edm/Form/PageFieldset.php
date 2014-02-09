@@ -9,16 +9,21 @@ use Zend\Form\Fieldset,
  * Description of PageFieldset
  * @todo separate mvc config section into it's own fieldset.
  * @todo separate uri config section into it's own fieldset.
+ * @todo have a create a page category  on post category create.
  * @author ElyDeLaCruz
  */
 class PageFieldset extends Fieldset {
 
     public function __construct($name = 'page-fieldset', $options = array()) {
-
         parent::__construct($name, $options);
+        $this->init();
+    }
+
+    public function init() {
 
         // Page Object
         $this->setObject(new Page());
+
         // Term Taxonomy Service
         // Label
         $this->add(array(
@@ -125,13 +130,13 @@ class PageFieldset extends Fieldset {
 
         // Uri
         $this->add(array(
-            'name' => 'uri',
+            'name' => 'acl_uri',
             'type' => 'Text',
             'options' => array(
                 'label' => 'Uri/Url'
             ),
             'attributes' => array(
-                'id' => 'uri',
+                'id' => 'acl_uri',
                 'required' => true
             )
         ));
@@ -193,19 +198,6 @@ class PageFieldset extends Fieldset {
             )
         ));
 
-        // Menu Id
-        $this->add(array(
-            'name' => 'menu_id',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Menu',
-                'placeholder' => 'Menu'
-            ),
-            'attributes' => array(
-                'id' => 'menu_id'
-            )
-        ));
-
         // Description
         $this->add(array(
             'name' => 'description',
@@ -218,38 +210,6 @@ class PageFieldset extends Fieldset {
                 'placeholder' => 'Description',
                 'cols' => 72,
                 'rows' => 5,
-            )
-        ));
-
-        // Status
-        $this->add(array(
-            'name' => 'status',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Page Status',
-                'value_options' => array(
-                    'published' => 'Published'
-                )
-            ),
-            'attributes' => array(
-                'id' => 'status',
-                'required' => false
-            )
-        ));
-
-        // Access Group
-        $this->add(array(
-            'name' => 'accessGroup',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Access Group',
-                'value_options' => array(
-                    'guest' => 'Guest'
-                )
-            ),
-            'attributes' => array(
-                'id' => 'accessGroup',
-                'required' => false
             )
         ));
 
