@@ -29,11 +29,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
     protected $screenNameLength = 8;
     protected $notAllowedForUpdate = array(
         'activationKey',
-        'registeredDate',
-        'registeredBy',
-        'contact_id',
-        'user_id',
-        'type'
+        'user_id'
     );
 
     /**
@@ -84,11 +80,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         if (isset($contact->parent_id) && !is_numeric($contact->parent_id)) {
             unset($contact->parent_id);
         }
-
-        // Set registeredDate
-        $today = new \DateTime();
-        $user->registeredDate = $today->getTimestamp();
-
+        
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
         $cleanUser = $dbDataHelper->escapeTuple(
@@ -104,22 +96,28 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-        // Create contact
-        $this->getContactTable()->insert($cleanContact);
-        $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
-
-        // Create user
-        $retVal = $this->getUserTable()->insert($cleanUser);
-
-        // Create user contact rel
-        $this->getUserContactRelTable()->insert($userContactRel);
-
-        return $retVal;
-
+            
         // Begin transaction
         $conn->beginTransaction();
         try {
+            // Create contact
+            $this->getContactTable()->insert($cleanContact);
 
+            // Insert date info
+            $today = new \DateTime();
+            $this->getDateInfoTable()->insert(
+                    array('createdDate' => $today->getTimestamp(), 
+                          'createdById' => '0'));
+            
+            // Get date_info_id for post
+            $cleanUser['date_info_id'] = $driver->getLastGeneratedValue();
+            
+            // Create user
+            $retVal = $this->getUserTable()->insert($cleanUser);
+
+            // Create user contact rel
+            $this->getUserContactRelTable()->insert($userContactRel);
+            
             // Commit and return true
             $conn->commit();
         } catch (\Exception $e) {

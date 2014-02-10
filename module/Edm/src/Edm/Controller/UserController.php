@@ -154,7 +154,7 @@ class UserController extends AbstractController implements TermTaxonomyServiceAw
         }
         // send failure message to user 
         else {
-            var_dump($rslt->getMessage()); exit();
+//            var_dump($rslt->getMessage()); exit();
             $fm->setNamespace('error')
                     ->addMessage('User with email "' . $email . '" failed to be added.');
         }

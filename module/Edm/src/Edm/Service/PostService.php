@@ -85,7 +85,7 @@ implements \Edm\UserAware,
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-        
+            
         // Begin transaction
         $conn->beginTransaction();
         try {
