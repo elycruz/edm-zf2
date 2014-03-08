@@ -3,7 +3,7 @@
 namespace Edm\Service;
 
 // Temporarily include hasher
-require(implode(DIRECTORY_SEPARATOR, array('CrackStation', 'Pbkdf2_Hasher.php')));
+//require(implode(DIRECTORY_SEPARATOR, array('CrackStation', 'Pbkdf2_Hasher.php')));
 
 use Edm\Service\AbstractService,
     Edm\Model\User,
@@ -11,7 +11,8 @@ use Edm\Service\AbstractService,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter as DbTableWithCallback;
+    Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter as DbTableWithCallback,
+    CrackStation\Pbkdf2Hasher;
 
 /**
  * @author ElyDeLaCruz
@@ -290,7 +291,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
                 'screenName', 
                 'password',
                 function ($a, $b) {
-                    $hasher = new \Pbkdf2_Hasher();
+                    $hasher = new Pbkdf2Hasher();
                     return $hasher->validate_against_hash($b, $a);
                 });
 

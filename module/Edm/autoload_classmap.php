@@ -11,4 +11,5 @@ return array(
 //    'Edm\Model\UserModel'               => __DIR__ . '/src/Edm/Model/User.php',
 //    'EdmTest\Framework\TestCase'        => __DIR__ . '/tests/Edm/Framework/TestCase.php',
 //    'EdmTest\SampleTest'                => __DIR__ . '/tests/Edm/SampleTest.php',
+//    'CrackStation\Pbkdf2Hasher'                => __DIR__ . '/../../vendor/CrackStation/src/CrackStation/Pbkdf2Hasher.php',
 );

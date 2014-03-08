@@ -21,7 +21,7 @@
  */
 
 // Require our hasher
-require(".." . DIRECTORY_SEPARATOR . "Pbkdf2_Hasher.php");
+require(implode(array("..", "src", "CrackStation", "Pbkdf2_Hasher.php"), DIRECTORY_SEPARATOR));
 
 // Make sure password isset
 if (!isset($argv[1])) {

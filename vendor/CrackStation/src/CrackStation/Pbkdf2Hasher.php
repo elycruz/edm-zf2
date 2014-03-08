@@ -1,5 +1,7 @@
 <?php
 
+namespace CrackStation;
+
 /*
  * Password Hashing With PBKDF2 (http://crackstation.net/hashing-security.htm).
  * Copyright (c) 2013, Taylor Hornby
@@ -45,7 +47,7 @@ define("HASH_ITERATION_INDEX", 1);
 define("HASH_SALT_INDEX", 2);
 define("HASH_PBKDF2_INDEX", 3);
 
-class Pbkdf2_Hasher {
+class Pbkdf2Hasher {
    
     public function __construct() {}
     

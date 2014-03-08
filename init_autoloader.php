@@ -1,8 +1,4 @@
 <?php
-
-//echo phpinfo();
-//exit();
-
 /**
  * Zend Framework (http://framework.zend.com/)
  *
@@ -32,33 +28,31 @@ $zf2Path = false;
 if (getenv('ZF2_PATH')) {
     $zf2Path = getenv('ZF2_PATH');
     // Support for zf2_path directive value
-} 
-else if (get_cfg_var('zf2_path')) {
+} else if (get_cfg_var('zf2_path')) {
     $zf2Path = get_cfg_var('zf2_path');
-} 
-else if (is_dir('vendor/ZF2/library')) {
+} else if (is_dir('vendor/ZF2/library')) {
     $zf2Path = 'vendor/ZF2/library';
 }
 
 // Hasher path
-$crackStationPath = __DIR__ . implode(DIRECTORY_SEPARATOR, array(
-            '',
-            'vendor',
-            'CrackStation'
+$crackStationPath = implode(DIRECTORY_SEPARATOR, array(
+    __DIR__, 'vendor', 'CrackStation', 'src', 'CrackStation'
         ));
 
+// If zf2 path, initiate autoloader
 if ($zf2Path) {
     if (isset($loader)) {
         $loader->add('Zend', $zf2Path);
-    } else {
+        $loader->add('CrackStation', $crackStationPath);
+    } 
+    else {
         include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
         Zend\Loader\AutoloaderFactory::factory(array(
             'Zend\Loader\StandardAutoloader' => array(
                 'autoregister_zf' => true,
                 'namespaces' => array(
                     'CrackStation' => $crackStationPath
-                )
-            )
+                ))
         ));
     }
 }
@@ -66,18 +60,3 @@ if ($zf2Path) {
 if (!class_exists('Zend\Loader\AutoloaderFactory')) {
     throw new RuntimeException('Unable to load ZF2. Run `php composer.phar install` or define a ZF2_PATH environment variable.');
 }
-
-ini_set('include_path', ini_get('include_path') . 
-            PATH_SEPARATOR . __DIR__ . DIRECTORY_SEPARATOR . 'vendor');
-//
-//// Register some more namespaces
-//if (!isset($loader)) {
-//    include $zf2Path . implode(DIRECTORY_SEPARATOR, array(
-//        '', 'Zend', 'Loader', 'AutoloaderFactory.php'
-//    ));
-//    $loader = new Zend\Loader\StandardAutoloader();
-//    $loader->registerNamespace('CrackStation', $crackStationPath);
-//    $loader->register();
-//}
-//
-//var_dump($crackStationPath);
