@@ -96,4 +96,5 @@ class Module implements
         $viewModel->setTemplate('layout/edm-admin-login');
     }
 
+
 }
