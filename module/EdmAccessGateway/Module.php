@@ -45,7 +45,7 @@ class Module implements AutoloaderProviderInterface {
         
         $eventMngr = $app->getEventManager();
         $eventMngr->attach('route', array($this, 'onRoute'), -100);
-        $eventMngr->attach('dispatch', array($this, 'setNavigation'), -1);
+        $eventMngr->attach('route', array($this, 'setNavigation'), -1000);
 
         $this->acl = $app->getServiceManager()
                 ->get('EdmAccessGateway\Permissions\Acl\Acl');
@@ -113,42 +113,16 @@ class Module implements AutoloaderProviderInterface {
     
         
     public function setNavigation ($e) {  
+        
+        $serviceManager = $e->getApplication()->getServiceManager();
+        
         // Get nav config
         $config = new Config(include 'configs/edm-navigation-config.php');
         
         // Set default nav
-        $nav = new Navigation ($config['default']);
+        $nav = new Navigation($config['default']);
         
-        // Get current acl
-        $acl = $e->getApplication()->getServiceManager()->get('edm-acl');
-        
-        // Get view model
-        $view = $e->getViewModel();
-        
-        // @todo make sure navigation_payload returned to frontend is a filter result
-//        $rslt = $this->filterPagesByAclAndRole($nav->toArray(), $acl, $this->user_role);
-        
-        // Set navigation json to be rendered in view template
-        $view->navigation_json = json_encode($nav->toArray());
-    }
-    
-    protected function filterPagesByAclAndRole (array $pages, Acl $acl, $role) {
-        // Out param
-        $out = array();
-        
-        // Loop through pages
-        foreach ($pages as $page) {
-            $resource = $page['resource'];
-            $privilege = $page['privilege'];
-            if ($acl->isAllowed($role, $resource, $privilege)) {
-                if (isset($page['pages']) && is_array($page['pages'])) {
-                    $page['pages'] = $this->filterPagesByAclAndRole($page, $acl, $role);
-                }
-                $out[] = $page;
-            }
-        }
-
-        return $out;
+        $serviceManager->setService('edm-navigation', $nav);
     }
     
     public function getAutoloaderConfig() {
