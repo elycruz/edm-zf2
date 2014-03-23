@@ -112,6 +112,15 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
+                            'flashMessagesToJson' => array(
+                                'type' => 'Segment',
+                                'options' => array(
+                                    'route' => '[/message-namespace-prefix/:prefix]',
+                                    'constraints' => array(
+                                        'prefix' => '[a-zA-Z\d\_\-]+'
+                                    )
+                                )
+                            ),
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
                                 'options' => array(

@@ -53,6 +53,10 @@ class TermController extends AbstractController {
     }
 
     public function createAction() {
+        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'create-';
+        
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view =
@@ -79,7 +83,8 @@ class TermController extends AbstractController {
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.');
+            $fm->setNamespace('create-error')
+                    ->addMessage('Form validation failed.');
             return $view;
         }
 
@@ -90,7 +95,8 @@ class TermController extends AbstractController {
         // Check if term already exists
         $termExists = $termTable->getByAlias((string) $term->alias);
         if (!empty($termExists)) {
-            $fm->setNamespace('error')->addMessage('Term "' . $term->name
+            $fm->setNamespace('create-error')
+                    ->addMessage('Term "' . $term->name
                     . '" with alias "' . $term->alias . '" already exists.');
             return $view;
         }
@@ -100,7 +106,7 @@ class TermController extends AbstractController {
 
         // Send success message to user
         if ($rslt) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('create-highlight')
                     ->addMessage('Term "' . $term->name . '" with alias "'
                             . $term->alias . '" added successfully.')
                     ->addMessage($term->alias);
@@ -112,7 +118,7 @@ class TermController extends AbstractController {
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('create-error')
                     ->addMessage('Term "' . $term->name . '" with alias "'
                             . $term->alias . '" failed to be added to database.');
         }
@@ -199,24 +205,16 @@ class TermController extends AbstractController {
     }
 
     public function deleteAction() {
+        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'index-';
+        
         // Set up prelims and populate $this -> view for 
-        $view =
-                $this->view =
-                new ViewModel();
+        $view = $this->view = new ViewModel();
         $view->setTerminal(true);
         
         // init flash messenger
         $fm = $this->initFlashMessenger();
-
-//        // No deletion for demo
-//        $fm->setNamespace('error')->addMessage('Deleting terms is not ' .
-//                'allowed in this demo.');
-//        
-//        // init flash messenger
-//        $fm = $this->initFlashMessenger();
-//        
-//        // Bail
-//        return $view;
 
         // Id
         $id = $this->getParam('itemId');
@@ -226,7 +224,7 @@ class TermController extends AbstractController {
 
         // If request is not a get or id is empty return
         if (empty($id) || !$request->isGet()) {
-            $fm->setNamespace('error')->addMessage('No `id` was set for ' .
+            $fm->setNamespace('index-error')->addMessage('No `id` was set for ' .
                     'deletion in the query string.  Value received: ' . $id);
             return $view;
         }
@@ -239,7 +237,7 @@ class TermController extends AbstractController {
             $term = $termTable->getByAlias($id);
         } catch (\Exception $e) {
             // If not send message and bail
-            $fm->setNamespace('error')->addMessage('Term alias "' .
+            $fm->setNamespace('index-error')->addMessage('Term alias "' .
                     $id . '" doesn\t exist in database.');
             $view->error = $e;
             return $view;
@@ -250,14 +248,14 @@ class TermController extends AbstractController {
 
         // Send success message to user
         if ($rslt) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('index-highlight')
                     ->addMessage('Term deleted successfully. '
                             . 'Term name: "' . $term->name . '"'
                             . 'Term alias: "' . $term->alias . '"');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('Term "' . $term->name . '" with alias "'
                             . $term->alias . '" failed to be deleted.');
         }
