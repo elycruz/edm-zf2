@@ -1,5 +1,5 @@
 <?php
-namespace Edm\TraitPartials;;
+namespace Edm\TraitPartials;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
 

@@ -19,6 +19,9 @@ class AjaxUiController extends AbstractActionController
         $this->view = new ViewModel(array('key' => 'value'));
         $this->view->setTerminal(true);
         $this->view->setTemplate('layout/edm-admin-ajax-ui');
+        $this->view->navigation_json = 
+                json_encode($this->getServiceLocator()
+                        ->get('edm-navigation')->toArray());
         return $this->view;
     }
 }

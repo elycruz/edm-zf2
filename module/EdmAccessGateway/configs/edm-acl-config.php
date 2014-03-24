@@ -29,7 +29,8 @@ return array(
             'update' => array(
                 'cms-editor' => 'allow'),
             'delete' => array(
-                'cms-publisher' => 'allow')
+                'cms-publisher' => 'allow'),
+            'flash-messages-to-json' => array('cms-user' => 'allow'),
         ),
         
         'term-taxonomy' => 'term',

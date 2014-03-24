@@ -12,7 +12,9 @@ namespace EdmAccessGateway;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface,
     Zend\Config\Config,
-    Zend\Mvc\MvcEvent;
+    Zend\Mvc\MvcEvent,
+    Zend\Permissions\Acl\Acl,
+    Zend\Navigation\Navigation;
 
 class Module implements AutoloaderProviderInterface {
 
@@ -21,9 +23,13 @@ class Module implements AutoloaderProviderInterface {
      * @var EdmAccessGateway\Permissions\Acl\Acl
      */
     protected $acl;
+    
+    protected $user_role;
 
     public function getConfig() {
-        return include __DIR__ . '/configs/module.config.php';
+        $config = include __DIR__ . '/configs/module.config.php';
+        $config['acl'] = include __DIR__ . '/configs/edm-acl-config.php';
+        return $config;
     }
 
     /**
@@ -34,14 +40,19 @@ class Module implements AutoloaderProviderInterface {
 
     public function onBootstrap(MvcEvent $e) {
         $app = $e->getApplication();
+        
         $this->serviceLocator = $app->getServiceManager();
+        
         $eventMngr = $app->getEventManager();
-        $eventMngr->attach('route', array($this, 'onRoute'), -1);
+        $eventMngr->attach('route', array($this, 'onRoute'), -100);
+        $eventMngr->attach('route', array($this, 'setNavigation'), -1000);
+
         $this->acl = $app->getServiceManager()
                 ->get('EdmAccessGateway\Permissions\Acl\Acl');
+
     }
 
-    public function onRoute(MvcEvent $e) {
+    public function onRoute(MvcEvent $e) {        
         // Get route match
         $routeMatch = $e->getRouteMatch();
 
@@ -57,6 +68,9 @@ class Module implements AutoloaderProviderInterface {
         // Get Acl
         $aclSource = include(__DIR__ . '/configs/edm-acl-config.php');
         $acl = $this->acl->setConfig(new Config($aclSource));
+        
+        // Make acl accessible from outside
+        $e->getApplication()->getServiceManager()->setService('edm-acl', $acl);
 
         // Get auth service
         $authService = $this->serviceLocator->get('Zend\Authentication\AuthService');
@@ -67,9 +81,12 @@ class Module implements AutoloaderProviderInterface {
         } else {
             $role = 'guest';
         }
+        
+        // Set role (used later by set navigation handler)
+        $this->user_role = $role;
 
         // Restrict access
-//        var_dump('user role is "' . $role . '" <br /> '. $resource);
+        // var_dump('user role is "' . $role . '" <br /> '. $resource);
         if (preg_match('/\\+/', $resource) > -1) {
             $resourceParts = explode('\\', strtolower($resource));
             $resource = $resourceParts[count($resourceParts) - 1];
@@ -93,7 +110,21 @@ class Module implements AutoloaderProviderInterface {
                             ->setParam('dispatched', false);
         }
     }
-
+    
+        
+    public function setNavigation ($e) {  
+        
+        $serviceManager = $e->getApplication()->getServiceManager();
+        
+        // Get nav config
+        $config = new Config(include 'configs/edm-navigation-config.php');
+        
+        // Set default nav
+        $nav = new Navigation($config['default']);
+        
+        $serviceManager->setService('edm-navigation', $nav);
+    }
+    
     public function getAutoloaderConfig() {
         return array(
             'Zend\Loader\StandardAutoloader' => array(

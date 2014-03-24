@@ -1,10 +1,5 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace Edm\Form;
 
 use Zend\Form\Fieldset,
@@ -12,26 +7,33 @@ use Zend\Form\Fieldset,
 
 /**
  * Description of PageFieldset
+ * @todo separate mvc config section into it's own fieldset.
+ * @todo separate uri config section into it's own fieldset.
+ * @todo have a create a page category  on post category create.
  * @author ElyDeLaCruz
  */
 class PageFieldset extends Fieldset {
 
     public function __construct($name = 'page-fieldset', $options = array()) {
-
         parent::__construct($name, $options);
+        $this->init();
+    }
+
+    public function init() {
 
         // Page Object
         $this->setObject(new Page());
 
-        // Title
+        // Term Taxonomy Service
+        // Label
         $this->add(array(
-            'name' => 'title',
+            'name' => 'label',
             'type' => 'Text',
             'options' => array(
-                'label' => 'Title'
+                'label' => 'Label'
             ),
             'attributes' => array(
-                'id' => 'title',
+                'id' => 'label',
                 'required' => true
             )
         ));
@@ -41,21 +43,154 @@ class PageFieldset extends Fieldset {
             'name' => 'alias',
             'type' => 'Text',
             'options' => array(
-                'label' => 'Alias',
-                'required' => false,
+                'label' => 'Alias'
             ),
             'attributes' => array(
                 'id' => 'alias',
+                'required' => true
+            )
+        ));
+
+        // 
+        // For Zend_Navigation_Page_Mvc
+        // ---------------------------------------
+        // Module
+        $this->add(array(
+            'name' => 'mvc_module',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Module'
+            ),
+            'attributes' => array(
+                'id' => 'mvc_module'
+            )
+        ));
+
+        // Controller
+        $this->add(array(
+            'name' => 'mvc_controller',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Controller'
+            ),
+            'attributes' => array(
+                'id' => 'mvc_controller'
+            )
+        ));
+
+        // Action
+        $this->add(array(
+            'name' => 'mvc_action',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Action'
+            ),
+            'attributes' => array(
+                'id' => 'mvc_action'
+            )
+        ));
+
+        // Route
+        $this->add(array(
+            'name' => 'mvc_route',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Route'
+            ),
+            'attributes' => array(
+                'id' => 'mvc_route'
+            )
+        ));
+
+        // ResetParamsOnRender
+        $this->add(array(
+            'type' => 'checkbox',
+            'name' => 'mvc_resetParamsOnRender',
+            'options' => array(
+                'value' => '1',
+                'label' => 'Reset params on render'
+            ),
+            'attributes' => array(
+                'id' => 'mvc_resetParamsOnRender'
+            )
+        ));
+
+        // Visible
+        $this->add(array(
+            'type' => 'checkbox',
+            'name' => 'visible',
+            'options' => array(
+                'value' => '1',
+                'label' => 'Visible'
+            ),
+            'attributes' => array(
+                'id' => 'visible'
+            )
+        ));
+
+        // Uri
+        $this->add(array(
+            'name' => 'acl_uri',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Uri/Url'
+            ),
+            'attributes' => array(
+                'id' => 'acl_uri',
+                'required' => true
+            )
+        ));
+
+        // ---------------------------------------
+        // Acl elements
+        // ---------------------------------------
+        // Privilege
+        $this->add(array(
+            'name' => 'acl_privilege',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Privilege',
+                'required' => false,
+            ),
+            'attributes' => array(
+                'id' => 'acl_privilege',
                 'required' => false,
             )
         ));
-        
+
+        // Resource
+        $this->add(array(
+            'name' => 'acl_resource',
+            'type' => 'Text',
+            'options' => array(
+                'label' => 'Resource',
+                'required' => false,
+            ),
+            'attributes' => array(
+                'id' => 'acl_resource',
+                'required' => false,
+            )
+        ));
+
+        // Category Id
+        $this->add(array(
+            'name' => 'term_taxonomy_id',
+            'type' => 'Zend\Form\Element\Select',
+            'options' => array(
+                'label' => 'Category',
+                'placeholder' => 'Category'
+            ),
+            'attributes' => array(
+                'id' => 'term_taxonomy_id'
+            )
+        ));
+
         // Parent Id
         $this->add(array(
             'name' => 'parent_id',
             'type' => 'Zend\Form\Element\Select',
             'options' => array(
-                'label' => 'Parent',
+                'label' => 'Parent Page',
                 'placeholder' => 'Parent'
             ),
             'attributes' => array(
@@ -63,81 +198,18 @@ class PageFieldset extends Fieldset {
             )
         ));
 
-        // Content
+        // Description
         $this->add(array(
-            'options' => array(
-                'label' => 'Content'
-            ),
-            'name' => 'content',
+            'name' => 'description',
             'type' => 'TextArea',
+            'options' => array(
+                'label' => 'Description'
+            ),
             'attributes' => array(
                 'id' => 'content',
-                'placeholder' => 'Content',
+                'placeholder' => 'Description',
                 'cols' => 72,
                 'rows' => 5,
-            )
-        ));
-
-        // Excerpt
-        $this->add(array(
-            'options' => array(
-                'label' => 'Excerpt'
-            ),
-            'name' => 'excerpt',
-            'type' => 'Zend\Form\Element\TextArea',
-            'attributes' => array(
-                'id' => 'excerpt',
-                'placeholder' => 'Excerpt',
-                'cols' => 72,
-                'rows' => 5,
-            )
-        ));
-        
-        // Status
-        $this->add(array(
-            'name' => 'status',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Page Status',
-                'value_options' => array(
-                    'published' => 'Published'
-                )
-            ),
-            'attributes' => array(
-                'id' => 'status',
-                'required' => false
-            )
-        ));
-        
-        // Commenting
-        $this->add(array(
-            'name' => 'commenting',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Commenting',
-                'value_options' => array(
-                    'enabled' => 'Enabled'
-                )
-            ),
-            'attributes' => array(
-                'id' => 'commenting',
-                'required' => false
-            )
-        ));
-
-        // Access Group
-        $this->add(array(
-            'name' => 'accessGroup',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Access Group',
-                'value_options' => array(
-                    'guest' => 'Guest'
-                )
-            ),
-            'attributes' => array(
-                'id' => 'accessGroup',
-                'required' => false
             )
         ));
 
@@ -148,7 +220,7 @@ class PageFieldset extends Fieldset {
             'options' => array(
                 'label' => 'Page Type',
                 'value_options' => array(
-                    'blog' => 'Blog'
+                    'null' => '-- Select a Page Type --'
                 )
             ),
             'attributes' => array(
@@ -156,6 +228,6 @@ class PageFieldset extends Fieldset {
                 'required' => false
             )
         ));
-
     }
+
 }

@@ -6,5 +6,5 @@
  * @author ElyDeLaCruz
  */
 class SecondaryProtoAware {
-    
+//    
 }

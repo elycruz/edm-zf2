@@ -110,14 +110,14 @@ class PageController extends AbstractController implements PageServiceAware {
         $fm = $this->initFlashMessenger();
 
         // Setup form
-        $form = new PageForm('post-form', array(
+        $form = new PageForm('page-form', array(
             'serviceLocator' => $this->getServiceLocator()));
-        $form->setAttribute('action', '/edm-admin/post/create');
+        $form->setAttribute('action', '/edm-admin/page/create');
         $view->form = $form;
 
         // If not post bail
         $request = $this->getRequest();
-        if (!$request->isPage()) {
+        if (!$request->isPost()) {
             return $view;
         }
 
@@ -138,8 +138,8 @@ class PageController extends AbstractController implements PageServiceAware {
         // Get data
         $data = $form->getData();
         $mergedData = array_merge(
-                $data['post-fieldset'], 
-                $data['post-term-rel-fieldset'],
+                $data['page-fieldset'], 
+                $data['page-term-rel-fieldset'],
                 $data['user-params-fieldset']);
         
         $postData = new Page($mergedData);
@@ -188,7 +188,7 @@ class PageController extends AbstractController implements PageServiceAware {
         $postService = $this->getPageService();
 
         // Setup form
-        $form = new PageForm('post-form', array(
+        $form = new PageForm('page-form', array(
             'serviceLocator' => $this->getServiceLocator()
         ));
         $form->setAttribute('action', '/edm-admin/post/update/id/' . $id);
@@ -211,10 +211,10 @@ class PageController extends AbstractController implements PageServiceAware {
 
         // Set data
         $form->setData(array(
-            'post-term-rel-fieldset' => array(
+            'page-term-rel-fieldset' => array(
                 'term_taxonomy_id' => $existingPage->getPageTermRelProto()->term_taxonomy_id,
             ),
-            'post-fieldset' => array(
+            'page-fieldset' => array(
                 'title' => $existingPage->title,
                 'alias' => $existingPage->alias,
                 'content' => $existingPage->content,
@@ -231,7 +231,7 @@ class PageController extends AbstractController implements PageServiceAware {
         
         // If not post bail
         $request = $this->getRequest();
-        if (!$request->isPage()) {
+        if (!$request->isPost()) {
             return $view;
         }
 
@@ -250,9 +250,9 @@ class PageController extends AbstractController implements PageServiceAware {
 
         // Allocoate updates
         $mergedData = array_merge(
-                $data['post-fieldset'], 
-                $data['post-term-rel-fieldset'], 
-                array('post_id' => $id),
+                $data['page-fieldset'], 
+                $data['page-term-rel-fieldset'], 
+                array('page_id' => $id),
                 $data['user-params-fieldset']);
         
         // Create new post model obj

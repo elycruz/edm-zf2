@@ -2,24 +2,26 @@
 
 namespace Edm\Service;
 
+// Temporarily include hasher
+//require(implode(DIRECTORY_SEPARATOR, array('CrackStation', 'Pbkdf2_Hasher.php')));
+
 use Edm\Service\AbstractService,
     Edm\Model\User,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Authentication\Adapter\DbTable,
-    Zend\Stdlib\DateTime;
+    Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter as DbTableWithCallback,
+    CrackStation\Pbkdf2Hasher;
 
 /**
  * @author ElyDeLaCruz
  */
-class UserService extends AbstractService 
-implements \Edm\UserAware,
-            \Edm\Db\CompositeDataColumnAware {
-    
+class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\CompositeDataColumnAware {
+
     use \Edm\UserAwareTrait,
-        \Edm\Db\CompositeDataColumnAwareTrait;
+        \Edm\Db\CompositeDataColumnAwareTrait,
+        \Edm\Db\Table\DateInfoTableAwareTrait;
 
     protected $userTable;
     protected $contactTable;
@@ -28,12 +30,14 @@ implements \Edm\UserAware,
     protected $screenNameLength = 8;
     protected $notAllowedForUpdate = array(
         'activationKey',
-        'registeredDate',
-        'registeredBy',
-        'contact_id',
-        'user_id',
-        'type'
+        'user_id'
     );
+
+    /**
+     * Our password hasher.
+     * @var Pbkdf2_Hasher
+     */
+    protected $hasher;
 
     public function __construct() {
         $this->sql = new Sql($this->getDb());
@@ -77,46 +81,47 @@ implements \Edm\UserAware,
         if (isset($contact->parent_id) && !is_numeric($contact->parent_id)) {
             unset($contact->parent_id);
         }
-
-        // Set registeredDate
-        $today = new DateTime();
-        $user->registeredDate = $today->getTimestamp();
-
+        
         // Escape tuples 
         $dbDataHelper = $this->getDbDataHelper();
         $cleanUser = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($user->toArray()));
         $cleanContact = $dbDataHelper->escapeTuple(
                 $this->ensureOkForUpdate($contact->toArray()));
-        
+
         // User contact rel
         $userContactRel = array(
             'email' => $cleanContact['email'],
             'screenName' => $cleanUser['screenName']);
-            
+
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
+            
+        // Begin transaction
+        $conn->beginTransaction();
+        try {
             // Create contact
             $this->getContactTable()->insert($cleanContact);
-            $cleanUser['contact_id'] = $driver->getLastGeneratedValue();
 
+            // Insert date info
+            $today = new \DateTime();
+            $this->getDateInfoTable()->insert(
+                    array('createdDate' => $today->getTimestamp(), 
+                          'createdById' => '0'));
+            
+            // Get date_info_id for post
+            $cleanUser['date_info_id'] = $driver->getLastGeneratedValue();
+            
             // Create user
             $retVal = $this->getUserTable()->insert($cleanUser);
 
             // Create user contact rel
             $this->getUserContactRelTable()->insert($userContactRel);
             
-            return $retVal;
-
-        // Begin transaction
-        $conn->beginTransaction();
-        try {
-
             // Commit and return true
             $conn->commit();
-        } 
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e;
         }
@@ -226,28 +231,73 @@ implements \Edm\UserAware,
         }
         return $retVal;
     }
+    
+    private function _logUserIn (User $user) {
+        $un_hashed_password = $user->password;
+        $fetchedUser = $this->getByScreenName($user->screenName);
+        
+        // Validate
+        if (is_array($fetchedUser) 
+                && count($fetchedUser) > 0
+                && !empty($fetchedUser['screenName'])
+                && !empty($fetchedUser['password'])) {
+                    $validatedUser = new User($fetchedUser);
+            $hashed_password = $validatedUser->password;
+        }
+
+        // Validate user 
+        $rslt = $this->getHasher()
+                ->validate_against_hash($un_hashed_password, $hashed_password);
+        
+        if (!$rslt) {
+            return false;
+        }
+        
+        // store the username, first and last names of the user
+        $authService = $this->getAuthService();
+        $storage = $authService->getStorage();
+        $storage->write(array(
+                    'user_id' => $validatedUser->user_id,
+                    'screeName' => $validatedUser->screenName,
+                    'lastLogin' => $validatedUser->lastLogin,
+                    'role' => $validatedUser->role
+                ));
+
+        // Update user lastLogin
+        $this->getUserTable()
+                ->updateLastLoginForId($validatedUser->user_id);
+        
+        return true;
+
+    }
 
     /**
      * Log user in and validate them by (email|screenName) and password
      * @param User $user
      * @param string $credentialColumn default 'screenName'
+     * @todo figure out what to do about authservice and pbkdf2_hasher (maybe compose a new auth service that uses the pbkdf2 hasher to do it's job
      * @return boolean
      */
-    public function loginUser(User $user, $credentialColumn = 'screenName') {
-        // Encode password
-        $password = $this->encodePassword($user->password);
-
+    public function loginUser(User $user, 
+            $identityColumn = 'screenName', $credentialColumn = 'password') {
+        
         // Get auth adapater
         $authService = $this->getAuthService();
-        
+
         // Set auth type
-        $authAdapter = new DbTable(
-                        $this->getDb(), 
-                        $this->getUserTable()->table, $credentialColumn, 'password');
-        
+        $authAdapter = new DbTableWithCallback(
+                $this->getDb(), 
+                $this->getUserTable()->table, 
+                'screenName', 
+                'password',
+                function ($a, $b) {
+                    $hasher = new Pbkdf2Hasher();
+                    return $hasher->validate_against_hash($b, $a);
+                });
+
         // Set preliminaries before check
         $authAdapter->setIdentity($user->screenName);
-        $authAdapter->setCredential($password);
+        $authAdapter->setCredential($user->password);
         $authAdapter->getDbSelect()->where(array('status' => 'activated'));
         $rslt = $authService->authenticate($authAdapter);
 
@@ -256,8 +306,8 @@ implements \Edm\UserAware,
             // store the username, first and last names of the user
             $storage = $authService->getStorage();
             $storage->write($authAdapter->getResultRowObject(array(
-                                'user_id', $credentialColumn, 'lastLogin',
-                                'role', 'registeredDate')));
+                        'user_id', $identityColumn, 'lastLogin',
+                        'role')));
 
             // Update user lastLogin
             $this->getUserTable()
@@ -329,9 +379,31 @@ implements \Edm\UserAware,
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
         // @todo implement return values only for current role level
+        // @todo make password and activationkey optional via flag
         return $select
-                        ->from(array('user' => $this->getUserTable()->table))
-                        ->join(array('contact' => $this->getContactTable()->table), 'contact.contact_id=user.contact_id');
+            // User Contact Rel Table
+            ->from(array('userContactRel' => $this->getUserContactRelTable()->table))
+
+            // User Table
+            ->join(array('user' => $this->getUserTable()->table), 
+                    'user.screenName=userContactRel.screenName', 
+                    array(
+                        'user_id', 'password', 'role',
+                        'accessGroup', 'status', 'lastLogin',
+                        'activationKey', 'date_info_id'))
+
+            // Contact Table
+            ->join(array('contact' => $this->getContactTable()->table), 
+                    'contact.email=userContactRel.email', 
+                    array(
+                        'contact_id', 'altEmail', 'name',
+                        'type', 'firstName', 'middleName', 'lastName',
+                        'userParams'))
+
+            // Date Info Table
+            ->join(array('dateInfo' => $this->getDateInfoTable()->table),
+                'user.date_info_id=dateInfo.date_info_id', array(
+                    'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'));
     }
 
     public function getUserTable() {
@@ -354,13 +426,13 @@ implements \Edm\UserAware,
         if (empty($this->userContactRelTable)) {
             $feature = new FeatureSet();
             $feature->addFeature(new GlobalAdapterFeature());
-            $this->userContactRelTable =
-                    new \Zend\Db\TableGateway\TableGateway(
+            $this->userContactRelTable = new \Zend\Db\TableGateway\TableGateway(
                     'user_contact_relationships', $this->getServiceLocator()
                             ->get('Zend\Db\Adapter\Adapter'), $feature);
         }
         return $this->userContactRelTable;
     }
+
 
     /**
      * Checks if an email already exists for a user
@@ -424,7 +496,7 @@ implements \Edm\UserAware,
      * @return alnum md5 hash
      */
     public function encodePassword($password) {
-        return hash('sha256', EDM_SALT . $password . EDM_PEPPER);
+        return $this->getHasher()->create_hash($password); //EDM_SALT . $password . EDM_PEPPER);
     }
 
     /**
@@ -480,6 +552,17 @@ implements \Edm\UserAware,
             $uid = $uid . $this->gen_uuid(22);     // append until length achieved
 
         return substr($uid, 0, $len);
+    }
+
+    /**
+     * Our password and activation key hasher.
+     * @return Pbkdf2_Hasher
+     */
+    public function getHasher() {
+        if (empty($this->hasher)) {
+            $this->hasher = new \Pbkdf2_Hasher();
+        }
+        return $this->hasher;
     }
 
 }

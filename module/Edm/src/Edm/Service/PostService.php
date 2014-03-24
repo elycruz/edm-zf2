@@ -27,6 +27,7 @@ implements \Edm\UserAware,
     
     use \Edm\UserAwareTrait,
         \Edm\Db\CompositeDataColumnAwareTrait,
+        \Edm\Db\Table\DateInfoTableAwareTrait,
         TermTaxonomyServiceAwareTrait;
 
     protected $postTable;
@@ -54,23 +55,16 @@ implements \Edm\UserAware,
         $user = $this->getUser();
         
         // Bail if no user
-        if (empty($user)) {
-            return false;
-        }
+//        if (empty($user)) {
+//            return false;
+//        }
         
         // Get some help for cleaning data to be submitted to db
         $dbDataHelper = $this->getDbDataHelper();
         
         // Post Term Rel
         $postTermRel = $post->getPostTermRelProto();
-        
-        // Created Date
-        $today = new DateTime();
-        $post->createdDate = $today->getTimestamp();
-        
-        // Created by
-        $post->createdById = $user->user_id;
-        
+               
         // If empty user params
         if (!isset($post->userParams)) {
             $post->userParams = '';
@@ -91,10 +85,19 @@ implements \Edm\UserAware,
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-        
+            
         // Begin transaction
         $conn->beginTransaction();
         try {
+            // Insert date info
+            $today = new \DateTime();
+            $this->getDateInfoTable()->insert(
+                    array('createdDate' => $today->getTimestamp(), 
+                          'createdById' => '0'));
+            
+            // Get date_info_id for post
+            $cleanPost['date_info_id'] = $driver->getLastGeneratedValue();
+            
             // Create post
             $this->getPostTable()->insert($cleanPost);
             $retVal = $post_id = $driver->getLastGeneratedValue();
@@ -105,9 +108,9 @@ implements \Edm\UserAware,
 
             // Commit and return true
             $conn->commit();
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             $conn->rollback();
-            Debug::dump($e->getMessage());
             $retVal = $e;
         }
         return $retVal;
@@ -124,7 +127,7 @@ implements \Edm\UserAware,
     public function updatePost(Post $post) {
         
         $id = $post->post_id;
-//        Debug::dump($post);
+
         // Get Db Data Helper
         $dbDataHelper = $this->getDbDataHelper();
         
@@ -143,13 +146,24 @@ implements \Edm\UserAware,
             $postData['userParams'] = $this->serializeAndEscapeTuples($postData['userParams']);
         }
         
+        // Db driver
+        $driver = $this->getDb()->getDriver();
+        
         // Get database platform object
-        $conn = $this->getDb()->getDriver()->getConnection();
+        $conn = $driver->getConnection();
         
         // Begin transaction
         $conn->beginTransaction();
         try {
-
+            // Insert date info
+            $today = new \DateTime();
+            $this->getDateInfoTable()->insert(
+                    array('lastUpdated' => $today->getTimestamp(), 
+                          'lastUpdatedById' => '0'));
+            
+            // Get date_info_id for post
+            $cleanPost['date_info_id'] = $driver->getLastGeneratedValue();
+            
             // Update postTermRel
             if (is_array($postTermRelData) && count($postTermRelData) > 0) {
                 $this->getPostTermRelTable()
@@ -236,16 +250,22 @@ implements \Edm\UserAware,
                 ->from(array('post' => $this->getPostTable()->table))
                 ->join(array('postTermRel' => 
                     $this->getPostTermRelTable()->table), 
-                        'postTermRel.post_id=post.post_id')
+                        'postTermRel.post_id=post.post_id',
+                        array('term_taxonomy_id'))
         
+            // Date Info Table
+            ->join(array('dateInfo' => $this->getDateInfoTable()->table),
+                'post.date_info_id=dateInfo.date_info_id', array(
+                    'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'))
+                
             // Term Taxonomy
             ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
                     'termTax.term_taxonomy_id=postTermRel.term_taxonomy_id',
                     array('term_alias'))
+                
+            // Term
             ->join(array('term' => $termTaxService->getTermTable()->table), 
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
-        
-        // @todo Join the category here
     }
 
     public function getPostTable() {

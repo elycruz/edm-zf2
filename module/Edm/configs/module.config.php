@@ -37,6 +37,7 @@ return array(
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
             'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
             'Edm\Service\PostService'           => 'Edm\Service\PostService',
+            'Edm\Service\PageService'           => 'Edm\Service\PageService',
 
             // Db invokables
             'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
@@ -68,6 +69,7 @@ return array(
             'Edm\Controller\Menu'         => 'Edm\Controller\MenuController',
             'Edm\Controller\User'         => 'Edm\Controller\UserController',
             'Edm\Controller\Post'         => 'Edm\Controller\PostController',
+            'Edm\Controller\Page'         => 'Edm\Controller\PageController',
             'Edm\Controller\AjaxUi'       => 'Edm\Controller\AjaxUiController',
         ),
     ),
@@ -110,6 +112,15 @@ return array(
                             ),
                         ),
                         'child_routes' => array(
+                            'flashMessagesToJson' => array(
+                                'type' => 'Segment',
+                                'options' => array(
+                                    'route' => '[/message-namespace-prefix/:prefix]',
+                                    'constraints' => array(
+                                        'prefix' => '[a-zA-Z\d\_\-]+'
+                                    )
+                                )
+                            ),
                             'updateOrDelete' => array(
                                 'type' => 'Segment',
                                 'options' => array(
@@ -192,8 +203,8 @@ return array(
             'Edm' => __DIR__ . '/../view-scripts',
         ),
         'template_map' => array(
-            'layout/edm-admin-login'     => APP_PATH .'/public/module-templates/edm-ko-ui-2/login.phtml',
-            'layout/edm-admin-ajax-ui'  => APP_PATH . '/public/module-templates/edm-ko-ui-2/index.phtml'
+            'layout/edm-admin-login'     => APP_PATH .'/public/module-templates/edm-ko-ui/login.phtml',
+            'layout/edm-admin-ajax-ui'  => APP_PATH . '/public/module-templates/edm-ko-ui2/index.phtml'
         )
     ),
 );

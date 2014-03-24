@@ -1,0 +1,66 @@
+<?php
+
+$form           = $this->form;
+$page           = $form->get('page-fieldset');
+$menuPageRel    = $form->get('menu-page-rel-fieldset');
+$mixedTermRel   = $form->get('mixed-term-rel-fieldset');
+$mvcParams      = $form->get('mvc-params-fieldset');
+$otherParams    = $form->get('other-params-fieldset');
+$submitAndReset = $form->get('submit-and-reset');
+
+echo <<<HTML
+    <form id="{$form->getName()}" 
+        method="{$form->getAttribute('method')}" 
+        action="{$form->getAttribute('action')}">
+        <fieldset>
+            <legend>Link Info</legend>
+            {$this->edmFormElement($page->get('label'))}
+            {$this->edmFormElement($page->get('alias'))}<br class="cb" />
+        </fieldset>
+        <fieldset>
+            <legend>Page Type</legend>
+            {$this->edmFormElement($page->get('type'))}<br class="cb" />
+            <div>
+                <label>Uri Page</label>
+                {$this->edmFormElement($page->get('acl_uri'))}
+                {$this->edmFormElement($page->get('acl_resource'))}
+                {$this->edmFormElement($page->get('acl_privilege'))}
+            </div>
+            <div>
+                <label>Mvc Page</label>
+                {$this->edmFormElement($page->get('mvc_action'))}
+                {$this->edmFormElement($page->get('mvc_controller'))}
+                {$this->edmFormElement($page->get('mvc_module'))}
+                {$this->edmFormElement($page->get('mvc_route'))}
+                {$this->edmFormElement($page->get('mvc_resetParamsOnRender'))}
+                <fieldset>
+                    <legend>Mvc Params</legend>
+                    {$this->edmFormCollection($mvcParams->get('userParams'))}
+                </fieldset>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Associations</legend>
+            {$this->edmFormElement($mixedTermRel->get('term_taxonomy_id'))}
+            {$this->edmFormElement($page->get('parent_id'))}
+            {$this->edmFormElement($form->get('menu-page-rel-fieldset')->get('menu_id'))}   
+        </fieldset>
+        <fieldset>
+            <legend>Permissions</legend>
+            {$this->edmFormElement($mixedTermRel->get('status'))}
+            {$this->edmFormElement($page->get('description'))}
+            {$this->edmFormElement($page->get('visible'))}<br class="cb" />
+            {$this->edmFormElement($mixedTermRel->get('accessGroup'))}
+        </fieldset>
+        <fieldset class="other-params">
+            <legend>Other Params (html params, and other user defined params etc.)</legend>
+            {$this->edmFormCollection($otherParams->get('userParams'))}
+        </fieldset>
+        <fieldset class="controls">
+            <div class="form-item">
+            {$this->formElement($submitAndReset->get('submit'))}
+            {$this->formElement($submitAndReset->get('reset'))}
+            </div>
+        </fieldset>
+    </form>
+HTML;

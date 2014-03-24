@@ -188,7 +188,6 @@ class ViewModuleFieldset extends Fieldset {
                         'value' => '*',
                         'label' => 'Select All'
                     )),
-                
             ),
 //            'attributes' => array(
 //                'required' => false,

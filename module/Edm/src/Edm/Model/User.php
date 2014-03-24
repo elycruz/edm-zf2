@@ -7,13 +7,27 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\Contact,
+    Edm\Model\DateInfo,
     Edm\Model\AbstractModel;
 
 class User extends AbstractModel implements InputFilterAwareInterface {
 
-    // Defaults
+    /**
+     * User role.
+     * @var {string}
+     */
     public $role = 'cms-manager';
+    
+    /**
+     * User status.
+     * @var {string}
+     */
     public $status = 'pending-activation';
+    
+    /**
+     * User's Access Group.
+     * @var {String}
+     */
     public $accessGroup = 'cms-manager';
     
     /**
@@ -29,21 +43,16 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         'status',
         'lastLogin',
         'activationKey',
-        'registeredDate',
-        'registeredById',
-        'lastUpdated',
-        'lastUpdatedById',
-        'checkedInDate',
-        'checkedOutDate',
-        'checkedOutById',
-        'contact_id'
+        'date_info_id'
     );
     
+    /**
+     * Keys not allowed for update.
+     * @var array
+     */
     public $notAllowedForUpdate = array(
         'activationKey',
-        'registeredDate',
-        'registeredBy',
-        'contact_id',
+        'date_info_id',
         'user_id'
     );
 
@@ -59,16 +68,34 @@ class User extends AbstractModel implements InputFilterAwareInterface {
      */
     protected $contactProto;
     
+    /**
+     * Date Info Proto.
+     * @var Edm\Model\DateInfo
+     */
+    protected $dateInfoProto;
+    
+    /**
+     * Constructor
+     * @param {mixed|Array|numm} $data - default null
+     */
     public function __construct($data = null) {
         if (is_array($data)) {
             $this->exchangeArray($data);
         }
     }
 
+    /**
+     * Sets our input filter.
+     * @param \Zend\InputFilter\InputFilterInterface $inputFilter
+     */
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;
     }
 
+    /**
+     * Returns our input filter.
+     * @return \Zend\InputFilter\InputFilter
+     */
     public function getInputFilter() {
 
         // Return input filter if exists
@@ -128,33 +155,31 @@ class User extends AbstractModel implements InputFilterAwareInterface {
         ))));
         
         // Last Login
-        // Registered Date
-        // Registered By Id
-        // Last Updated 
-        // Last Updated By Id
-        // Checked In Date
-        // Checked Out Date
-        // Checked Out By Id
+        // Date Info Id
 
         $this->inputFilter = $retVal;
 
         return $retVal;
     }
     
-    
     /**
-     * Exchange array overriden to divide data between user data and contact data
+     * Exchange array overriden to divide data between user data, contact data, and date info data
      * @param array $data
      * @return \Edm\Model\AbstractModel
      */
     public function exchangeArray(array $data) {
         $contact = $this->getContactProto();
+        $dateInfo = $this->getDateInfoProto();
         $contactValidKeys = $contact->getValidKeys();
+        $dateInfoValidKeys = $dateInfo->getValidKeys();
         foreach ($data as $key => $val) {
             if (in_array($key, $this->validKeys)) {
                 $this->{$key} = $val;
             }
             else if (in_array($key, $contactValidKeys)) {
+                $contact->{$key} = $val;
+            }
+            else if (in_array($key, $dateInfoValidKeys)) {
                 $contact->{$key} = $val;
             }
         }
@@ -172,6 +197,18 @@ class User extends AbstractModel implements InputFilterAwareInterface {
             $this->contactProto = new Contact($data);
         }
         return $this->contactProto;
+    }
+    
+    /**
+     * Returns our Date Info Proto.
+     * @param {mixed|Array|Null} $data
+     * @return Edm\Model\DateInfo
+     */
+    public function getDateInfoProto($data = null) {
+        if (empty($this->dateInfoProto)) {
+            $this->dateInfoProto = new DateInfo($data);
+        }
+        return $this->dateInfoProto;
     }
     
 }

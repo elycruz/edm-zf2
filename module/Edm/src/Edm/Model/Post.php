@@ -35,13 +35,6 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         'type',
         'accessGroup',
         'status',
-        'createdDate',
-        'createdById',
-        'lastUpdated',
-        'lastUpdatedById',
-        'checkedInDate',
-        'checkedOutDate',
-        'checkedOutById',
         'userParams'
     );
     
@@ -167,42 +160,7 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
                     'name' => 'commentCount',
                     'required' => false
         ))));
-        
-        // Last Updated 
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('int', array(
-                    'name' => 'lastUpdated',
-                    'required' => false
-        ))));
-        
-        // Last Updated By Id
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('int', array(
-                    'name' => 'lastUpdatedById',
-                    'required' => false
-        ))));
-        
-        // Checked In Date
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('int', array(
-                    'name' => 'checkedInDate',
-                    'required' => false
-        ))));
-        
-        // Checked Out Date
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('int', array(
-                    'name' => 'checkedOutDate',
-                    'required' => false
-        ))));
-        
-        // Checked Out By Id
-        $retVal->add($factory->createInput(
-            self::getDefaultInputOptionsByKey('int', array(
-                    'name' => 'checkedOutById',
-                    'required' => false
-        ))));
-        
+                
         // User Params
         
         $this->inputFilter = $retVal;
@@ -218,6 +176,8 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
     public function exchangeArray(array $data) {
         $postTermRel = $this->getPostTermRelProto();
         $postTermRelValidKeys = $postTermRel->getValidKeys();
+        $dateInfo = $this->getDateInfoProto();
+        $dateInfoValidKeys = $dateInfo->getValidKeys();
         foreach ($data as $key => $val) {
             if (in_array($key, $this->validKeys)) {
                 $this->{$key} = $val;
@@ -225,8 +185,10 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
             else if (in_array($key, $postTermRelValidKeys)) {
                 $postTermRel->{$key} = $val;
             }
+            else if (in_array($key, $dateInfoValidKeys)) {
+                $dateInfo->{$key} = $val;
+            }
         }
-        $this->postTermRelProto = $postTermRel;
         return $this;
     }
     
@@ -252,6 +214,22 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         }
         else if ($data instanceof AbstractModel) {
             $this->postTermRelProto = $data;
+        }
+    }
+    
+    public function getDateInfoProto($data = null) {
+        if (empty($this->dateInfoProto)) {
+            $this->dateInfoProto = new DateInfo($data);
+        }
+        return $this->dateInfoProto;
+    }
+    
+    public function setDateInfoProto($data) {
+        if (is_array($data)) {
+            $this->dateInfoProto = new DateInfo($data);
+        }
+        else if ($data instanceof AbstractModel) {
+            $this->dateInfoProto = $data;
         }
     }
     

@@ -143,6 +143,7 @@ class PostController extends AbstractController implements PostServiceAware {
                 $data['user-params-fieldset']);
         
         $postData = new Post($mergedData);
+        var_dump($postData);
         
         // If emtpy alias populate it
         if (empty($postData->alias)) {
@@ -169,7 +170,7 @@ class PostController extends AbstractController implements PostServiceAware {
             $fm->setNamespace('error')
                     ->addMessage('Post "' . $postData->title . '" failed to be added.');
         }
-
+        
         // Return message to view
         return $view;
     }
@@ -219,7 +220,7 @@ class PostController extends AbstractController implements PostServiceAware {
                 'alias' => $existingPost->alias,
                 'content' => $existingPost->content,
                 'excerpt' => $existingPost->excerpt,
-                'commenting' => $existingPost->commenting,
+                'commenting' => $existingPost->{'commenting'},
                 'status' => $existingPost->status,
                 'accessGroup' => $existingPost->accessGroup,
                 'type' => $existingPost->type,
