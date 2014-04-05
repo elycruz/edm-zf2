@@ -55,6 +55,9 @@ class Module implements AutoloaderProviderInterface {
     public function onRoute(MvcEvent $e) {        
         // Get route match
         $routeMatch = $e->getRouteMatch();
+        
+        // Make router available via the service locator
+//        $this->serviceLocator->setService('edm-router', $e->getRouter());
 
         // Get module name (if any)
         $module = $routeMatch->getParam('module');

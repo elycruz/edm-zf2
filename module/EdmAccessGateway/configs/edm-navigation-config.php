@@ -26,6 +26,22 @@ return array(
                         )
                     )
                 ),
+                array(
+                    'label' => 'View Modules',
+                    'route' => 'paginator',
+                    'resource' => 'view-module',
+                    'privilege' => 'cms-author',
+                    'controller' => 'view-module',
+                    'action' => 'index',
+                    'pages' => array(
+                        array(
+                            'label' => 'View Module Create',
+                            'route' => 'edm-admin-default',
+                            'privilege' => 'cms-author',
+                            'resource' => 'create'
+                        )
+                    )
+                ),
             )
         ),
         array(
