@@ -106,6 +106,10 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
     }
 
     public function createAction() {
+                
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'create-';
+        
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view =
@@ -151,7 +155,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.' .
+            $fm->setNamespace('create-error')->addMessage('Form validation failed.' .
                     '  Please try again.');
             // Debug::dump($form->getMessages());
             return $view;
@@ -197,7 +201,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
         // Check if term taxonomy already exists
         $viewModuleCheck = $viewModuleService->getByAlias($viewModuleData->alias);
         if (!empty($viewModuleCheck)) {
-            $fm->setNamespace('error')->addMessage('View Module with alias "' . $viewModuleData->alias . '" already ' .
+            $fm->setNamespace('create-error')->addMessage('View Module with alias "' . $viewModuleData->alias . '" already ' .
                     'exists in the database.  Click here to edit it.');
             return $view;
         }
@@ -207,13 +211,13 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // Send success message to user
         if (is_numeric($rslt) && !empty($rslt) && $rslt instanceof \Exception === false) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('create-highlight')
                     ->addMessage('View Module "' . $viewModuleData->title .
                             '" added successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('create-error')
                     ->addMessage('View Module "' . $viewModuleData->title .
                             '" failed to be added.  Errors: <br />'
                             . '<pre>' . $rslt->getTraceAsString()
@@ -226,6 +230,10 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
     }
 
     public function updateAction() {
+                        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'update-';
+        
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view = $this->view = new ViewModel();
@@ -271,7 +279,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
         
         // Check if term already exists if not bail
         if (empty($existingViewModule)) {
-            $fm->setNamespace('error')->addMessage('ViewModule with id "'
+            $fm->setNamespace('update-error')->addMessage('ViewModule with id "'
                     . $id . '" doesn\'t exist in database.');
             return $view;
         }
@@ -334,7 +342,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.  ' .
+            $fm->setNamespace('update-error')->addMessage('Form validation failed.  ' .
                     'Please review values and try again.');
             return $view;
         }
@@ -357,14 +365,14 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // Send success message to user
         if ($rslt === true && $rslt instanceof \Exception === false) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('update-highlight')
                     ->addMessage('ViewModule "'
                             . $viewModuleData->title . '" in category "' . $viewModuleData->term_taxonomy_id
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('update-error')
                     ->addMessage('ViewModule "'
                             . $viewModuleData->title . '" in category "' . $viewModuleData->term_taxonomy_id
                             . '" failed to be updated.');
@@ -375,6 +383,10 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
     }
 
     public function deleteAction() {
+
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'delete-';
+        
         // Set up prelims and populate $this -> view for 
         $view =
                 $this->view =
@@ -389,7 +401,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // If request is not a get or id is empty return
         if (empty($id)) {
-            $fm->setNamespace('error')->addMessage('No `id` was set for ' .
+            $fm->setNamespace('delete-error')->addMessage('No `id` was set for ' .
                     'deletion in the query string.');
             return $view;
         }
@@ -401,7 +413,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
         $viewModuleRslt = $viewModuleService->getById($id);
         if (empty($viewModuleRslt)) {
             // If not send message and bail
-            $fm->setNamespace('error')->addMessage('ViewModule Id "' .
+            $fm->setNamespace('delete-error')->addMessage('ViewModule Id "' .
                     $id . '" doesn\'t exist in database.');
             return $view;
         }
@@ -415,14 +427,14 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // Send success message to user
         if ($rslt) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('delete-highlight')
                     ->addMessage('ViewModule "'
                             . $viewModule->title . '" in category "' . $mixedTermRel->term_taxonomy_id
                             . '" deleted successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('delete-error')
                     ->addMessage('ViewModule "'
                             . $viewModule->title . '" in category "' . $mixedTermRel->term_taxonomy_id
                             . '" failed to be deleted.');
@@ -433,6 +445,10 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
     }
 
     public function setListOrderAction() {
+        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'delete-';
+        
         $view =
                 $this->view =
                 new JsonModel();
@@ -451,7 +467,7 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // Set error message if term tax not found
         if (empty($viewModule)) {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('ViewModule id "' . $id
                             . '" not found in database.  ' .
                             'List order change failed.');
@@ -466,14 +482,14 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
 
         // Send success message to user
         if (!empty($rslt)) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('index-highlight')
                     ->addMessage('ViewModule "'
                             . $viewModule->term_name . ' > ' . $viewModule->taxonomy
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('ViewModule "'
                             . $viewModule->term_name . ' > ' . $viewModule->taxonomy
                             . '" failed to be updated.');

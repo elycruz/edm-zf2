@@ -11,14 +11,14 @@ use Edm\Service\AbstractService,
     Zend\Db\TableGateway\TableGateway,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Stdlib\DateTime,
     Zend\Debug\Debug;
 
 /**
  * @todo fix composite data column aware interface and trait to use the 
- * @todo start using the db\table->alias for aliases to avoid conflicts and 
- * maintain readability
  * "tuple" language instead of the array language
+ * @todo start using the db\table->alias for aliases to avoid conflicts and 
+ * maintain readability 
+ * @todo outfit for date_info
  * @author ElyDeLaCruz
  */
 class ViewModuleService extends AbstractService 
@@ -78,13 +78,6 @@ implements \Edm\UserAware,
         // ViewModule Term Rel
         $mixedTermRel = $viewModule->getMixedTermRelProto();
         
-        // Created Date
-        $today = new DateTime();
-        $viewModule->createdDate = $today->getTimestamp();
-        
-        // Created by
-        $viewModule->createdById = $user->user_id;
-        
         // If empty alias
         if (empty($viewModule->alias)) {
             $viewModule->alias = $dbDataHelper->getValidAlias($viewModule->title);
@@ -106,12 +99,11 @@ implements \Edm\UserAware,
         $cleanViewModule['allowedOnPages'] = 
                 $this->serializeAndEscapeArray($viewModule->allowedOnPages);
         
-        
         // Secondary data
         if (!empty($this->secondaryTableName)) {
             $cleanSecondaryData = $dbDataHelper->escapeTuple(
                     $viewModule->getSecondaryProto()->toArray());
-            Debug::dump($cleanSecondaryData);
+//            Debug::dump($cleanSecondaryData);
         }
             
         // Get database platform object
@@ -121,7 +113,7 @@ implements \Edm\UserAware,
         // Begin transaction
         $conn->beginTransaction();
         try {
-
+            
             // Create viewModule
             $this->getViewModuleTable()->insert($cleanViewModule);
             $retVal = $view_module_id = $driver->getLastGeneratedValue();
@@ -157,8 +149,16 @@ implements \Edm\UserAware,
      */
     public function updateViewModule(ViewModule $viewModule) {
         
+        // Get current user
+        $user = $this->getUser();
+        
+        // Bail if no user
+        if (empty($user)) {
+            return false;
+        }
+        
         $id = $viewModule->view_module_id;
-//        Debug::dump($viewModule);
+
         // Get Db Data Helper
         $dbDataHelper = $this->getDbDataHelper();
         
@@ -183,7 +183,7 @@ implements \Edm\UserAware,
         // Begin transaction
         $conn->beginTransaction();
         try {
-
+            
             // Update mixedTermRel
             if (is_array($mixedTermRelData) && count($mixedTermRelData) > 0) {
                 $this->getMixedTermRelTable()

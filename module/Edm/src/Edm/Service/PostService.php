@@ -55,9 +55,9 @@ implements \Edm\UserAware,
         $user = $this->getUser();
         
         // Bail if no user
-//        if (empty($user)) {
-//            return false;
-//        }
+        if (empty($user)) {
+            return false;
+        }
         
         // Get some help for cleaning data to be submitted to db
         $dbDataHelper = $this->getDbDataHelper();
@@ -93,7 +93,7 @@ implements \Edm\UserAware,
             $today = new \DateTime();
             $this->getDateInfoTable()->insert(
                     array('createdDate' => $today->getTimestamp(), 
-                          'createdById' => '0'));
+                          'createdById' => $user->user_id));
             
             // Get date_info_id for post
             $cleanPost['date_info_id'] = $driver->getLastGeneratedValue();
@@ -125,6 +125,14 @@ implements \Edm\UserAware,
      * @return mixed boolean | Exception
      */
     public function updatePost(Post $post) {
+                
+        // Get current user
+        $user = $this->getUser();
+        
+        // Bail if no user
+        if (empty($user)) {
+            return false;
+        }
         
         $id = $post->post_id;
 
@@ -157,12 +165,14 @@ implements \Edm\UserAware,
         try {
             // Insert date info
             $today = new \DateTime();
-            $this->getDateInfoTable()->insert(
-                    array('lastUpdated' => $today->getTimestamp(), 
-                          'lastUpdatedById' => '0'));
             
-            // Get date_info_id for post
-            $cleanPost['date_info_id'] = $driver->getLastGeneratedValue();
+            // Update Date Info
+            $this->getDateInfoTable()
+                ->update(array(
+                            'lastUpdated' => $today->getTimestamp(), 
+                            'lastUpdatedById' => $user->user_id),
+                         array(
+                            'date_info_id' => $postData['date_info_id'] ));
             
             // Update postTermRel
             if (is_array($postTermRelData) && count($postTermRelData) > 0) {

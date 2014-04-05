@@ -75,7 +75,7 @@ class ViewModuleForm extends EdmForm {
             $this->getTaxonomySelectElmOptions(array(
                 'taxonomy' => 'view-module-type',
                 'defaultOption' => array(
-                    'value' => null,
+                    'value' => 'uncategorized',
                     'label' => '-- Select a View Module Type --'
                 ),
                 'optionValueAndLabelKeys' => array(
@@ -86,13 +86,13 @@ class ViewModuleForm extends EdmForm {
         
         // Add Position values
         $position = $mixedTermRelFieldset->get('term_taxonomy_id');
-        $position->setLabel('Positions');
+        $position->setLabel('Ui Positions');
         $position->setValueOptions(
             $this->getTaxonomySelectElmOptions(array(
-                'taxonomy' => 'position',
+                'taxonomy' => 'ui-position',
                 'defaultOption' => array(
                     'value' => null,
-                    'label' => '-- Select a Position --'
+                    'label' => '-- Select a Ui Position --'
                 ),
                 'optionValueAndLabelKeys' => array(
                     'value' => 'term_taxonomy_id',
