@@ -11,6 +11,22 @@ return array(
             'uri' => '/edm-admin/content',
             'pages' => array(
                 array(
+                    'label' => 'Pages',
+                    'route' => 'paginator',
+                    'resource' => 'page',
+                    'privilege' => 'cms-author',
+                    'controller' => 'post',
+                    'action' => 'index',
+                    'pages' => array(
+                        array(
+                            'label' => 'Page Create',
+                            'route' => 'edm-admin-default',
+                            'privilege' => 'cms-author',
+                            'resource' => 'create'
+                        )
+                    )
+                ),
+                array(
                     'label' => 'Posts',
                     'route' => 'paginator',
                     'resource' => 'post',

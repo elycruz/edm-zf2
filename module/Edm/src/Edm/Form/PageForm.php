@@ -56,6 +56,18 @@ class PageForm extends EdmForm {
                     'label' => 'term_name'
                 )
         )));
+        
+        // Add Mixed Term Rel Type
+        $mixedTermRelFieldset->add(array(
+            'name' => 'objectType',
+            'type' => 'Hidden',
+            'attributes' => array(
+                'id' => 'objectType',
+                'required' => true,
+                'value' => 'page'
+            )
+        ));
+        
         // Default the form elements value
         $pageStatus->setValue('published');
         

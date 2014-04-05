@@ -107,7 +107,7 @@ class PageFieldset extends Fieldset {
             'type' => 'checkbox',
             'name' => 'mvc_resetParamsOnRender',
             'options' => array(
-                'value' => '1',
+                'value' => 1,
                 'label' => 'Reset params on render'
             ),
             'attributes' => array(
@@ -169,19 +169,6 @@ class PageFieldset extends Fieldset {
             'attributes' => array(
                 'id' => 'acl_resource',
                 'required' => false,
-            )
-        ));
-
-        // Category Id
-        $this->add(array(
-            'name' => 'term_taxonomy_id',
-            'type' => 'Zend\Form\Element\Select',
-            'options' => array(
-                'label' => 'Category',
-                'placeholder' => 'Category'
-            ),
-            'attributes' => array(
-                'id' => 'term_taxonomy_id'
             )
         ));
 

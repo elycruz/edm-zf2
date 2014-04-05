@@ -20,19 +20,20 @@ echo <<<HTML
         <fieldset>
             <legend>Page Type</legend>
             {$this->edmFormElement($page->get('type'))}<br class="cb" />
-            <div>
-                <label>Uri Page</label>
+            <div class="form-item clear-both">
+                <label>Uri Page</label><br />
                 {$this->edmFormElement($page->get('acl_uri'))}
                 {$this->edmFormElement($page->get('acl_resource'))}
                 {$this->edmFormElement($page->get('acl_privilege'))}
             </div>
-            <div>
-                <label>Mvc Page</label>
+            <div class="form-item clear-both">
+                <label>Mvc Page</label><br />
                 {$this->edmFormElement($page->get('mvc_action'))}
                 {$this->edmFormElement($page->get('mvc_controller'))}
                 {$this->edmFormElement($page->get('mvc_module'))}
                 {$this->edmFormElement($page->get('mvc_route'))}
                 {$this->edmFormElement($page->get('mvc_resetParamsOnRender'))}
+                <br class="clear-both" />
                 <fieldset>
                     <legend>Mvc Params</legend>
                     {$this->edmFormCollection($mvcParams->get('userParams'))}
@@ -58,6 +59,7 @@ echo <<<HTML
         </fieldset>
         <fieldset class="controls">
             <div class="form-item">
+            {$this->formElement($mixedTermRel->get('objectType'))}
             {$this->formElement($submitAndReset->get('submit'))}
             {$this->formElement($submitAndReset->get('reset'))}
             </div>

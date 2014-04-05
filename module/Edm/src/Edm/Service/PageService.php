@@ -86,15 +86,40 @@ implements \Edm\UserAware,
         
         // Created by
         $page->createdById = $user->user_id;
-        
-        // If empty user params
-        if (!isset($page->userParams)) {
-            $page->userParams = '';
-        }
 
         // If empty alias
         if (empty($page->alias)) {
             $page->alias = $dbDataHelper->getValidAlias($page->title);
+        }
+                
+        // If empty user params
+        if (!isset($page->userParams)) {
+            $page->userParams = '';
+        }
+        
+        // If empty Html Attribs
+        if (empty($page->htmlAttribs)) {
+            $page->htmlAttribs = '';
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_params)) {
+            $page->mvc_params = '';
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_resetParamsOnRender)) {
+            $page->mvc_resetParamsOnRender = 0;
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_resetParamsOnRender)) {
+            $page->mvc_resetParamsOnRender = 0;
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->visible)) {
+            $page->visible = 0;
         }
         
         // Escape tuples 
@@ -109,8 +134,8 @@ implements \Edm\UserAware,
         $conn = $driver->getConnection();
         
         // Begin transaction
-        $conn->beginTransaction();
-        try {
+//        $conn->beginTransaction();
+//        try {
             // Create page
             $this->getPageTable()->insert($cleanPage);
             $retVal = $page_id = $driver->getLastGeneratedValue();
@@ -120,12 +145,11 @@ implements \Edm\UserAware,
             $this->getMixedTermRelTable()->insert($cleanMixedTermRel);
 
             // Commit and return true
-            $conn->commit();
-        } catch (\Exception $e) {
-            $conn->rollback();
-            Debug::dump($e->getMessage());
-            $retVal = $e;
-        }
+//            $conn->commit();
+//        } catch (\Exception $e) {
+//            $conn->rollback();
+//            $retVal = $e;
+//        }
         return $retVal;
     }
 
