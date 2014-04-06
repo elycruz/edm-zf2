@@ -14,6 +14,8 @@ use Zend\Mvc\Controller\AbstractActionController,
 
 class AjaxUiController extends AbstractActionController
 {
+        use \Edm\UserAwareTrait;
+
     public function indexAction()
     {
         $this->view = new ViewModel(array('key' => 'value'));
@@ -22,6 +24,9 @@ class AjaxUiController extends AbstractActionController
         $this->view->navigation_json = 
                 json_encode($this->getServiceLocator()
                         ->get('edm-navigation')->toArray());
+        
+        $this->view->screenName = $this->getUser()->screenName;
+        
         return $this->view;
     }
 }

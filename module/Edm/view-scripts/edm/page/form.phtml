@@ -48,9 +48,9 @@ echo <<<HTML
         </fieldset>
         <fieldset>
             <legend>Permissions</legend>
-            {$this->edmFormElement($mixedTermRel->get('status'))}
-            {$this->edmFormElement($page->get('description'))}
-            {$this->edmFormElement($page->get('visible'))}<br class="cb" />
+            {$this->edmFormElement($mixedTermRel->get('status'))}<br class="clear-both" />
+            {$this->edmFormElement($page->get('description'))}<br class="clear-both" />
+            {$this->edmFormElement($page->get('visible'))}
             {$this->edmFormElement($mixedTermRel->get('accessGroup'))}
         </fieldset>
         <fieldset class="other-params">

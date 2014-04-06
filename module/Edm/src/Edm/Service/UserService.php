@@ -3,7 +3,7 @@
 namespace Edm\Service;
 
 // Temporarily include hasher
-//require(implode(DIRECTORY_SEPARATOR, array('CrackStation', 'Pbkdf2_Hasher.php')));
+//require(implode(DIRECTORY_SEPARATOR, array('CrackStation', 'Pbkdf2Hasher.php')));
 
 use Edm\Service\AbstractService,
     Edm\Model\User,
@@ -35,7 +35,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
 
     /**
      * Our password hasher.
-     * @var Pbkdf2_Hasher
+     * @var Pbkdf2Hasher
      */
     protected $hasher;
 
@@ -258,7 +258,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         $storage = $authService->getStorage();
         $storage->write(array(
                     'user_id' => $validatedUser->user_id,
-                    'screeName' => $validatedUser->screenName,
+                    'screenName' => $validatedUser->screenName,
                     'lastLogin' => $validatedUser->lastLogin,
                     'role' => $validatedUser->role
                 ));
@@ -556,11 +556,11 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
 
     /**
      * Our password and activation key hasher.
-     * @return Pbkdf2_Hasher
+     * @return Pbkdf2Hasher
      */
     public function getHasher() {
         if (empty($this->hasher)) {
-            $this->hasher = new \Pbkdf2_Hasher();
+            $this->hasher = new Pbkdf2Hasher();
         }
         return $this->hasher;
     }

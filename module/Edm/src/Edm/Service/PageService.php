@@ -10,7 +10,7 @@ use Edm\Service\AbstractService,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    Zend\Stdlib\DateTime,
+    \DateTime,
     Zend\Debug\Debug;
 
 /**
@@ -134,8 +134,8 @@ implements \Edm\UserAware,
         $conn = $driver->getConnection();
         
         // Begin transaction
-//        $conn->beginTransaction();
-//        try {
+        $conn->beginTransaction();
+        try {
             // Create page
             $this->getPageTable()->insert($cleanPage);
             $retVal = $page_id = $driver->getLastGeneratedValue();
@@ -145,11 +145,11 @@ implements \Edm\UserAware,
             $this->getMixedTermRelTable()->insert($cleanMixedTermRel);
 
             // Commit and return true
-//            $conn->commit();
-//        } catch (\Exception $e) {
-//            $conn->rollback();
-//            $retVal = $e;
-//        }
+            $conn->commit();
+        } catch (\Exception $e) {
+            $conn->rollback();
+            $retVal = $e;
+        }
         return $retVal;
     }
 
@@ -163,7 +163,6 @@ implements \Edm\UserAware,
      */
     public function updatePage(Page $page) {
         $id = $page->page_id;
-//        Debug::dump($page);
         // Get Db Data Helper
         $dbDataHelper = $this->getDbDataHelper();
         
@@ -359,7 +358,6 @@ implements \Edm\UserAware,
         if (!$page->getInputFilter()->isValid()) {
             throw new \Exception('Page object received in ' .
                     __CLASS__ .'->'. __FUNCTION__ . ' is invalid.');
-            // @todo spit out error messages here
         }
         
         // If taxonomy alias is not valid

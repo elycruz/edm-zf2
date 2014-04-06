@@ -126,9 +126,7 @@ class PageController extends AbstractController implements PageServiceAware {
         // If form not valid return
         if (!$view->form->isValid()) {
             $fm->setNamespace('create-error')->addMessage('Form validation failed.' .
-                    '  Please try again.' . (json_encode($form->getMessages()))
-                    . (json_encode($form->getData())));
-//             Debug::dump($form->getMessages());
+                    '  Please try again.');
             return $view;
         }
 
@@ -142,32 +140,32 @@ class PageController extends AbstractController implements PageServiceAware {
                 $data['mixed-term-rel-fieldset'],
                 $data['other-params-fieldset']);
         
-        $postData = new Page($mergedData);
+        $pageData = new Page($mergedData);
         
         // If emtpy alias populate it
-        if (empty($postData->alias)) {
-            $postData->alias = $this->getDbDataHelper()->getValidAlias($postData->title);
+        if (empty($pageData->alias)) {
+            $pageData->alias = $this->getDbDataHelper()->getValidAlias($pageData->label);
         }
         // Check if term taxonomy already exists
-        $postCheck = $pageService->getByAlias($postData->alias);
+        $postCheck = $pageService->getByAlias($pageData->alias);
         if (!empty($postCheck)) {
-            $fm->setNamespace('create-error')->addMessage('Page with alias "' . $postData->alias . '" already ' .
+            $fm->setNamespace('create-error')->addMessage('Page with alias "' . $pageData->alias . '" already ' .
                     'exists in the database.  Click here to edit it.');
             return $view;
         }
 
         // Create term taxonomy
-        $rslt = $pageService->createPage($postData);
+        $rslt = $pageService->createPage($pageData);
 
         // Send success message to user
         if (is_numeric($rslt) && !empty($rslt) && $rslt instanceof \Exception === false) {
             $fm->setNamespace('create-highlight')
-                    ->addMessage('Page "' . $postData->title . '" added successfully.');
+                    ->addMessage('Page "' . $pageData->label . '" added successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('create-error')
-                    ->addMessage('Page "' . $postData->title . '" failed to be added.');
+                    ->addMessage('Page "' . $pageData->label . '" failed to be added.');
         }
 
         // Return message to view
@@ -175,6 +173,10 @@ class PageController extends AbstractController implements PageServiceAware {
     }
 
     public function updateAction() {
+                        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'create-';
+        
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view = $this->view = new ViewModel();
@@ -212,10 +214,10 @@ class PageController extends AbstractController implements PageServiceAware {
         // Set data
         $form->setData(array(
             'mixed-term-rel-fieldset' => array(
-                'term_taxonomy_id' => $existingPage->getPageTermRelProto()->term_taxonomy_id,
+                'term_taxonomy_id' => $existingPage->getMixedTermRelProto()->term_taxonomy_id,
             ),
             'page-fieldset' => array(
-                'title' => $existingPage->title,
+                'label' => $existingPage->label,
                 'alias' => $existingPage->alias,
                 'content' => $existingPage->content,
                 'excerpt' => $existingPage->excerpt,
@@ -256,23 +258,23 @@ class PageController extends AbstractController implements PageServiceAware {
                 $data['other-params-fieldset']);
         
         // Create new post model obj
-        $postData = new Page($mergedData);
+        $pageData = new Page($mergedData);
 
         // Update term in db
-        $rslt = $pageService->updatePage($postData);
+        $rslt = $pageService->updatePage($pageData);
 
         // Send success message to user
         if ($rslt === true && $rslt instanceof \Exception === false) {
             $fm->setNamespace('create-highlight')
                     ->addMessage('Page "'
-                            . $postData->title . '" in category "' . $postData->term_taxonomy_id
+                            . $pageData->label . '" in category "' . $pageData->term_taxonomy_id
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
             $fm->setNamespace('create-error')
                     ->addMessage('Page "'
-                            . $postData->title . '" in category "' . $postData->term_taxonomy_id
+                            . $pageData->label . '" in category "' . $pageData->term_taxonomy_id
                             . '" failed to be updated.');
         }
 
@@ -281,10 +283,12 @@ class PageController extends AbstractController implements PageServiceAware {
     }
 
     public function deleteAction() {
+                        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'delete-';
+        
         // Set up prelims and populate $this -> view for 
-        $view =
-                $this->view =
-                new JsonModel();
+        $view = $this->view = new JsonModel();
         $view->setTerminal(true);
 
         // init flash messenger
@@ -295,7 +299,7 @@ class PageController extends AbstractController implements PageServiceAware {
 
         // If request is not a get or id is empty return
         if (empty($id)) {
-            $fm->setNamespace('error')->addMessage('No `id` was set for ' .
+            $fm->setNamespace('delete-error')->addMessage('No `id` was set for ' .
                     'deletion in the query string.');
             return $view;
         }
@@ -304,34 +308,28 @@ class PageController extends AbstractController implements PageServiceAware {
         $pageService = $this->getPageService();
 
         // Check if term already exists
-        $postRslt = $pageService->getById($id);
-        if (empty($postRslt)) {
+        $page = new Page($pageService->getById($id));
+        if (empty($page)) {
             // If not send message and bail
-            $fm->setNamespace('error')->addMessage('Page Id "' .
+            $fm->setNamespace('delete-error')->addMessage('Page Id "' .
                     $id . '" doesn\'t exist in database.');
             return $view;
         }
 
-        // Page object
-        $post = new Page($postRslt);
-        $postTermRel = $post->getPageTermRelProto();
-
         // Delete term in db
-        $rslt = $pageService->deletePage($post->post_id);
+        $rslt = $pageService->deletePage($page->page_id);
 
         // Send success message to user
-        if ($rslt) {
-            $fm->setNamespace('highlight')
+        if ($rslt instanceof Exception === false) {
+            $fm->setNamespace('delete-highlight')
                     ->addMessage('Page "'
-                            . $post->title . '" in category "' . $postTermRel->term_taxonomy_id
-                            . '" deleted successfully.');
+                            . $page->label . '" deleted successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('delete-error')
                     ->addMessage('Page "'
-                            . $post->title . '" in category "' . $postTermRel->term_taxonomy_id
-                            . '" failed to be deleted.');
+                            . $page->label . '" failed to be deleted.');
         }
 
         // Return message to view
@@ -339,6 +337,10 @@ class PageController extends AbstractController implements PageServiceAware {
     }
 
     public function setListOrderAction() {
+                        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'index-';
+        
         $view =
                 $this->view =
                 new JsonModel();
@@ -357,7 +359,7 @@ class PageController extends AbstractController implements PageServiceAware {
 
         // Set error message if term tax not found
         if (empty($post)) {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('Page id "' . $id
                             . '" not found in database.  ' .
                             'List order change failed.');
@@ -372,14 +374,14 @@ class PageController extends AbstractController implements PageServiceAware {
 
         // Send success message to user
         if (!empty($rslt)) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('index-highlight')
                     ->addMessage('Page "'
                             . $post->term_name . ' > ' . $post->taxonomy
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('Page "'
                             . $post->term_name . ' > ' . $post->taxonomy
                             . '" failed to be updated.');

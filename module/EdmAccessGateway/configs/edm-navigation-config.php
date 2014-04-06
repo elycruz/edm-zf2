@@ -55,6 +55,18 @@ return array(
                             'route' => 'edm-admin-default',
                             'privilege' => 'cms-author',
                             'resource' => 'create'
+                        ),
+                        array(
+                            'label' => 'Menu View Modules',
+                            'route' => 'edm-admin-default',
+                            'privilege' => 'cms-author',
+                            'resource' => 'index/view-module/menu'
+                        ),
+                        array(
+                            'label' => 'Html View Modules',
+                            'route' => 'edm-admin-default',
+                            'privilege' => 'cms-author',
+                            'resource' => 'index/view-module/html'
                         )
                     )
                 ),
