@@ -128,6 +128,10 @@ class TermController extends AbstractController {
     }
 
     public function updateAction() {
+        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'create-';
+        
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view =
@@ -147,7 +151,7 @@ class TermController extends AbstractController {
         try {
             $existingTerm = $termTable->getByAlias($id);
         } catch (\Exception $e) {
-            $fm->setNamespace('error')->addMessage('Term '
+            $fm->setNamespace('update-error')->addMessage('Term '
                     . 'doesn\'t exist in database.');
             return $view;
         }
@@ -171,7 +175,7 @@ class TermController extends AbstractController {
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.');
+            $fm->setNamespace('update-error')->addMessage('Form validation failed.');
             return $view;
         }
 
@@ -184,7 +188,7 @@ class TermController extends AbstractController {
 
         // Send success message to user
         if ($rslt) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('update-highlight')
                     ->addMessage('Term "' . $term->name . '" with alias "'
                             . $term->alias . '" updated successfully.');
             $view->form->setData(array(
@@ -195,7 +199,7 @@ class TermController extends AbstractController {
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('update-error')
                     ->addMessage('Term "' . $term->name . '" with alias "'
                             . $term->alias . '" failed to be updated.');
         }

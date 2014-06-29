@@ -7,7 +7,8 @@ use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilterAwareInterface,
     Zend\InputFilter\InputFilterInterface,
     Edm\Model\AbstractModel,
-    Edm\Model\MixedTermRel;
+    Edm\Model\MixedTermRel,
+    Edm\Model\MenuPageRel;
 
 
 /**
@@ -227,7 +228,7 @@ class Page extends AbstractModel implements InputFilterAwareInterface {
         return $retVal;
     }
 
-        /**
+    /**
      * Exchange array overriden to divide data between user data and mixedTermRel data
      * @param array $data
      * @return \Edm\Model\AbstractModel
@@ -235,14 +236,21 @@ class Page extends AbstractModel implements InputFilterAwareInterface {
     public function exchangeArray(array $data) {
         $mixedTermRel = $this->getMixedTermRelProto();
         $mixedTermRelValidKeys = $mixedTermRel->getValidKeys();
+        $menuPageRel = $this->getMenuPageRelProto();
+        $menuPageRelValidKeys = $menuPageRel->getValidKeys();
         foreach ($data as $key => $val) {
             if (in_array($key, $this->validKeys)) {
                 $this->{$key} = $val;
-            } else if (in_array($key, $mixedTermRelValidKeys)) {
+            } 
+            else if (in_array($key, $mixedTermRelValidKeys)) {
                 $mixedTermRel->{$key} = $val;
+            }
+            else if (in_array($key, $menuPageRelValidKeys)) {
+                $menuPageRel->{$key} = $val;
             }
         }
         $this->mixedTermRelProto = $mixedTermRel;
+        $this->menuPageRelProto = $menuPageRel;
         return $this;
     }
     
@@ -255,6 +263,18 @@ class Page extends AbstractModel implements InputFilterAwareInterface {
             $this->mixedTermRelProto = new MixedTermRel($data);
         }
         return $this->mixedTermRelProto;
+    }
+    
+    /**
+     * Menu Page Rel Proto
+     * @param {array} $data - default `null`
+     * @return Edm\Model\MenuPageRel
+     */
+    public function getMenuPageRelProto ($data = null) {
+        if (empty($this->menuPageRelProto)) {
+            $this->menuPageRelProto = new MenuPageRel($data);
+        }
+        return $this->menuPageRelProto;    
     }
 
 }

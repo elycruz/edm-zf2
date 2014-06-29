@@ -80,13 +80,6 @@ implements \Edm\UserAware,
         // Page Term Rel
         $mixedTermRel = $page->getMixedTermRelProto();
         
-        // Created Date
-        $today = new DateTime();
-        $page->createdDate = $today->getTimestamp();
-        
-        // Created by
-        $page->createdById = $user->user_id;
-
         // If empty alias
         if (empty($page->alias)) {
             $page->alias = $dbDataHelper->getValidAlias($page->title);
@@ -105,11 +98,6 @@ implements \Edm\UserAware,
         // If empty Mvc Params
         if (empty($page->mvc_params)) {
             $page->mvc_params = '';
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->mvc_resetParamsOnRender)) {
-            $page->mvc_resetParamsOnRender = 0;
         }
         
         // If empty Mvc Params

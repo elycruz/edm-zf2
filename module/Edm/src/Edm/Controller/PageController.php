@@ -210,25 +210,43 @@ class PageController extends AbstractController implements PageServiceAware {
             $userParamsFieldset = $pageService->unSerializeAndUnEscapeTuples(
                     $existingPage->userParams);
         }
+        
+        $mvcParamsFieldset = null;
+        // Resolve mvc params field
+        if (!empty($existingPage->mvcParams)) {
+            $mvcParamsFieldset = $pageService->unSerializeAndUnEscapeTuples(
+                    $existingPage->mvcParams);
+        }
 
         // Set data
         $form->setData(array(
             'mixed-term-rel-fieldset' => array(
                 'term_taxonomy_id' => $existingPage->getMixedTermRelProto()->term_taxonomy_id,
-            ),
-            'page-fieldset' => array(
-                'label' => $existingPage->label,
-                'alias' => $existingPage->alias,
-                'content' => $existingPage->content,
-                'excerpt' => $existingPage->excerpt,
-                'commenting' => $existingPage->commenting,
                 'status' => $existingPage->status,
                 'accessGroup' => $existingPage->accessGroup,
                 'type' => $existingPage->type,
             ),
+            'page-fieldset' => array(
+                'label' => $existingPage->label,
+                'alias' => $existingPage->alias,
+                'type' => $existingPage->type,
+                'uri' => $existingPage->uri,
+                'parent_id' => $existingPage->parent_id,
+                'acl_resource' => $existingPage->acl_resource,
+                'acl_privilege' => $existingPage->acl_privilege,
+                'mvc_action' => $existingPage->mvc_action,
+                'mvc_controller' => $existingPage->mvc_controller,
+                'mvc_module' => $existingPage->mvc_module,
+                'mvc_route' => $existingPage->mvc_route,
+                'mvc_params' => $existingPage->mvc_params,
+                'description' => $existingPage->description
+            ),
+            'mvc-params-fieldset' => array(
+                'userParams' => $mvcParamsFieldset
+            ),
             'other-params-fieldset' => array(
                 'userParams' => $userParamsFieldset
-                )
+            )
         ));
         
         // If not post bail

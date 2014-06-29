@@ -99,6 +99,10 @@ class PostController extends AbstractController implements PostServiceAware {
     }
 
     public function createAction() {
+        
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'create-';
+
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view =
@@ -126,7 +130,7 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.' .
+            $fm->setNamespace('create-error')->addMessage('Form validation failed.' .
                     '  Please try again.');
             // Debug::dump($form->getMessages());
             return $view;
@@ -143,7 +147,7 @@ class PostController extends AbstractController implements PostServiceAware {
                 $data['user-params-fieldset']);
         
         $postData = new Post($mergedData);
-        var_dump($postData);
+//        var_dump($postData);
         
         // If emtpy alias populate it
         if (empty($postData->alias)) {
@@ -152,7 +156,7 @@ class PostController extends AbstractController implements PostServiceAware {
         // Check if term taxonomy already exists
         $postCheck = $postService->getByAlias($postData->alias);
         if (!empty($postCheck)) {
-            $fm->setNamespace('error')->addMessage('Post with alias "' . $postData->alias . '" already ' .
+            $fm->setNamespace('create-error')->addMessage('Post with alias "' . $postData->alias . '" already ' .
                     'exists in the database.  Click here to edit it.');
             return $view;
         }
@@ -162,12 +166,12 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // Send success message to user
         if (is_numeric($rslt) && !empty($rslt) && $rslt instanceof \Exception === false) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('create-highlight')
                     ->addMessage('Post "' . $postData->title . '" added successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('create-error')
                     ->addMessage('Post "' . $postData->title . '" failed to be added.');
         }
         
@@ -176,6 +180,9 @@ class PostController extends AbstractController implements PostServiceAware {
     }
 
     public function updateAction() {
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'update-';
+        
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view = $this->view = new ViewModel();
@@ -198,7 +205,7 @@ class PostController extends AbstractController implements PostServiceAware {
         // Check if term already exists if not bail
         $existingPost = $postService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
         if (empty($existingPost)) {
-            $fm->setNamespace('error')->addMessage('Post with id "'
+            $fm->setNamespace('update-error')->addMessage('Post with id "'
                     . $id . '" doesn\'t exist in database.');
             return $view;
         }
@@ -241,7 +248,7 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // If form not valid return
         if (!$view->form->isValid()) {
-            $fm->setNamespace('error')->addMessage('Form validation failed.  ' .
+            $fm->setNamespace('update-error')->addMessage('Form validation failed.  ' .
                     'Please review values and try again.');
             return $view;
         }
@@ -264,14 +271,14 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // Send success message to user
         if ($rslt === true && $rslt instanceof \Exception === false) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('update-highlight')
                     ->addMessage('Post "'
                             . $postData->title . '" in category "' . $postData->term_taxonomy_id
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('update-error')
                     ->addMessage('Post "'
                             . $postData->title . '" in category "' . $postData->term_taxonomy_id
                             . '" failed to be updated.');
@@ -282,6 +289,9 @@ class PostController extends AbstractController implements PostServiceAware {
     }
 
     public function deleteAction() {
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'delete-';
+
         // Set up prelims and populate $this -> view for 
         $view =
                 $this->view =
@@ -296,7 +306,7 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // If request is not a get or id is empty return
         if (empty($id)) {
-            $fm->setNamespace('error')->addMessage('No `id` was set for ' .
+            $fm->setNamespace('delete-error')->addMessage('No `id` was set for ' .
                     'deletion in the query string.');
             return $view;
         }
@@ -308,7 +318,7 @@ class PostController extends AbstractController implements PostServiceAware {
         $postRslt = $postService->getById($id);
         if (empty($postRslt)) {
             // If not send message and bail
-            $fm->setNamespace('error')->addMessage('Post Id "' .
+            $fm->setNamespace('delete-error')->addMessage('Post Id "' .
                     $id . '" doesn\'t exist in database.');
             return $view;
         }
@@ -322,14 +332,14 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // Send success message to user
         if ($rslt) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('delete-highlight')
                     ->addMessage('Post "'
                             . $post->title . '" in category "' . $postTermRel->term_taxonomy_id
                             . '" deleted successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('delete-error')
                     ->addMessage('Post "'
                             . $post->title . '" in category "' . $postTermRel->term_taxonomy_id
                             . '" failed to be deleted.');
@@ -340,6 +350,9 @@ class PostController extends AbstractController implements PostServiceAware {
     }
 
     public function setListOrderAction() {
+        // Set message namespace prefix
+        $this->messageNamespacePrefix = 'index-';
+        
         $view =
                 $this->view =
                 new JsonModel();
@@ -358,7 +371,7 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // Set error message if term tax not found
         if (empty($post)) {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('Post id "' . $id
                             . '" not found in database.  ' .
                             'List order change failed.');
@@ -373,14 +386,14 @@ class PostController extends AbstractController implements PostServiceAware {
 
         // Send success message to user
         if (!empty($rslt)) {
-            $fm->setNamespace('highlight')
+            $fm->setNamespace('index-highlight')
                     ->addMessage('Post "'
                             . $post->term_name . ' > ' . $post->taxonomy
                             . '" updated successfully.');
         }
         // send failure message to user 
         else {
-            $fm->setNamespace('error')
+            $fm->setNamespace('index-error')
                     ->addMessage('Post "'
                             . $post->term_name . ' > ' . $post->taxonomy
                             . '" failed to be updated.');
