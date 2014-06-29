@@ -10,8 +10,7 @@ use Edm\Service\AbstractService,
     Zend\Db\Sql\Sql,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
-    \DateTime,
-    Zend\Debug\Debug;
+    \stdClass;
 
 /**
  * @todo fix composite data column aware interface and trait to use the 
@@ -74,48 +73,8 @@ implements \Edm\UserAware,
             return false;
         }
         
-        // Get some help for cleaning data to be submitted to db
-        $dbDataHelper = $this->getDbDataHelper();
-        
-        // Page Term Rel
-        $mixedTermRel = $page->getMixedTermRelProto();
-        
-        // If empty alias
-        if (empty($page->alias)) {
-            $page->alias = $dbDataHelper->getValidAlias($page->title);
-        }
-                
-        // If empty user params
-        if (!isset($page->userParams)) {
-            $page->userParams = '';
-        }
-        
-        // If empty Html Attribs
-        if (empty($page->htmlAttribs)) {
-            $page->htmlAttribs = '';
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->mvc_params)) {
-            $page->mvc_params = '';
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->mvc_resetParamsOnRender)) {
-            $page->mvc_resetParamsOnRender = 0;
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->visible)) {
-            $page->visible = 0;
-        }
-        
-        // Escape tuples 
-        $cleanPage = $dbDataHelper->escapeTuple($page->toArray());
-        $cleanMixedTermRel = $dbDataHelper->escapeTuple($mixedTermRel->toArray());
-        if (is_array($cleanPage['userParams'])) {
-            $cleanPage['userParams'] = $this->serializeAndEscapeTuples($cleanPage['userParams']);
-        }
+        // Prepare common values for db
+        $cleanData = $this->prepareCommonValuesForDb($page);
 
         // Get database platform object
         $driver = $this->getDb()->getDriver();
@@ -125,12 +84,18 @@ implements \Edm\UserAware,
         $conn->beginTransaction();
         try {
             // Create page
-            $this->getPageTable()->insert($cleanPage);
+            $this->getPageTable()->insert($cleanData->page);
             $retVal = $page_id = $driver->getLastGeneratedValue();
             
             // Create page mixed term rel for page
-            $cleanMixedTermRel['object_id'] = $page_id;
-            $this->getMixedTermRelTable()->insert($cleanMixedTermRel);
+            $cleanData->mixedTermRel['object_id'] = $page_id;
+            $this->getMixedTermRelTable()->insert($cleanData->mixedTermRel);
+
+//            // If we have a page menu rel
+//            if (!empty($cleanData->pageMenuRel) && isset($cleanData->pageMenuRel['menu_id'])) {
+//                $cleanData->pageMenuRel['page_id'] = $page_id;
+//                $this->getPageMenuRelTable()->insert($cleanData->pageMenuRel);
+//            }
 
             // Commit and return true
             $conn->commit();
@@ -140,7 +105,7 @@ implements \Edm\UserAware,
         }
         return $retVal;
     }
-
+    
     /**
      * Updates a page and it's constituants
      *   (mixedTermRel and page mixedTermRel relationship).  
@@ -150,24 +115,20 @@ implements \Edm\UserAware,
      * @return mixed boolean | Exception
      */
     public function updatePage(Page $page) {
+        
+        // Get current user
+        $user = $this->getUser();
+        
+        // Bail if no user
+        if (empty($user)) {
+            return false;
+        }
+
+        // Get page id
         $id = $page->page_id;
-        // Get Db Data Helper
-        $dbDataHelper = $this->getDbDataHelper();
-        
-        // If empty alias
-        if (empty($page->alias)) {
-            $page->alias = $dbDataHelper->getValidAlias($page->title);
-        }
-        
-        // Escape tuples 
-        $pageData = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($page->toArray()));
-        $mixedTermRelData = $dbDataHelper->escapeTuple(
-                $this->ensureOkForUpdate($page->getMixedTermRelProto()->toArray()));
-        
-        // If is array user params serialize it to string
-        if (is_array($pageData['userParams'])) {
-            $pageData['userParams'] = $this->serializeAndEscapeTuples($pageData['userParams']);
-        }
+
+        // Prepare common values for db
+        $cleanData = $this->prepareCommonValuesForDb($page);
         
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
@@ -175,15 +136,22 @@ implements \Edm\UserAware,
         // Begin transaction
         $conn->beginTransaction();
         try {
-
-            // Update mixedTermRel
-            if (is_array($mixedTermRelData) && count($mixedTermRelData) > 0) {
+            
+            // Update Mixed Term Rel if necessary
+            if (isset($cleanData->mixedTermRel) && is_array($cleanData->mixedTermRel)) {
                 $this->getMixedTermRelTable()
-                        ->update($mixedTermRelData, array('page_id' => $id));
+                        ->update($cleanData->mixedTermRel, array('page_id' => $id));
             }
 
-            // Update page
-            $this->getPageTable()->update($pageData, array('page_id' => $id));
+            // Update Page
+            $this->getPageTable()->update($$cleanData->page, array('page_id' => $id));
+            
+//            // Update Page Menu Rel if necessary
+//            if ($this->pageIdInPageMenuRelTable($id) 
+//                    && isset($cleanData->pageMenuRel) && is_array($cleanData->pageMenuRel)) {
+//                $this->getPageMenuRelTable()
+//                        ->update($cleanData->pageMenuRel, array('page_id' => $id));
+//            }
 
             // Commit and return true
             $conn->commit();
@@ -197,7 +165,7 @@ implements \Edm\UserAware,
 
     /**
      * Deletes a page and depends on RDBMS triggers and cascade rules to delete
-     * it's related tables (mixedTermRel and page mixedTermRel rels)
+     * it's related tables (mixedTermRel and page menu rels)
      * @param int $id
      * @return boolean
      */
@@ -256,20 +224,33 @@ implements \Edm\UserAware,
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
         $termTaxService = $this->getTermTaxService();
+        
         // @todo implement return values only for current role level
         return $select
-                ->from(array('page' => $this->getPageTable()->table))
-                ->join(array('mixedTermRel' => 
-                    $this->getMixedTermRelTable()->table), 
-                        'mixedTermRel.object_id=page.page_id')
-        
-            // Term Taxonomy
+            
+            // Select from Page
+            ->from(array('page' => $this->getPageTable()->table))
+                
+            // Join Mixed Term Rel
+            ->join(array('mixedTermRel' => 
+                $this->getMixedTermRelTable()->table), 
+                    'mixedTermRel.object_id=page.page_id')
+//
+//            // Join Page Menu Rel
+//            ->join(array('pageMenuRel' => 
+//                $this->getPageMenuRelTable()->table),
+//                    'pageMenuRel.page_id=page.page_id',
+//                    array('menu_id'))
+
+            // Join Term Taxonomy
             ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
                     'termTax.term_taxonomy_id=mixedTermRel.term_taxonomy_id',
                     array('term_alias'))
+
+            // Join Term
             ->join(array('term' => $termTaxService->getTermTable()->table), 
                     'term.alias=termTax.term_alias', array('term_name' => 'name'))
-                
+
             // Limit from mixed term rel (allow only "page" types) for our page 
             // select statement
             ->where('mixedTermRel.objectType="page"');
@@ -298,35 +279,114 @@ implements \Edm\UserAware,
         }
         return $this->mixedTermRelTable;
     }
-
+    
+    public function getPageMenuRelTable() {
+        if (empty($this->pageMenuRelTable)) {
+            $feature = new FeatureSet();
+            $feature->addFeature(new GlobalAdapterFeature());
+            $this->pageMenuRelTable =
+                    new \Zend\Db\TableGateway\TableGateway(
+                    'page_menu_relationships', $this->getServiceLocator()
+                            ->get('Zend\Db\Adapter\Adapter'), $feature);
+        }
+        return $this->pageMenuRelTable;
+    }
+    
     /**
      * Checks if an alias already exists for a page
      * @param string $alias
      * @return boolean 
      */
     public function checkPageAliasExistsInDb($alias) {
-        $rslt = $this->getMixedTermRelTable()->select(
-                        array('alias' => $alias))->current();
-        if (empty($rslt)) {
-            return false;
-        } else {
-            return true;
-        }
+        return $this->getMixedTermRelTable()
+                ->select(array('alias' => $alias))->valid();
     }
-
+    
     /**
-     * Remove any empty keys and ones in the not ok for update list
-     * @param array $data
-     * @return array
+     * Cleans, escapes, serializes (where necessary), and normalizes `Page` data 
+     * before entry into database.
+     * @param \Edm\Model\Page $page
+     * @return \stdClass {(array)page, (array)mixedTermRel, (array)pageMenuRel)}
      */
-    public function ensureOkForUpdate(array $data) {
-        foreach ($this->notAllowedForUpdate as $key) {
-            if (array_key_exists($key, $data) ||
-                    (array_key_exists($key, $data) && !isset($data[$key]))) {
-                unset($data[$key]);
-            }
+    protected function prepareCommonValuesForDb(Page $page) {
+                
+        // Get some help for cleaning data to be submitted to db
+        $dbDataHelper = $this->getDbDataHelper();
+        
+        // Page Term Rel
+        $mixedTermRel = $page->getMixedTermRelProto();
+        
+        // Page Menu Rel
+        $pageMenuRel = $page->getMenuPageRelProto();
+        
+        // Output variable
+        $out = new stdClass();
+        
+        // If empty alias
+        if (empty($page->alias)) {
+            $page->alias = $dbDataHelper->getValidAlias($page->title);
         }
-        return $data;
+                
+        // If empty user params
+        if (!isset($page->userParams)) {
+            $page->userParams = '';
+        }
+        
+        // If empty Html Attribs
+        if (empty($page->htmlAttribs)) {
+            $page->htmlAttribs = '';
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_params)) {
+            $page->mvc_params = '';
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_resetParamsOnRender)) {
+            $page->mvc_resetParamsOnRender = 0;
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->visible)) {
+            $page->visible = 0;
+        }
+        
+        // Page tuple
+        $cleanPage = $dbDataHelper->escapeTuple($page->toArray());
+        
+        // Mixed Term Rel tuple
+        $cleanMixedTermRel = $dbDataHelper->escapeTuple($mixedTermRel->toArray());
+        
+        // Page Menu Rel tuple
+        $cleanPageMenuRel =  $dbDataHelper->escapeTuple($pageMenuRel->toArray());
+        
+        // Serialize and escape user params if any
+        if (is_array($cleanPage['userParams'])) {
+            $cleanPage['userParams'] = $this->serializeAndEscapeTuples($cleanPage['userParams']);
+        }
+        
+        // Serialize and escape mvc_params if necessary
+        if (is_array($cleanPage['mvc_params'])) {
+            $cleanPage['mvc_params'] = $this->serializeAndEscapeTuples($cleanPage['mvc_params']);
+        }
+        
+        // Set values to return
+        $out->page = $cleanPage;
+        $out->pageMenuRel = $cleanPageMenuRel;
+        $out->mixedTermRel = $cleanMixedTermRel;
+        
+        // Return values
+        return $out;
+    }
+    
+    /**
+     * Checks to see if page_id is in the Page Menu Rel Table
+     * @param {int} $id
+     * @return {boolean}
+     */
+    public function pageIdInPageMenuRelTable ($id) {
+        return $this->getMixedTermRelTable->select(array('page_id' => $id))->valid();
     }
     
     public function setListOrderForPage (Page $page) {

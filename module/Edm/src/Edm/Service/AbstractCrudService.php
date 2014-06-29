@@ -232,4 +232,21 @@ implements Edm_Service_Internal_CrudInterface
         }
         return $this->infoSchema;
     }
+    
+    
+    /**
+     * Remove any empty keys and ones in the not ok for update list
+     * @param array $data
+     * @return array
+     */
+    public function ensureOkForUpdate(array $data) {
+        foreach ($this->notAllowedForUpdate as $key) {
+            if (array_key_exists($key, $data) ||
+                    (array_key_exists($key, $data) && !isset($data[$key]))) {
+                unset($data[$key]);
+            }
+        }
+        return $data;
+    }
+    
 }

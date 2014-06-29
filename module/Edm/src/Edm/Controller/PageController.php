@@ -272,6 +272,8 @@ class PageController extends AbstractController implements PageServiceAware {
         $mergedData = array_merge(
                 $data['page-fieldset'], 
                 $data['mixed-term-rel-fieldset'], 
+                $data['mvc-params-fieldset'],
+                $data['menu-page-rel-fieldset'],
                 array('page_id' => $id),
                 $data['other-params-fieldset']);
         
