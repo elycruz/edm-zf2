@@ -34,9 +34,15 @@ echo <<<HTML
                 {$this->edmFormElement($page->get('mvc_route'))}
                 {$this->edmFormElement($page->get('mvc_resetParamsOnRender'))}
                 <br class="clear-both" />
-                <fieldset>
+                <fieldset class="mvc-params key-value-pair-collection">
                     <legend>Mvc Params</legend>
                     {$this->edmFormCollection($mvcParams->get('userParams'))}
+                    <div class="controls">
+                        <div class="form-item float-right">
+                            <button class="less btn big-btn">-</button>
+                            <button class="more btn big-btn">+</button>
+                        </div>
+                    </div>
                 </fieldset>
             </div>
         </fieldset>
@@ -53,7 +59,7 @@ echo <<<HTML
             {$this->edmFormElement($page->get('visible'))}
             {$this->edmFormElement($mixedTermRel->get('accessGroup'))}
         </fieldset>
-        <fieldset class="other-params">
+        <fieldset class="other-params key-value-pair-collection">
             <legend>Other Params (html params, and other user defined params etc.)</legend>
             {$this->edmFormCollection($otherParams->get('userParams'))}
             <div class="controls">

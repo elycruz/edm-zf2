@@ -7,10 +7,10 @@ use Edm\Db\DbAware,
     Edm\TraitPartials\DbAwareTrait,
     Edm\TraitPartials\ServiceLocatorAwareTrait,
     Edm\TraitPartials\DbDataHelperAwareTrait,
-    \stdClass,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Zend\Db\ResultSet\ResultSet,
-    Zend\Db\Sql\Sql;
+    Zend\Db\Sql\Sql,
+    \stdClass;
 
 abstract class AbstractService implements
 ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
@@ -136,43 +136,42 @@ ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
      */
     public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_RESULT_SET_TO_ARRAY) {
         $dbDataHelper = $this->getDbDataHelper();
+        $retVal = null;
+        
+        // Is current index in result set valid
+         $validRslt = $rslt->valid();
+         if (!$validRslt) {
+             return null;
+         }
+         $current = $rslt->current();
+         if (empty($current)) {
+             return null;
+         }
+         
+        // Get data
+        $data = $current->toArray();
+
         // Resolve fetchmode
         switch ($fetchMode) {
             case self::FETCH_FIRST_AS_ARRAY:
-                    if ($rslt->valid() === false) {
-                        return null;
-                    }
-                    $current = $rslt->current();
-                    if (empty($current)) {
-                        return null;
-                    }
-                    $data = $current->toArray();
                     $current->exchangeArray($dbDataHelper->reverseEscapeTuple($data));
-                    return $current->toArray();
+                    $retVal = $current->toArray();
                 break;
             case self::FETCH_FIRST_AS_ARRAY_OBJ:
-                    // Is current index in result set valid
-                    $validRslt = $rslt->valid();
-                    if (!$validRslt) {
-                        return null;
-                    }
-                    $current = $rslt->current();
-                    if (empty($current)) {
-                        return null;
-                    }
                     // Clean current
-                    $data = $current->toArray();
                     $current->exchangeArray($dbDataHelper->reverseEscapeTuple($data));
-                    return $current;
+                    $retVal = $current;
                 break;
             case self::FETCH_RESULT_SET:
-                    return (new ResultSet())->initialize($rslt);
+                    $retVal = (new ResultSet())->initialize($rslt);
                 break;
             case self::FETCH_RESULT_SET_TO_ARRAY: 
             default: 
-                return $this->cleanResultSetToArray($rslt);
+                $retVal = $this->cleanResultSetToArray($rslt);
             break;
         }
+        
+        return $retVal;
     }
     
 }
