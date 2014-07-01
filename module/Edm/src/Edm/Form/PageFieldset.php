@@ -130,13 +130,13 @@ class PageFieldset extends Fieldset {
 
         // Uri
         $this->add(array(
-            'name' => 'acl_uri',
+            'name' => 'uri',
             'type' => 'Text',
             'options' => array(
                 'label' => 'Uri/Url'
             ),
             'attributes' => array(
-                'id' => 'acl_uri',
+                'id' => 'uri',
                 'required' => true
             )
         ));

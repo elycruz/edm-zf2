@@ -1,4 +1,4 @@
-<?
+<?php
 namespace Edm\Service;
 
 use Edm\Service\AbstractService;

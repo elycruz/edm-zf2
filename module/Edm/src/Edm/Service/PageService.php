@@ -46,11 +46,23 @@ implements \Edm\UserAware,
      */
     protected $pageMenuRelTable;
     
+    /**
+     *
+     * @var type 
+     */
     protected $resultSet;
+    
+    /**
+     *
+     * @var type 
+     */
     protected $notAllowedForUpdate = array(
         'page_id',
     );
 
+    /**
+     * Constructor sets result set, sql, and result set's prototype object
+     */
     public function __construct() {
         $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
@@ -144,7 +156,7 @@ implements \Edm\UserAware,
             }
 
             // Update Page
-            $this->getPageTable()->update($$cleanData->page, array('page_id' => $id));
+            $this->getPageTable()->update($cleanData->page, array('page_id' => $id));
             
 //            // Update Page Menu Rel if necessary
 //            if ($this->pageIdInPageMenuRelTable($id) 
@@ -322,35 +334,8 @@ implements \Edm\UserAware,
         // Output variable
         $out = new stdClass();
         
-        // If empty alias
-        if (empty($page->alias)) {
-            $page->alias = $dbDataHelper->getValidAlias($page->title);
-        }
-                
-        // If empty user params
-        if (!isset($page->userParams)) {
-            $page->userParams = '';
-        }
-        
-        // If empty Html Attribs
-        if (empty($page->htmlAttribs)) {
-            $page->htmlAttribs = '';
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->mvc_params)) {
-            $page->mvc_params = '';
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->mvc_resetParamsOnRender)) {
-            $page->mvc_resetParamsOnRender = 0;
-        }
-        
-        // If empty Mvc Params
-        if (empty($page->visible)) {
-            $page->visible = 0;
-        }
+        // Ensure required defaults for model values that are not set
+        $this->ensureRequiredDefaultsForModel($page);
         
         // Page tuple
         $cleanPage = $dbDataHelper->escapeTuple($page->toArray());
@@ -378,6 +363,40 @@ implements \Edm\UserAware,
         
         // Return values
         return $out;
+    }
+    
+    protected function ensureRequiredDefaultsForModel(Page $page) {
+        // If empty alias
+        if (empty($page->alias)) {
+            $page->alias = $this->getDbDataHelper()->getValidAlias($page->title);
+        }
+                
+        // If empty user params
+        if (!isset($page->userParams)) {
+            $page->userParams = '';
+        }
+        
+        // If empty Html Attribs
+        if (empty($page->htmlAttribs)) {
+            $page->htmlAttribs = '';
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_params)) {
+            $page->mvc_params = '';
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->mvc_resetParamsOnRender)) {
+            $page->mvc_resetParamsOnRender = 0;
+        }
+        
+        // If empty Mvc Params
+        if (empty($page->visible)) {
+            $page->visible = 0;
+        }
+        
+        return $page;
     }
     
     /**
@@ -429,8 +448,7 @@ implements \Edm\UserAware,
         }
         
         // Update term taxonomy value and return outcome
-        return $this->getPageTable()->update(
-                array($taxonomyAlias => $value), 
+        return $this->getPageTable()->update(array($taxonomyAlias => $value), 
                 array('page_id' => $page->page_id));
     }
 

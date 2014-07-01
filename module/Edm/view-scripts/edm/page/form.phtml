@@ -22,7 +22,7 @@ echo <<<HTML
             {$this->edmFormElement($page->get('type'))}<br class="cb" />
             <div class="form-item clear-both">
                 <label>Uri Page</label><br />
-                {$this->edmFormElement($page->get('acl_uri'))}
+                {$this->edmFormElement($page->get('uri'))}
                 {$this->edmFormElement($page->get('acl_resource'))}
                 {$this->edmFormElement($page->get('acl_privilege'))}
             </div>
@@ -56,6 +56,12 @@ echo <<<HTML
         <fieldset class="other-params">
             <legend>Other Params (html params, and other user defined params etc.)</legend>
             {$this->edmFormCollection($otherParams->get('userParams'))}
+            <div class="controls">
+                <div class="form-item float-right">
+                    <button class="less btn big-btn">-</button>
+                    <button class="more btn big-btn">+</button>
+                </div>
+            </div>
         </fieldset>
         <fieldset class="controls">
             <div class="form-item">

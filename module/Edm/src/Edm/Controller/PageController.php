@@ -101,7 +101,7 @@ class PageController extends AbstractController implements PageServiceAware {
         // Set up prelims and populate $this -> view for 
         // init flash messenger
         $view =
-                $this->view =
+            $this->view =
                 new ViewModel();
 
         // Let view be terminal in this action
@@ -137,7 +137,9 @@ class PageController extends AbstractController implements PageServiceAware {
         $data = $form->getData();
         $mergedData = array_merge(
                 $data['page-fieldset'], 
+                $data['menu-page-rel-fieldset'],
                 $data['mixed-term-rel-fieldset'],
+                $data['mvc-params-fieldset'],
                 $data['other-params-fieldset']);
         
         $pageData = new Page($mergedData);
@@ -197,13 +199,16 @@ class PageController extends AbstractController implements PageServiceAware {
         $view->form = $form;
 
         // Check if term already exists if not bail
-        $existingPage = $pageService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY_OBJ);
+        $existingPage = $pageService->getById($id, AbstractService::FETCH_FIRST_AS_ARRAY);
         if (empty($existingPage)) {
             $fm->setNamespace('create-error')->addMessage('Page with id "'
                     . $id . '" doesn\'t exist in database.');
             return $view;
         }
-        
+        else {
+            $existingPage = new Page($existingPage);
+        }
+
         $userParamsFieldset = null;
         // Resolve user params field
         if (!empty($existingPage->userParams)) {
@@ -220,27 +225,8 @@ class PageController extends AbstractController implements PageServiceAware {
 
         // Set data
         $form->setData(array(
-            'mixed-term-rel-fieldset' => array(
-                'term_taxonomy_id' => $existingPage->getMixedTermRelProto()->term_taxonomy_id,
-                'status' => $existingPage->status,
-                'accessGroup' => $existingPage->accessGroup,
-                'type' => $existingPage->type,
-            ),
-            'page-fieldset' => array(
-                'label' => $existingPage->label,
-                'alias' => $existingPage->alias,
-                'type' => $existingPage->type,
-                'uri' => $existingPage->uri,
-                'parent_id' => $existingPage->parent_id,
-                'acl_resource' => $existingPage->acl_resource,
-                'acl_privilege' => $existingPage->acl_privilege,
-                'mvc_action' => $existingPage->mvc_action,
-                'mvc_controller' => $existingPage->mvc_controller,
-                'mvc_module' => $existingPage->mvc_module,
-                'mvc_route' => $existingPage->mvc_route,
-                'mvc_params' => $existingPage->mvc_params,
-                'description' => $existingPage->description
-            ),
+            'mixed-term-rel-fieldset' => $existingPage->getMixedTermRelProto()->toArray(),
+            'page-fieldset' => $existingPage->toArray(),
             'mvc-params-fieldset' => array(
                 'userParams' => $mvcParamsFieldset
             ),
