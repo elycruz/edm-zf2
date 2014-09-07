@@ -10,16 +10,24 @@ Edm_Service_Internal_AbstractCrudService
     protected $termModel;
     protected $termTaxonomy;
     
-    // @todo implement these and get rid of hardcoded values
+    /**
+     * Term Model's alias.
+     * @var String
+     */
     protected $termModel_alias = 'term';
+    
+    /**
+     * Term Taxonomy's alias.
+     * @var String
+     */
     protected $termTaxModel_alias = 'termTax';
     
     // @todo eliminate these and call model->getName() instead?
     // @todo check performance hits on this
     protected $_term_modelName = 'terms';
-    protected $_termTaxonomy_modelName = 'term_taxonomies';
+    protected $_termTaxonomy_modelName = 'term-taxonomies';
 
-    public function __construct() {
+    public function __construct($options = null) {
         $this->termModel = Edm_Db_Table_ModelBroker::getModel('term');
         $this->termTaxModel = Edm_Db_Table_ModelBroker::getModel('term-taxonomies');
 //        $this->_termTaxonomy_modelName = $this->termTaxModel->getName();
@@ -33,7 +41,7 @@ Edm_Service_Internal_AbstractCrudService
      * @return type 
      */
     public function getById($term_taxonomy_id, $fetchMode = Zend_Db::FETCH_ASSOC) {
-        return $this->getSelect()->where('termTax.term_taxonomy_id=?', $term_taxonomy_id)
+        return $this->getSelect()->where($this->termTaxModel_alias . '.term_taxonomy_id=?', $term_taxonomy_id)
             ->query($fetchMode)->fetch();
     }
     
@@ -46,7 +54,7 @@ Edm_Service_Internal_AbstractCrudService
      */
     public function getByAlias($alias, $taxonomy = 'taxonomy', $fetchMode = Zend_Db::FETCH_ASSOC) {
         return $this->getSelect()
-                        ->where('termTax.taxonomy="' . $taxonomy .
+                        ->where($this->termTaxModel_alias . '.taxonomy="' . $taxonomy .
                                 '" AND termTax.term_alias="' . $alias . '"')
                         ->query($fetchMode)->fetch();
     }
@@ -86,7 +94,7 @@ Edm_Service_Internal_AbstractCrudService
         }
         
         // Top level tuple's children
-        $topChildren = $select->where('termTax.taxonomy=' .
+        $topChildren = $select->where($this->termTaxModel_alias . '.taxonomy=' .
                             $topTuple->term_taxonomy_id)
                     ->order('term_name DESC')
                     ->query(Zend_Db::FETCH_ASSOC)
@@ -134,7 +142,7 @@ Edm_Service_Internal_AbstractCrudService
         foreach ($topTuples as $topChild) {
             // Get children
             $subChildren = $select
-                    ->where('termTax.parent_id='. $topChild['term_taxonomy_id'])
+                    ->where($this->termTaxModel_alias . '.parent_id='. $topChild['term_taxonomy_id'])
                     ->order('term_name DESC')
                     ->query(Zend_Db::FETCH_ASSOC)
                     ->fetchAll();
@@ -200,10 +208,10 @@ Edm_Service_Internal_AbstractCrudService
         // @todo fix this functions default values
         $parent_id = !empty($parent_id) ? $parent_id : 0;
         if (!$taxonomizeResult) {
-            $select = $this->getSelect()->where('termTax.taxonomy=?', $alias);
+            $select = $this->getSelect()->where($this->termTaxModel_alias . '.taxonomy=?', $alias);
             // If parent id:
             if (!empty($parent_id) && is_numeric($parent_id)) {
-                $select = $select->where('termTax.parent_id=?', $parent_id);
+                $select = $select->where($this->termTaxModel_alias . '.parent_id=?', $parent_id);
             }
             // Additional `where` criteria
             if (!empty($where)) {
@@ -217,7 +225,7 @@ Edm_Service_Internal_AbstractCrudService
         } else {
             $rslts = array();
             // Get all results with parent
-            $rslt = $this->getSelect()->where('termTax.taxonomy="' . $alias .
+            $rslt = $this->getSelect()->where($this->termTaxModel_alias . '.taxonomy="' . $alias .
                             '" AND termTax.parent_id = ' . $parent_id)
                     ->order($sortBy . ' ' . ($sort ? 'DESC' : 'ASC'))
                     ->query(Zend_Db::FETCH_OBJ)
@@ -225,7 +233,7 @@ Edm_Service_Internal_AbstractCrudService
             foreach ($rslt as $tuple) {
                 $rslts[] = $tuple;
                 $inner_rslt = $this->getSelect()->where(
-                                'termTax.parent_id=' . $tuple->term_taxonomy_id .
+                                $this->termTaxModel_alias . '.parent_id=' . $tuple->term_taxonomy_id .
                                 ' AND termTax.taxonomy="' . $alias . '"')
                         ->order($sortBy . ' ' . ($sort ? 'DESC' : 'ASC'))
                         ->query(Zend_Db::FETCH_OBJ)
@@ -252,9 +260,9 @@ Edm_Service_Internal_AbstractCrudService
     public function getSelect() {
         // @todo implement return values only for current role level
         return $this->getDb()->select()
-                        ->from(array('termTax' => $this->_termTaxonomy_modelName))
+                        ->from(array($this->termTaxModel_alias . '' => $this->_termTaxonomy_modelName))
                         ->join(array('term' => $this->_term_modelName), 
-                                'term.alias=termTax.term_alias', array(
+                                $this->termModel_alias . '.alias=termTax.term_alias', array(
                             'term_name' => 'name',
                             'term_group_alias'));
     }

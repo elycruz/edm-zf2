@@ -124,10 +124,14 @@ class TermTaxonomyService extends AbstractService {
             ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
 
             // Term
-            ->join(array('term' => $this->getTermTable()->table), 'term.alias=' . $this->termTaxTable_alias . '.term_alias', array('term_name' => 'name', 'term_group_alias'))
+            ->join(array('term' => $this->getTermTable()->table), 
+                    'term.alias=' . $this->termTaxTable_alias . '.term_alias', 
+                    array('term_name' => 'name', 'term_group_alias'))
 
             // Count table
-            ->join(array('termTaxProxy' => $this->termTaxProxyTableName), 'termTaxProxy.term_taxonomy_id=termTax.term_taxonomy_id', array('childCount', 'assocItemCount'));
+            ->join(array('termTaxProxy' => $this->termTaxProxyTableName), 
+                    'termTaxProxy.term_taxonomy_id=termTax.term_taxonomy_id', 
+                    array('childCount', 'assocItemCount'));
     }
 
     public function createItem(array $data) {
