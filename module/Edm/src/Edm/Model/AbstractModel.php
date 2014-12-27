@@ -145,4 +145,8 @@ class AbstractModel {
         return $retVal;
     }
     
+    public function getArrayCopy () {
+        
+    }
+    
 }

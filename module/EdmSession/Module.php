@@ -20,11 +20,11 @@ class Module {
         $sm = $e->getApplication()->getServiceManager();
         $config = $sm->get('session_config');
         $storage = null;
-        if ($sm->canCreate('session_storage', false)) {
+        if ($sm->has('session_storage', false)) {
             $storage = $sm->get('session_storage');
         }
         $saveHandler = null;
-        if ($sm->canCreate('session_save_handler', false)) {
+        if ($sm->has('session_save_handler', false)) {
             $saveHandler = $sm->get('session_save_handler');
         }
         $sessionManager = new SessionManager($config, $storage, $saveHandler);
