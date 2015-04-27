@@ -75,7 +75,7 @@ implements DbDataHelper {
      * @param array $skipFields
      * @return array
      */
-    public function escapeTuple(array $tuple, $skipFields = null) {
+    public function escapeTuple($tuple, $skipFields = null) {
         $new_array = array();
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
@@ -102,7 +102,7 @@ implements DbDataHelper {
      * @param array $tuples
      * @return array
      */
-    public function escapeTuples(array $tuples, $skipFields = null) {
+    public function escapeTuples($tuples, $skipFields = null) {
         $new_array = array();
         // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {
@@ -119,7 +119,7 @@ implements DbDataHelper {
      * @param array $values
      * @return array
      */
-    public function reverseEscapeTuple(array $tuple) {
+    public function reverseEscapeTuple($tuple) {
         $new_array = array();
         foreach ($tuple as $key => $val) {
             if (is_array($key)) {
@@ -140,7 +140,7 @@ implements DbDataHelper {
      * @param array $tuples
      * @return array
      */
-    public function reverseEscapeTuples(array $tuples) {
+    public function reverseEscapeTuples($tuples) {
         $new_array = array();
         // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {

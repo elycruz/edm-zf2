@@ -25,8 +25,8 @@ namespace Edm\Db;
  * @author ElyDeLaCruz
  */
 interface DbDataHelper {
-    public function escapeTuple(array $tuple);
-    public function escapeTuples(array $tuples);
-    public function reverseEscapeTuple(array $tuple);
-    public function reverseEscapeTuples(array $tuples);
+    public function escapeTuple($tuple);
+    public function escapeTuples($tuples);
+    public function reverseEscapeTuple($tuple);
+    public function reverseEscapeTuples($tuples);
 }

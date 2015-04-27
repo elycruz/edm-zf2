@@ -47,7 +47,7 @@ class TermController extends AbstractController {
 
         // Send results
         $view->results = $this->getDbDataHelper()->reverseEscapeTuples(
-                $paginator->getCurrentItems()->toArray());
+                $paginator->getCurrentItems());
         $view->setTerminal(true);
         return $view;
     }
