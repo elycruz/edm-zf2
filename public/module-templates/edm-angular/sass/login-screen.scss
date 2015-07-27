@@ -1,0 +1,12 @@
+[data-page-style-hook="login-page"] .view-module-2 {
+    top: 50%;
+    width: 50%;
+    text-align: left;
+    margin: auto;
+    min-width: 0;
+    .form-item {
+        padding: 0 !important;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+}

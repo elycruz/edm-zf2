@@ -1,0 +1,30 @@
+/** Text Align
+-------------------------------------------------------------*/
+.tl, .text-left {
+  text-align: left;
+}
+.tc, .text-center {
+  text-align: center;
+}
+.tj, .text-justify {
+  text-align: justify;
+}
+
+/** Text Size
+-------------------------------------------------------------*/
+.tsml, .text-small {
+  line-height: 10px;
+  font-size: 10px;
+}
+.tbld, .text-bold {
+  font-weight: bold;
+}
+.tnml, .text-normal {
+  font-weight: normal;
+}
+
+/** Text Decoration
+-------------------------------------------------------------*/
+.text-decor-underline {
+  text-decoration: underline;
+}

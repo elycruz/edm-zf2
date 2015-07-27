@@ -1,0 +1,44 @@
+.view-module-2 {
+    margin: 1%;
+    background: #CCCCCC;
+    border: 1px solid #00000;
+    width: 98%;
+
+    @include box-shadow(1px 1px 1% 0 #555555);
+
+    > header {
+        @include background(linear-gradient($color-3-4-desaturated, $color-3-1-desaturated));
+        border: 1px solid $color-3-1-desaturated;
+        border-bottom: none;
+        color: #AADDFF;
+        h3 {
+            font-size: 1.6rem;
+            padding: 1%;
+            margin: 0;
+        }
+        h3 > span {
+            margin: 1%;
+        }
+    }
+
+    > div,
+    > section {
+        padding: 1%;
+        > h2, h3 {
+            font-family: Tahoma, Verdana, Arial, Helvetica, Sans-serif;
+            font-size: 1.1rem;
+            margin-right: 1%;
+            margin-left: 1%;
+            line-height: 1%;
+            display: inline-block;
+        }
+        > .horiz-menu-left {
+            float: right;
+            margin: 0 1%;
+        }
+    }
+
+    > footer {
+        min-height: 1%;
+    }
+}

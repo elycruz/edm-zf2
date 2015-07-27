@@ -1,0 +1,44 @@
+#left {
+
+    position: fixed;
+    top: 80px;
+    height: 100%;
+    background: #555555;
+    @include single-transition(all, $aniSpeed, linear);
+    @include box-shadow(0 0 60px 0 #333 inset);
+
+    &.collapsed {
+        width: 0 !important;
+    }
+
+    &.expanded {
+        min-width: 220px;
+        width: 23%;
+    }
+
+    .modules {
+        @include single-transition(all, $aniSpeed, linear);
+    }
+
+    .triangle.points-south {
+        position: absolute;
+        right: 20px;
+    }
+
+    > .handle {
+        position: absolute;
+        float: right;
+        right: -20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    > .handle a {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        margin: 0;
+        padding: 3px;
+    }
+}
+
+

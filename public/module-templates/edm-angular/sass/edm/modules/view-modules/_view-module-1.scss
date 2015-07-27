@@ -1,0 +1,37 @@
+.view-module-1 ul.menu {
+  li {
+    list-style: none;
+    border-bottom: 1px solid $color-3-2;
+    border-top: 1px solid $color-3-3;
+    @include background (linear-gradient($darkened-blue, adjust-saturation($blue, -50%)));
+    box-shadow: 1px 1px 5px 0 $color-3-5 inset;
+  }
+  li.first {
+    border-top: none;
+  }
+  li a {
+    text-decoration: none;
+    color: #BBDDFF;
+    float: left;
+    width: 100%;
+    display: block;
+    @include background (linear-gradient($darkened-blue, $desaturated-blue));
+  }
+  li a:hover {
+    color: #FFFFFF;
+    @include background(rgba(255, 255, 255, 0.25), linear-gradient($color-3-4, $color-3-2));
+  }
+  li a:active {
+    color: $color-3-3;
+    @include background(linear-gradient (#888888, #eeeeee));
+  }
+
+  li a span {
+    margin: 10px;
+    display: block;
+  }
+
+  li li a span {
+    margin-left: 20px;
+  }
+}

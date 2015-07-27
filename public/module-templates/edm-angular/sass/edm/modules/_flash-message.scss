@@ -1,0 +1,6 @@
+edm-application /deep/ .flash-message {
+  @include border-radius(20px);
+  margin: 1%;
+  width: 96%;
+  display: block;
+}

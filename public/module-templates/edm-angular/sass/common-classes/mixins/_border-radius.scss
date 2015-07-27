@@ -1,0 +1,9 @@
+@mixin border-radius-bottom($amount: 10px) {
+  @include border-bottom-left-radius($amount);
+  @include border-bottom-right-radius($amount);
+}
+
+@mixin border-radius-top($amount: 10px) {
+  @include border-top-left-radius($amount);
+  @include border-top-right-radius($amount);
+}

@@ -1,0 +1,70 @@
+.view-module-3 {
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    @include background(
+            linear-gradient($color-3-1-desaturated, $color-3-4-desaturated));
+    @include box-shadow(-13px 0 13px -13px rgba(0, 0, 0, 0.38) inset);
+    > header {
+        position: relative;
+        color: adjust-saturation($color-3-5, -38%);
+        border-radius: none;
+        @include box-shadow(0 13px 13px 0 rgba($color-3-3, 0.38));
+        z-index: 98;
+    }
+
+    > header:hover {
+        cursor: pointer;
+        color: $color-3-5;
+        @include background(linear-gradient($color-3-1, $color-3-2));
+        .floating-triangle.points-south {
+            border-color: $color-3-5 transparent transparent transparent;
+        }
+    }
+
+    > header h3 {
+        padding: 10px;
+        margin: 0;
+    }
+
+    > div,
+    nav {
+        z-index: 99;
+        width: 92%;
+        margin: 0 4% 4%;
+    }
+
+    nav ul.menu {
+        li {
+            border: none;
+            @include background(linear-gradient(shade($color-3-3, 15%), $desaturated-blue));
+            @include box-shadow(none);
+        }
+        li a {
+            float: left;
+            width: 100%;
+            display: block;
+            text-decoration: none;
+            color: #BBDDFF;
+            background: none;
+            @include box-shadow(none);
+        }
+        li a:hover {
+            color: #FFFFFF;
+            @include background(linear-gradient($color-3-4, $color-3-2));
+        }
+        li a:active {
+            color: $color-3-3;
+            @include background(linear-gradient(#888, #eee));
+        }
+
+        li a span {
+            display: block;
+        }
+
+        li li a span {
+            margin-left: 20px;
+        }
+    }
+}

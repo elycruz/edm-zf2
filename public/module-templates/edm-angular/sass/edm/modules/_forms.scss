@@ -1,0 +1,62 @@
+edm-application /deep/ form,
+edm-application /deep/ .form,
+form,
+.form {
+    fieldset {
+        margin: 10px;
+        background: #dfdfdf;
+        border: 1px solid #aaaaaa;
+        padding: 5px;
+        clear: both;
+        appearance: none;
+        @include border-radius(10px);
+    }
+    legend {
+        font: bold;
+        color: $color-3-3;
+        padding: 10px 20px;
+        border: 1px solid $color-3-4;
+        @include background(linear-gradient($color-3-5,
+            adjust-lightness($color-3-5, 20%)));
+        @include border-radius(20px);
+    }
+
+    .form-item {
+        & nth:child {
+            font-weight: bold;
+        }
+        margin: 5px;
+        padding: 5px;
+        display: inline-block;
+        float: left;
+        @include border-radius(10px);
+    }
+    label {
+        font-size: 1.1rem;
+        &[for]:hover {
+            cursor: pointer;
+        }
+    }
+    label:nth-child(1) {
+        font-weight: bold;
+    }
+    input, select, textarea {
+        padding: 10px;
+        color: #333333;
+        font-size: 1.4rem;
+        border: 3px solid transparentize($color-3-5, 0.80);
+        font: normal 1.0rem Helvetica, Verdana, Arial, Sans-serif;
+        @include border-radius(5px);
+        @include box-shadow(3px 3px 5px #CCCCCC inset);
+    }
+}
+
+fieldset.user-params {
+    fieldset {
+        legend {
+            display: none;
+        }
+        border: none;
+        background: none;
+    }
+}

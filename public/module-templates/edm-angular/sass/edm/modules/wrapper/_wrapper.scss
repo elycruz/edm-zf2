@@ -1,0 +1,27 @@
+///** Use relative ems **/
+#wrapper {
+
+    position: relative;
+    min-width: 960px !important;
+    font-size: 13px;
+    font-size: 1.3rem;
+    text-align: left;
+
+    @import "header";
+    @import "nav";
+    @import "footer";
+
+    /** Z-Indexes **/
+    > footer,
+    > header {
+        z-index: 100;
+    }
+
+    > nav {
+        z-index: 99;
+    }
+
+    > section {
+        z-index: 98;
+    }
+}

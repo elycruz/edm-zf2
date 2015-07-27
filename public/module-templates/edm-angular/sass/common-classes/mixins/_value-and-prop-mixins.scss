@@ -1,0 +1,63 @@
+/*
+    Document   : mixins
+    Created on : May 18, 2013, 5:14:54 PM
+    Author     : ElyDeLaCruz
+    Description:
+    Purpose of the stylesheet follows.
+    Syntax recommendation http://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html
+*/
+
+$className: 0;
+
+// Generates a class definition with class prefix and attribute 
+// and value of type unit
+@mixin genClassForNums ($nums, $classPrefix, $classSuffix, $prop, $unit: px) {
+    @each $i in $nums {
+        @if $i == 0 {
+            $className: #{$classPrefix}#{$i};
+        }
+        @else if $i > 0 {
+            $className: #{$classPrefix}#{$i}#{$classSuffix};
+        }
+        .#{$className} {
+            #{$prop}: #{$i}#{$unit};
+        }
+    }
+}
+
+// Generates a property for labels and numbers with class suffix of type unit
+@mixin genClassForNumsAndSubProps ($nums, $subProps,
+            $classPrefix, $prefixPrefixes, $prop, $unit: px
+) {
+    $j: 1;
+    @each $subProp in $subProps {
+        @each $i in $nums {
+            @if $i == 0 {
+                $className: #{$classPrefix}#{nth($prefixPrefixes, $j)}#{$i};
+            }
+            @else if $i > 0 {
+                $className: #{$classPrefix}#{nth($prefixPrefixes, $j)}#{$i}#{$unit}; 
+            }
+            .#{$className} {
+                #{$prop}-#{$subProp}: #{$i}#{$unit};
+            }
+        }
+        $j: $j + 1;
+    }
+}
+
+// Generates property  
+@mixin genClassForNumsAndTwoSubProps ($nums, $prop, $subProps, $classPrefix, $unit: px) {
+    @each $i in $nums {
+        @if $i == 0 {
+            $className: #{$classPrefix}#{$i};
+        }
+        @else if $i > 0 {
+            $className: #{$classPrefix}#{$i}#{$unit};
+        }
+        .#{$className} {
+            #{$prop}-#{nth($subProps, 1)}: #{$i}#{$unit};
+            #{$prop}-#{nth($subProps, 2)}: #{$i}#{$unit};
+        }
+    }
+}

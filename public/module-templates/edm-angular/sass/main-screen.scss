@@ -1,0 +1,44 @@
+@import "compass/*";
+
+/** Unsemantic Grid System **/
+@import "../bower_components/unsemantic/assets/sass/unsemantic-grid-desktop";
+
+/** Custom "common-classes" modules @see http://github.com/elycruz/common-classes **/
+@import "common-classes/common-classes";
+
+/** Mixins **/
+@import "edm/mixins/_mixins";
+
+/** Theme **/
+@import "edm/themes/_default";
+
+/** Variables **/
+@import "edm/_vars";
+
+/** All Modules **/
+@import "edm/modules/modules";
+//@import "edm-polymer/edm-polymer";
+
+/** Base font of 62.5 to allow rem and em defines that
+ look like pixel measurements **/
+html, body {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font: normal 62.5% "Century Gothic", Helvetica, Verdana, Arial, Sans-serif;
+    background: #888;
+    color: #555;
+}
+
+body {
+    overflow: auto;
+}
+
+a {
+    @include single-transition(all, 0.16s, linear);
+}
+
+p {
+    line-height: 2%;
+    margin: 2%;
+}

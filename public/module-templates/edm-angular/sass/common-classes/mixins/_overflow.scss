@@ -1,0 +1,18 @@
+/*
+    Document   : _overflow
+    Created on : Aug 21, 2013, 11:09:16 AM
+    Author     : edelacruz
+    Description:
+    This mixin generates overflow-(x|y) for all browsers
+    Syntax recommendation http://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html
+*/
+
+@mixin overflow ($value, $dirs) {
+    @each $dir in $dirs {
+        -o-overflow-#{$dir}: $value;
+        -ms-overflow-#{$dir}: $value;
+        -moz-overflow-#{$dir}: $value;
+        -webkit-overflow-#{$dir}: $value;
+        overflow-#{$dir}: $value;
+    }
+}

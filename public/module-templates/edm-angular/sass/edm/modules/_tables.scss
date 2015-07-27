@@ -1,0 +1,45 @@
+edm-application /deep/ table,
+                       table {
+    clear: both;
+    width: auto;
+    border: 1px solid #555555;
+    background: #AAAAAA;
+    @include border-radius(10px);
+    @include box-shadow(1px 1px 3px 0 #888888);
+    thead, tfoot {
+        @include background(linear-gradient(#888, #ccc));
+    }
+    tbody td {
+        border: 1px solid #888888;
+        padding: 10px;
+    }
+    thead th,
+    tfoot th {
+        border: 1px solid #555555;
+        @include box-shadow(1px 1px 5px 0 #EEEEEE inset);
+        padding: 5px;
+    }
+    thead th:first-child {
+        @include border-radius-top(10px);
+    }
+    tfoot th:first-child {
+        @include border-radius-bottom(10px);
+    }
+    tr td {
+        padding: 10px;
+        @include single-transition(all, $aniSpeed, linear);
+    }
+    tr:nth-child(2n + 1) td {
+        background: #FFFFFF;
+    }
+    tr:nth-child(2n) td {
+        background: #DDDDDD;
+    }
+    tr:hover td {
+        background: #FFD073;
+        cursor: pointer;
+    }
+    tr:active td {
+        background: #FFBF40;
+    }
+}

@@ -1,0 +1,31 @@
+#main {
+    position: relative;
+    min-width: 720px;
+    min-height: 640px;
+    margin: 0;
+    padding: 10px 0;
+    @include single-transition(all, $aniSpeed, linear);
+
+    &.collapsed {
+        width: 75%;
+        left: 23%;
+    }
+
+    &.expanded {
+        width: 100%;
+        left: 0;
+    }
+
+    > header {
+        width: 100%;
+        margin: 10px 10px 0;
+        float: left;
+        h3,
+        .breadcrumbs {
+            margin-top: 10px;
+        }
+        h3 {
+            font-size: 24px;
+        }
+    }
+}

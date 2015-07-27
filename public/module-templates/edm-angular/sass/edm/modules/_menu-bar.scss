@@ -1,0 +1,8 @@
+edm-application /deep/ .menu-bar {
+  @include border-radius(20px);
+  @include background(linear-gradient($color-3-4-desaturated, $color-3-1-desaturated));
+  height: auto;
+  border: 1px solid $color-3-1-desaturated;
+  border-bottom: none;
+  color: #AADDFF;
+}

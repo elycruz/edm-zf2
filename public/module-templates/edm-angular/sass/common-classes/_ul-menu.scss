@@ -1,0 +1,26 @@
+/** Menus horizontal and vertical menus
+-------------------------------------------------------------*/
+ul.horiz-menu-left,
+ul.horiz-menu-left ul,
+ul.vert-menu-left,
+ul.vert-menu-left ul,
+ul.vert-menu-left li {
+  margin: 0;
+  padding: 0;
+  float: left;
+  clear: both;
+  width: 100%;
+}
+ul.horiz-menu-left li {
+  float: left;
+  clear: none;
+}
+ul.horiz-menu-left ul li {
+  clear: both;
+}
+ul.horiz-menu-left li,
+ul.horiz-menu-left li a span,
+ul.vert-menu-left li,
+ul.vert-menu-left li a span {
+  display: block;
+}

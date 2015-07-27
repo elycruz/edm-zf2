@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edm Cms - Ajax Interface</title>
+    <base url="/module-templates/edm-polymer-ui"/>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" media="all" href="/module-templates/edm-polymer-ui/distro/css/edm-polymer-ui.min.css"/>
+</head>
+<body>
+
+<!-- Main Wrapper -->
+<edm-application id="wrapper" initialPath="http://edmzf2/edm-admin"
+                 class="grid-100 grid-parent">
+
+    <!-- Main Header -->
+    <header>
+        <h1><a href="#">Edm Cms</a></h1>
+
+        <div class="user controls">
+            <span class="greeting">Logged in as "Some Name".</span>
+            <a href="/edm-admin/index/logout">Log out</a>
+        </div>
+    </header>
+
+    <!-- Main Nav -->
+    <edm-navigation ulClass="horiz-menu-left"
+                    useSpanWrap="true"
+                    pages='<?= $this->navigation_json; ?>'></edm-navigation>
+
+    <!-- Main Section -->
+    <section class="main-section">
+
+        <!-- Left Column -->
+        <div id="left" class="collapsed"></div>
+
+        <!-- Main Column -->
+        <div id="main" class="expanded">
+
+            <!-- Current Page -->
+
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="copyright mL10px">&copy;2013 and beyond <a href="http://elycruz.com">ElyCruz</a></div>
+    </footer>
+
+</edm-application>
+<!-- /#wrapper -->
+
+<script src="/module-templates/edm-polymer-ui/bower_components/requirejs/require.js"
+        data-main="/module-templates/edm-polymer-ui/src/edm/init.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+/** view-modules
+-------------------------------------------------------------*/
+.view-module,
+.view-module > header,
+.view-module > .header,
+.view-module > .body,
+.view-module > section,
+.view-module > div,
+.view-module > .footer,
+.view-module > div > header,
+.view-module > div > .header,
+.view-module > div > .body,
+.view-module > div > section,
+.view-module > div > div,
+.view-module > div > .footer,
+.view-module > div > footer {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}

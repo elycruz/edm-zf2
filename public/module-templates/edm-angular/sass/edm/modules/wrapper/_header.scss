@@ -1,0 +1,46 @@
+> header {
+    position: fixed;
+    background: desaturate($blue, 20%);
+    color: transparentize(#AADDFF, 0.5);
+    width: 100%;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    @include box-shadow(0 3px 5px 0 rgba(0, 0, 0, 0.20));
+
+    a {
+        color: transparentize(#AADDFF, 0.6);
+        text-decoration: none;
+
+        &:hover {
+            color: transparentize(#AADDFF, 0.1);
+        }
+    }
+
+    h1 {
+        display: inline-block;
+        margin: 0 10px;
+        font: bold 150%;
+
+        a {
+            font: normal 29px Impact, Arial Black, Comic-sans, sans-serif;
+        }
+    }
+
+    .user.controls,
+    .search.controls {
+        position: relative;
+        display: inline-block;
+        vertical-align: top;
+        a {
+            display: inline-block;
+            padding: 10px;
+            color: transparentize(#AADDFF, 0.5);
+
+            &:hover {
+                color: transparentize(#AADDFF, 0.1);
+            }
+        }
+    }
+
+}

@@ -1,0 +1,131 @@
+edm-navigation,
+> nav {
+
+    position: fixed;
+    top: 36px;
+    left: 0;
+    width: 100%;
+    height: 44px;
+    border-top: #888888;
+    border-bottom: 2px solid #777777;
+    @include background(#ccc linear-gradient(#888888, #cccccc));
+    @include box-shadow(0 0 20px 0 rgba(0, 0, 0, 0.38));
+    z-index: 99;
+
+    /deep/ ul,
+    > ul {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+
+        > li {
+            list-style: none;
+            border-left: 1px solid #888888;
+            border-right: 1px solid #888888;
+            box-shadow: 1px 0 5px #dddddd inset;
+            margin: 0;
+            padding: 0;
+
+            &.first {
+                border-left: none;
+            }
+
+            &.last {
+                border-right: none;
+            }
+
+            &:hover {
+                > ul {
+                    display: block;
+                }
+            }
+
+            a {
+                display: inline-block;
+                width: 100%;
+                color: $color-3-2;
+                height: 44px;
+                background: transparent;
+            }
+            a span {
+                margin: 10px;
+            }
+            a:hover {
+                color: $color-3-4;
+                background: transparentize(#FFFFFF, 0.38);
+            }
+            a.active,
+            a:active {
+                @include box-shadow(3px 3px 10px 0 transparentize(black, 0.6) inset);
+                background: #FFF;
+            }
+            ul {
+                position: absolute;
+                display: none;
+                top: 44px;
+                width: 220px;
+                z-index: 200;
+                background: #CCCCCC;
+                border: 2px solid #aaaaaa;
+                @include border-radius-bottom(20px);
+                @include box-shadow(5px 5px 20px 0 transparentize(black, 0.6));
+            }
+            ul li {
+                border: 1px solid #bbbbbb;
+                border-left: none;
+                border-right: none;
+                @include background(linear-gradient(#cccccc, #eeeeee));
+                width: 100%;
+            }
+            ul li a:active,
+            ul li a.active {
+                @include box-shadow(none);
+            }
+            ul li.last a,
+            ul li.last {
+                @include border-radius-bottom(20px);
+            }
+            ul li a span {
+                margin-left: 20px;
+            }
+
+            ul > li ul {
+                top: auto !important;
+                left: auto;
+                right: -220px;
+                margin-top: -36px;
+                z-index: 199;
+                @include border-radius(20px !important);
+            }
+
+            ul > li ul li a,
+            ul > li ul li {
+                @include border-radius(0);
+            }
+
+            ul > li ul li.first a,
+            ul > li ul li.first {
+                @include border-radius-top(20px);
+                @include border-radius-bottom(0);
+            }
+
+            ul > li ul li.last a,
+            ul > li ul li.last {
+                @include border-radius-top(0);
+                @include border-radius-bottom(20px);
+            }
+
+            ul > li ul li.first.last a,
+            ul > li ul li.first.last {
+                @include border-radius(20px !important);
+            }
+
+            ul > li:hover {
+                > ul {
+                    display: block;
+                }
+            }
+
+        }
+    }
+}

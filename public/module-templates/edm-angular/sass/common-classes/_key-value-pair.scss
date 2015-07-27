@@ -1,0 +1,17 @@
+/****/
+.key-value-pair {
+  font-size: 12px;
+  label,
+  .key {
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 5px !important;
+  }
+  div,
+  span,
+  output,
+  .value {
+    font-weight: normal;
+    color: #777;
+  }
+}

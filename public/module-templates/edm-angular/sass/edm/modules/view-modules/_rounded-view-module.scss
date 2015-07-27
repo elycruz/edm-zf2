@@ -1,0 +1,18 @@
+.rounded-view-module {
+  width: 100%;
+
+  @include border-radius(10px);
+
+  > header {
+    @include border-radius-top(10px);
+  }
+
+  > header:hover {
+    cursor: pointer;
+  }
+
+  > footer {
+    min-height: 10px;
+    @include border-radius-bottom(10px);
+  }
+}

@@ -1,0 +1,39 @@
+#main {
+    &/deep/ .controls a,
+&/deep/ .controls .btn,
+&/deep/ .controls button,
+&/deep/ .controls input[type="submit"],
+&/deep/ .controls input[type="reset"] {
+    display: inline-block;
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #333333;
+    border: 1px solid #555555;
+    box-shadow: 1px 1px 5px 0 transparentize(#555555, 0.72), 1px 1px 5px 0 #EEEEEE inset;
+    text-shadow: 1px 1px #EEEEEE;
+    margin: 3px;
+    @include border-radius(20px);
+    @include background(linear-gradient(#EEEEEE, #888888));
+    @include single-transition(all, $aniSpeed, linear);
+    padding: 10px;
+    &:hover {
+      @include background(linear-gradient(#FFFFFF, #AAAAAA));
+      text-shadow: 1px 1px #FFFFFF;
+      border: 1px solid #555555;
+      cursor: pointer;
+    }
+    &:active,
+    &.active {
+      @include background(linear-gradient(#FFFFFF, #AAAAAA));
+      text-shadow: 1px 1px #FFFFFF;
+      @include box-shadow(1px 1px 5px 0 transparentize(#EEEEEE, 0.72), 1px 1px 5px 0 #555555 inset);
+      color: #000000;
+    }
+  }
+
+    &/deep/ .controls .btn.big-btn {
+    font-size: 1.6rem;
+    padding: 13px;
+    margin: 5px;
+  }
+}

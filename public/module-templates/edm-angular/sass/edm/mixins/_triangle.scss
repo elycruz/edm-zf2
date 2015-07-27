@@ -1,0 +1,99 @@
+@mixin triangle($className: triangle, $width: 5px, $color: #000, $margin: 6px,
+$float: right, $border-width: 0, $border-color: #000, $equalateralBorder: false) {
+
+    // Triangle pointing directions
+    $triangle-directions: points-north points-east points-south points-west;
+
+    @if $border-width != 0 {
+        // Background triangle
+        .#{$className} {
+            position: relative;
+            display: inline-block;
+            float: $float;
+            width: 0;
+            height: 0;
+            margin: $margin;
+            border-style: solid;
+        }
+    }
+
+    // Foreground triangle
+    .#{$className}:before {
+        position: absolute;
+        left: - ($width);
+        top: - ($width);
+        display: inline-block;
+        content: "";
+        float: $float;
+        width: 0;
+        height: 0;
+        margin: $margin;
+        border-style: solid;
+    }
+
+    // Loop through directions and create a declaration for each
+    @for $i from 1 through length($triangle-directions) {
+
+        // Triangle direction
+        $dir: nth($triangle-directions, $i);
+
+        // Background triangle
+        @if $border-width != 0 {
+
+            // Background
+            .#{$dir}.#{$className} {
+
+                border-width: $width + ($border-width * 2);
+
+                @if $dir == points-north {
+                    border-color: transparent transparent $border-color transparent;
+                }
+                @if $dir == points-east {
+                    border-color: transparent transparent transparent $border-color;
+                }
+                @if $dir == points-south {
+                    border-color: $border-color transparent transparent transparent;
+                }
+                @if $dir == points-west {
+                    border-color: transparent $border-color transparent transparent;
+                }
+
+            }
+        }
+
+        // If not equal border (for tooltips and such (remove border on attach side))
+        @if ($equalateralBorder == false) {
+            $border-width: $border-width * 2;
+        }
+
+        // Foreground triangle
+        .#{$dir}.#{$className}:before {
+
+            border-width: $width;
+
+            @if $dir == points-north {
+                border-color: transparent transparent $color transparent;
+                top: - ($width - $border-width);
+
+            }
+            @if $dir == points-east {
+                border-color: transparent transparent transparent $color;
+                right: - ($width - $border-width);
+
+            }
+            @if $dir == points-south {
+                border-color: $color transparent transparent transparent;
+                bottom: - ($width - $border-width);
+
+            }
+            @if $dir == points-west {
+                border-color: transparent $color transparent transparent;
+                left: - ($width - $border-width);
+
+            }
+
+        }
+
+    }
+
+}

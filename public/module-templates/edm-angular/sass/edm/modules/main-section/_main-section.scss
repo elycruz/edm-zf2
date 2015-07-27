@@ -1,0 +1,14 @@
+edm-application /deep/ {
+    @import "breadcrumbs";
+    @import "left-column";
+    @import "main-column";
+    @import "right-column";
+
+    section.main-section {
+        position: relative;
+        top: 82px;
+        width: 100%;
+        min-width: 720px;
+        padding-bottom: 20px;
+    }
+}
