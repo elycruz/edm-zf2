@@ -19,6 +19,7 @@ class Bootstrap
     protected static $serviceManager;
     protected static $config;
     protected static $bootstrap;
+    protected static $autoload_config;
 
     public static function init()
     {
@@ -52,9 +53,14 @@ class Bootstrap
             ),
         );
 
-        $config = ArrayUtils::merge($baseConfig, $testConfig);
+        // Global configs
+        $global_autoload_options =  include __DIR__ . '/../../../../config/autoload/global.php';
+        $local_autoload_options =   include __DIR__ . '/../../../../config/autoload/local.php';
+        $autoload_config = static::$autoload_config = ArrayUtils::merge($global_autoload_options, $local_autoload_options);
 
-        $serviceManager = new ServiceManager(new ServiceManagerConfig());
+        // Application configs
+        $config = ArrayUtils::merge($baseConfig, $testConfig);
+        $serviceManager = new ServiceManager(new ServiceManagerConfig($autoload_config['service_manager']));
         $serviceManager->setService('ApplicationConfig', $config);
         $serviceManager->get('ModuleManager')->loadModules();
 
@@ -75,7 +81,21 @@ class Bootstrap
     }
     
     public static function initDbAdapter () {
-        GlobalAdapterFeature::setStaticAdapter();
+//
+//        $dbOptions = array_merge(
+//            array_merge(static::$autoload_config['db']['driver_options'],
+//            static::$autoload_config['db']['driver_options']);
+
+        GlobalAdapterFeature::setStaticAdapter(new DbAdapter(array(
+            'driver' => 'Mysqli',
+            'dbname' => 'edm',
+            'username' => 'root',
+            'password' => '07-bienven',
+            'host' => 'localhost',
+            'options' => array(
+                'buffer_results' => true
+            )
+        )));
     }
 
     protected static function initAutoloader()
@@ -89,8 +109,28 @@ class Bootstrap
             if (!$zf2Path) {
                 throw new RuntimeException('Unable to load ZF2. Run `php composer.phar install` or define a ZF2_PATH environment variable.');
             }
+            // Hasher path
+            $crackStationPath = implode(DIRECTORY_SEPARATOR, array(
+                __DIR__, 'vendor', 'CrackStation', 'src', 'CrackStation'
+            ));
 
-            include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
+            // If zf2 path, initiate autoloader
+            if (isset($loader)) {
+                $loader->add('Zend', $zf2Path);
+                $loader->add('CrackStation', $crackStationPath);
+            }
+            else {
+                include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
+                Zend\Loader\AutoloaderFactory::factory(array(
+                    'Zend\Loader\StandardAutoloader' => array(
+                        'autoregister_zf' => true,
+                        'namespaces' => array(
+                            'CrackStation' => $crackStationPath
+                        ))
+                ));
+            }
+
+//            include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
 
         }
 

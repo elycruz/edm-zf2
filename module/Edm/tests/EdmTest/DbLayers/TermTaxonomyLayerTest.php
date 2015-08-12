@@ -3,7 +3,8 @@
 namespace EdmTest\Controller;
 
 use EdmTest\Bootstrap;
-use \PHPUnit_Framework_TestCase;
+use \PHPUnit_Framework_TestCase,
+    Edm\Service\TermTaxonomyService;
 
 /**
  * Description of TermTaxonomyLayerTest
@@ -13,13 +14,14 @@ use \PHPUnit_Framework_TestCase;
 class TermTaxonomyLayerTest extends PHPUnit_Framework_TestCase {
 
     protected $serviceLocator;
+    protected $service;
 
     protected function setUp() {
         $this->serviceLocator = Bootstrap::getServiceManager();
+        $this->service = new TermTaxonomyService($this->serviceLocator);
     }
 
     public function testTermTaxonomyLayer() {
-        $db = $this->serviceLocator->get('Zend\Db\Adapter\Adapter');
-        var_dump($db->query('SELECT * FROM terms'));
+        $this->assertCount(10, $this->service->getByAlias('taxonomy'));
     }
 }

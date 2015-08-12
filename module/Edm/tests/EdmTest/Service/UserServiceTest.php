@@ -45,7 +45,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
         $dbAdapter = $this->userService->getDb();
         $this->assertInstanceOf('Zend\Db\Adapter\Adapter', $dbAdapter);
         $schema = $dbAdapter->getDriver()->getConnection()->getCurrentSchema();
-        $this->assertEquals('edm-0.4.0', $schema);
+        $this->assertEquals('edm', $schema);
     }
 
     public function testCreateAndDeleteUsers() {

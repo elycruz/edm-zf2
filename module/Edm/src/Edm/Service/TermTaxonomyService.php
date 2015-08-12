@@ -20,7 +20,10 @@ class TermTaxonomyService extends AbstractService {
     protected $termTaxProxyTableName = 'term_taxonomies_proxy';
     protected $resultSet;
 
-    public function __construct() {
+    public function __construct($serviceLocator = null) {
+        if ($serviceLocator != null) {
+            $this->setServiceLocator($serviceLocator);
+        }
         $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new TermTaxonomy());
