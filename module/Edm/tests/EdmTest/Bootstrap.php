@@ -81,21 +81,13 @@ class Bootstrap
     }
     
     public static function initDbAdapter () {
-//
-//        $dbOptions = array_merge(
-//            array_merge(static::$autoload_config['db']['driver_options'],
-//            static::$autoload_config['db']['driver_options']);
+        // Autoload configs
+        $autoload_config = static::$autoload_config;
 
-        GlobalAdapterFeature::setStaticAdapter(new DbAdapter(array(
-            'driver' => 'Mysqli',
-            'dbname' => 'edm',
-            'username' => 'root',
-            'password' => '07-bienven',
-            'host' => 'localhost',
-            'options' => array(
-                'buffer_results' => true
-            )
-        )));
+        // Initialize and set global db adapter
+        GlobalAdapterFeature::setStaticAdapter(new DbAdapter(
+            $autoload_config['db']
+        ));
     }
 
     protected static function initAutoloader()
