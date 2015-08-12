@@ -24,9 +24,9 @@ class Bootstrap
     {
         // Load the user-defined test configuration file, if it exists; otherwise, load
         if (is_readable(__DIR__ . '/TestConfig.php')) {
-            $testConfig = include __DIR__ . '/TestConfig.php';
+            $testConfig = include __DIR__ . '/../TestConfig.php';
         } else {
-            $testConfig = include __DIR__ . '/TestConfig.php.dist';
+            $testConfig = include __DIR__ . '/../TestConfig.php.dist';
         }
 
         $zf2ModulePaths = array();
@@ -75,14 +75,7 @@ class Bootstrap
     }
     
     public static function initDbAdapter () {
-//        GlobalAdapterFeature::setStaticAdapter(
-//            new DbAdapter(array(
-//                'driver' => 'Mysqli',
-//                'dbname' => 'edm-0.4.0',
-//                'username' => 'root',
-//                'password' => '07-bienven',
-//                'host' => 'localhost'
-//            )));
+        GlobalAdapterFeature::setStaticAdapter();
     }
 
     protected static function initAutoloader()
