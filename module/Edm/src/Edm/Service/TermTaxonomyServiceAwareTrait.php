@@ -13,14 +13,14 @@ namespace Edm\Service;
  */
 trait TermTaxonomyServiceAwareTrait {
 
-    public $termTaxService;
+    public $_termTaxService;
 
-    public function getTermTaxService() {
-        if (empty($this->termTaxService)) {
-            $this->termTaxService = 
+    public function termTaxonomyService() {
+        if (empty($this->_termTaxService)) {
+            $this->_termTaxService =
                 $this->serviceLocator->get('Edm\Service\TermTaxonomyService');
         }
-        return $this->termTaxService;
+        return $this->_termTaxService;
     }
 
 }

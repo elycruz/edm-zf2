@@ -64,7 +64,7 @@ trait TermTaxonomyOptionsTrait
         
         // Fetch taxonomies 
         $output = array();
-        $rslt = $this->getTermTaxService()->read($readOptions);
+        $rslt = $this->termTaxonomyService()->read($readOptions);
         
         // Set the default option
         if (isset($options->defaultOption)) {

@@ -29,10 +29,10 @@ class Edm_View_Helper_TaxonomyFilterSelectElement
         }
 
         // Term Tax Service
-        $termTaxService = new Edm_Service_Internal_TermTaxonomyService();
+        $_termTaxonomyService = new Edm_Service_Internal_TermTaxonomyService();
         
         // Taxonomies
-        $taxonomies = $termTaxService->getTermTaxonomiesByAlias($this->taxonomy,
+        $taxonomies = $_termTaxonomyService->getTermTaxonomiesByAlias($this->taxonomy,
                         null, 'name', null, null, true);
 
         $selectBoxOptions = array('0' => '-- '. $this->firstOptionText .' --');

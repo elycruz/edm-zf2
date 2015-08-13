@@ -22,7 +22,7 @@ extends AbstractHelper {
         $this->_view = $controller->view;
 
         // Populate layout positions
-        $termTaxServ = $this->getTermTaxService();
+        $termTaxServ = $this->termTaxonomyService();
         $positions = $termTaxServ->getTermTaxonomiesByAlias('position');
         foreach ($positions as $pos) {
             $this->_getLayout()->{$pos->term_alias} = '';
@@ -156,7 +156,7 @@ extends AbstractHelper {
         return $this->_dbDataHelper;
     }
 
-    public function getTermTaxService() {
+    public function termTaxonomyService() {
         if (empty($this->_termTaxService)) {
             if (Zend_Registry::isRegistered('edm-termTax-service')) {
                 $_termTaxService = Zend_Registry::get('edm-termTax-service');

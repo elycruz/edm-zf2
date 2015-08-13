@@ -254,7 +254,7 @@ implements \Edm\UserAware,
     public function getSelect($sql = null) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
-        $termTaxService = $this->getTermTaxService();
+        $_termTaxonomyService = $this->termTaxonomyService();
         // @todo implement return values only for current role level
         return $select
                 ->from(array('post' => $this->getPostTable()->table))
@@ -269,12 +269,12 @@ implements \Edm\UserAware,
                     'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'))
                 
             // Term Taxonomy
-            ->join(array('termTax' => $termTaxService->getTermTaxonomyTable()->table),
+            ->join(array('termTax' => $_termTaxonomyService->getTermTaxonomyTable()->table),
                     'termTax.term_taxonomy_id=postTermRel.term_taxonomy_id',
                     array('term_alias'))
                 
             // Term
-            ->join(array('term' => $termTaxService->getTermTable()->table), 
+            ->join(array('term' => $_termTaxonomyService->getTermTable()->table),
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
     }
 
@@ -362,7 +362,7 @@ implements \Edm\UserAware,
         }
 
         // Check if taxonomy alias indeed has $value else throw error
-        $allowedCheck = $this->getTermTaxService()->getByAlias($value, $taxonomyAlias);
+        $allowedCheck = $this->termTaxonomyService()->getByAlias($value, $taxonomyAlias);
         if (empty($allowedCheck)) {
             throw new \Exception('One of the values passed into "' .
                     __CLASS__ .'->'. __FUNCTION__ . '" are not allowed.');

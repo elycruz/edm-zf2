@@ -43,7 +43,7 @@ implements Edm_Db_DbAccess, Edm_Db_DbDataHelperAccess {
      * Term Tax Service;  Not sure if we're keeping this one here
      * @var Edm_Service_Internal_TermTaxonomyService
      */
-    protected $termTaxService;
+    protected $_termTaxonomyService;
 
     public function setDb(Zend_Db_Adapter_Abstract $db) {
         $this->db = $db;
@@ -74,16 +74,16 @@ implements Edm_Db_DbAccess, Edm_Db_DbDataHelperAccess {
         $this->_dbDataHelper = $dbDataHelper;
     }
     
-    public function getTermTaxService() {
+    public function termTaxonomyService() {
         if (empty($this->termTaxService)) {
             if (Zend_Registry::isRegistered('edm-termTax-service')) {
-                $termTaxService = Zend_Registry::get('edm-termTax-service');
+                $_termTaxonomyService = Zend_Registry::get('edm-termTax-service');
             }
             else {
                 $this->termTaxService = 
-                    $termTaxService =
+                    $_termTaxonomyService =
                         new Edm_Service_Internal_TermTaxonomyService();
-                Zend_Registry::set('edm-termTax-service', $termTaxService);
+                Zend_Registry::set('edm-termTax-service', $_termTaxonomyService);
             }
         }
         return $this->termTaxService;

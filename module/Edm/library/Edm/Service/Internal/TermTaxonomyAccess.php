@@ -11,6 +11,6 @@ interface Edm_Service_Internal_TermTaxonomyAccess {
     /**
      * @return Edm_Service_Internal_AbstractCrudService
      */
-    public function getTermTaxService();
+    public function termTaxonomyService();
     
 }

@@ -179,10 +179,10 @@ ViewModuleServiceAware, TermTaxonomyServiceAware {
         if (isset($viewModuleType)) {
 
             // Get table name and alias according to view module type
-            $termTaxService = $this->getTermTaxService();
+            $_termTaxonomyService = $this->termTaxonomyService();
 
             // Fetch table
-            $rslt = $termTaxService->getByAlias($viewModuleType . '-alias', 'table-name-by-alias');
+            $rslt = $_termTaxonomyService->getByAlias($viewModuleType . '-alias', 'table-name-by-alias');
 
             $mergedData = array_merge($mergedData, $data[$viewModuleTypeData->getFieldsetAlias()]);
             $viewModuleData->setSecondaryProtoName($viewModuleTypeData->getModelClassName());

@@ -28,6 +28,8 @@ use Edm\Controller\Action\AbstractController;
 class AbstractCrudController extends AbstractController {
 //implements Edm_Db_DbAccess, Edm_Db_DbDataHelperAccess {
 
+    use Edm\Service\TermTaxonomyServiceAwareTrait;
+
     /**
      * Database data helper for escaping data to and fro database
      * @var Edm_Db_DbDataHelper
@@ -39,12 +41,6 @@ class AbstractCrudController extends AbstractController {
      * @var Zend_Db_AbstractAdapter
      */
     protected $_db;
-    
-    /**
-     * Term Tax Service;  Not sure if we're keeping this one here
-     * @var Edm_Service_Internal_TermTaxonomyService
-     */
-    protected $termTaxService;
 
     public function setDb(Zend_Db_Adapter_Abstract $db) {
         $this->_db = $db;
@@ -85,20 +81,5 @@ class AbstractCrudController extends AbstractController {
 
     public function setDbDataHelper(Edm_Db_DbDataHelper $dbDataHelper) {
         $this->_dbDataHelper = $dbDataHelper;
-    }
-    
-    public function getTermTaxService() {
-        $t = $this->termTaxService;
-        if (empty($t)) {
-            if (Zend_Registry::isRegistered('edm-termTax-service')) {
-                $t = Zend_Registry::get('edm-termTax-service');
-            }
-            else {
-                $t = new Edm_Service_Internal_TermTaxonomyService();
-                Zend_Registry::set('edm-termTax-service', $t);
-            }
-            $this->termTaxService = $t;
-        }
-        return $t;
     }
 }

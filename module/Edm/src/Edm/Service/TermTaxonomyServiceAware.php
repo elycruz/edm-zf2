@@ -7,5 +7,5 @@ interface TermTaxonomyServiceAware {
      * Gets the Term Taxonomy Service
      * @return Edm\Service\AbstractCrudService
      */
-    public function getTermTaxService();
+    public function termTaxonomyService();
 }

@@ -16,6 +16,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase {
      * @var Edm\Service\UserService
      */
     protected $userService;
+    protected $serviceLocator;
     protected $numUsers = 8;
     protected $data = array();
     protected $userIds = array();

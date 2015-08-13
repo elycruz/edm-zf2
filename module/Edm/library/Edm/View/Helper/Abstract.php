@@ -297,17 +297,17 @@ Edm_Db_DbDataHelperAccess,
         $this->_dbDataHelper = $dbDataHelper;
     }
     
-    public function getTermTaxService() {
+    public function termTaxonomyService() {
         if (empty($this->_termTaxService)) {
             if (Zend_Registry::isRegistered('edm-termTax-service')) {
-                $termTaxService = Zend_Registry::get('edm-termTax-service');
+                $_termTaxonomyService = Zend_Registry::get('edm-termTax-service');
             }
             else {
-                    $termTaxService =
+                    $_termTaxonomyService =
                         new Edm_Service_Internal_TermTaxonomyService();
-                Zend_Registry::set('edm-termTax-service', $termTaxService);
+                Zend_Registry::set('edm-termTax-service', $_termTaxonomyService);
             }
-            $this->_termTaxService = $termTaxService;
+            $this->_termTaxService = $_termTaxonomyService;
         }
         return $this->_termTaxService;
     }
