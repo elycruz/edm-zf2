@@ -14,6 +14,7 @@ use EdmTest\Bootstrap;
 class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
 
     use \Edm\Service\TermTaxonomyServiceAwareTrait,
+        \Edm\Service\UserServiceAwareTrait,
         \Edm\ServiceManager\ServiceLocatorAwareTrait;
 
     protected function setUp() {
@@ -27,7 +28,7 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testDbConnection () {
-        $dbAdapter = $this->userService->getDb();
+        $dbAdapter = $this->getUserService()->getDb();
         $this->assertInstanceOf('Zend\Db\Adapter\Adapter', $dbAdapter);
         $schema = $dbAdapter->getDriver()->getConnection()->getCurrentSchema();
         $this->assertEquals('edm', $schema);
