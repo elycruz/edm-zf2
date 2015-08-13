@@ -4,7 +4,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-namespace Edm\TraitPartials;
+namespace Edm\Db;
 
 use Edm\Db\DatabaseDataHelper,
  Edm\Db\DbDataHelper;

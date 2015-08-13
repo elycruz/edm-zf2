@@ -14,12 +14,10 @@ use EdmTest\Bootstrap;
 class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
 
     use \Edm\Service\TermTaxonomyServiceAwareTrait,
-        \Edm\TraitPartials\ServiceLocatorAwareTrait;
+        \Edm\ServiceManager\ServiceLocatorAwareTrait;
 
     protected function setUp() {
         $this->setServiceLocator(Bootstrap::getServiceManager());
-        $this->setTermTaxService(
-            new TermTaxonomyService($this->serviceLocator));
     }
 
     public function testTermTaxonomyLayer() {
