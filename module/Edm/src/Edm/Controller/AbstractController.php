@@ -11,7 +11,7 @@ namespace Edm\Controller;
 use Zend\Mvc\Controller\AbstractActionController,
  Zend\View\Model\JsonModel,
  Edm\Db\DbDataHelperAware,
- Edm\TraitPartials\DbDataHelperAwareTrait;
+ Edm\Db\DbDataHelperAwareTrait;
 
 class AbstractController extends AbstractActionController 
 implements DbDataHelperAware {

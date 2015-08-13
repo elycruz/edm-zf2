@@ -6,8 +6,8 @@ namespace Edm\Db\Table;
 use Zend\Db\TableGateway\TableGateway,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Edm\Db\DbDataHelperAware,
-    Edm\TraitPartials\ServiceLocatorAwareTrait,
-    Edm\TraitPartials\DbDataHelperAwareTrait;
+    Edm\ServiceManager\ServiceLocatorAwareTrait,
+    Edm\Db\DbDataHelperAwareTrait;
 
 abstract class AbstractTable extends TableGateway 
 implements 
