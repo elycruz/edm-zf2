@@ -8,14 +8,17 @@
 
 namespace EdmTest\Service;
 
-use EdmTest\Bootstrap;
+use EdmTest\Bootstrap,
+    Edm\Service\TermTaxonomyServiceAwareTrait,
+    Edm\Service\UserServiceAwareTrait,
+    Edm\ServiceManager\ServiceLocatorAwareTrait;
 
 
 class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
 
-    use \Edm\Service\TermTaxonomyServiceAwareTrait,
-        \Edm\Service\UserServiceAwareTrait,
-        \Edm\ServiceManager\ServiceLocatorAwareTrait;
+    use TermTaxonomyServiceAwareTrait,
+        UserServiceAwareTrait,
+        ServiceLocatorAwareTrait;
 
     protected function setUp() {
         $this->setServiceLocator(Bootstrap::getServiceManager());

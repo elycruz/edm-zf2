@@ -6,7 +6,7 @@ namespace Edm\Model;
  * Description of SecondaryFieldsetDataModel
  * @author ElyDeLaCruz
  */
-use Edm\TraitPartials\StringHelpersTrait,
+use Edm\Utils\StringHelpersTrait,
     Zend\Db\TableGateway\TableGatewayInterface,
     Zend\Form\FieldsetInterface;
 

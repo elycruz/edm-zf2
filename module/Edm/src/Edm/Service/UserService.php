@@ -12,7 +12,7 @@ use Edm\Service\AbstractService,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
     Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter as DbTableWithCallback,
-    CrackStation\Pbkdf2Hasher;
+    Edm\Utils\Pbkdf2Hasher;
 
 /**
  * @author ElyDeLaCruz
@@ -442,11 +442,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
     public function checkEmailExistsInDb($email) {
         $rslt = $this->getUserContactRelTable()->select(
                         array('email' => $email))->current();
-        if (empty($rslt)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !empty($rslt);
     }
 
     /**
@@ -455,12 +451,9 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
      * @return boolean 
      */
     public function checkScreenNameExistsInDb($screenName) {
-        $rslt = $this->getUserContactRelTable()->select(
-                        array('screenName' => $screenName))->current();
-        if (!empty($rslt)) {
-            return true;
-        }
-        return false;
+        $rslt = $this->getUserContactRelTable()
+            ->select(array('screenName' => $screenName))->current();
+        return !empty($rslt);
     }
 
     /**

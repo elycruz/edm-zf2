@@ -1,6 +1,6 @@
 <?php
 
-namespace CrackStation;
+namespace Edm\Utils;
 
 /*
  * Password Hashing With PBKDF2 (http://crackstation.net/hashing-security.htm).
