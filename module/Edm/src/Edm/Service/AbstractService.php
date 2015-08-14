@@ -13,7 +13,7 @@ use Edm\Db\DbAware,
     \stdClass;
 
 abstract class AbstractService implements
-ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
+    ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
 
     use ServiceLocatorAwareTrait,
         DbDataHelperAwareTrait,

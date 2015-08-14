@@ -8,18 +8,20 @@
 
 namespace EdmTest\Service;
 
-use EdmTest\Bootstrap;
+use EdmTest\Bootstrap,
+    Edm\Service\TermTaxonomyServiceAwareTrait,
+    Edm\Service\UserServiceAwareTrait,
+    Edm\ServiceManager\ServiceLocatorAwareTrait;
 
 
 class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
 
-    use \Edm\Service\TermTaxonomyServiceAwareTrait,
-        \Edm\TraitPartials\ServiceLocatorAwareTrait;
+    use TermTaxonomyServiceAwareTrait,
+        UserServiceAwareTrait,
+        ServiceLocatorAwareTrait;
 
     protected function setUp() {
         $this->setServiceLocator(Bootstrap::getServiceManager());
-        $this->setTermTaxService(
-            new TermTaxonomyService($this->serviceLocator));
     }
 
     public function testTermTaxonomyLayer() {
@@ -29,7 +31,7 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testDbConnection () {
-        $dbAdapter = $this->userService->getDb();
+        $dbAdapter = $this->getUserService()->getDb();
         $this->assertInstanceOf('Zend\Db\Adapter\Adapter', $dbAdapter);
         $schema = $dbAdapter->getDriver()->getConnection()->getCurrentSchema();
         $this->assertEquals('edm', $schema);
