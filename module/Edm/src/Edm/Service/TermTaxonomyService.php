@@ -90,7 +90,7 @@ class TermTaxonomyService extends AbstractService {
     /**
      * Sets a term taxonomy's list order value
      * @param int $id
-     * @param numeric $listOrder
+     * @param int $listOrder
      * @return mixed boolean | ?
      * @throws \Exception
      */

@@ -203,7 +203,7 @@ return array(
             'Edm' => __DIR__ . '/../view-scripts',
         ),
         'template_map' => array(
-            'layout/edm-admin-login'    => APP_PATH .'/public/module-templates/edm-polymer-ui/server-versions/php/login.phtml',
+            'layout/edm-admin-login'    => APP_PATH .'/public/module-templates/edm-polymer-ui/login.phtml',
             'layout/edm-admin-ajax-ui'  => APP_PATH . '/public/module-templates/edm-polymer-ui/index.phtml'
         )
     ),
