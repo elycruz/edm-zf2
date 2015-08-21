@@ -9,7 +9,6 @@ use Edm\Db\DbAware,
     Edm\Db\DbDataHelperAwareTrait,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Zend\Db\ResultSet\ResultSet,
-    Zend\Db\Sql\Sql,
     \stdClass;
 
 abstract class AbstractService implements
@@ -23,12 +22,6 @@ abstract class AbstractService implements
     const FETCH_FIRST_AS_ARRAY = 2;
     const FETCH_RESULT_SET = 3;
     const FETCH_RESULT_SET_TO_ARRAY = 4;
-    
-    /**
-     * Services Sql Object
-     * @var Zend\Db\Sql\Sql
-     */
-    protected $sql;
 
     /**
      * Return Options as stdClass
@@ -92,31 +85,16 @@ abstract class AbstractService implements
     public function read($options = null) {
         // Normalize/get options object and seed it with default select params
         $options = $this->seedOptionsForSelect(
-                $this->normalizeMethodOptions($options));
+            $this->normalizeMethodOptions($options));
 
         // Get results
         $rslt = $this->resultSet->initialize(
-                $options->sql->prepareStatementForSqlObject(
-                        $options->select)->execute());
+            $options->sql->prepareStatementForSqlObject(
+                $options->select)->execute());
 
         return $this->fetchFromResult($rslt, $options->fetchMode);
     }
-    
-    /**
-     * Returns an Sql object seeded with the global db adapter 
-     * for the edm module
-     * @return Zend\Db\Sql\Sql
-     */
-    protected function getSql() {
-        if (empty($this->sql)) {
-            $this->sql = new Sql($this->getDb());
-        }
-        return $this->sql;
-    }
 
-    /**
-     * 
-     */
     abstract protected function getSelect();
 
     /**

@@ -4,6 +4,8 @@ namespace Edm\Service;
 
 use Edm\Service\AbstractService,
     Edm\Model\Page,
+    Edm\UserAware,
+    Edm\UserAwareTrait,
     Edm\Service\TermTaxonomyServiceAware,
     Edm\Service\TermTaxonomyServiceAwareTrait,
     Zend\Db\ResultSet\ResultSet,
@@ -20,12 +22,11 @@ use Edm\Service\AbstractService,
  * @author ElyDeLaCruz
  */
 class PageService extends AbstractService 
-implements \Edm\UserAware,
-        \Edm\Db\CompositeDataColumnAware,
-        TermTaxonomyServiceAware {
+implements UserAware, CompositeDataColumnAware, TermTaxonomyServiceAware {
     
-    use \Edm\UserAwareTrait,
-        \Edm\Db\CompositeDataColumnAwareTrait,
+    use UserAwareTrait,
+        CompositeDataColumnAware,
+        CompositeDataColumnAwareTrait,
         TermTaxonomyServiceAwareTrait;
     
     /**
@@ -64,7 +65,6 @@ implements \Edm\UserAware,
      * Constructor sets result set, sql, and result set's prototype object
      */
     public function __construct() {
-        $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new Page());
     }
@@ -233,7 +233,7 @@ implements \Edm\UserAware,
      * @return Zend\Db\Sql\Select
      */
     public function getSelect($sql = null) {
-        $sql = $sql !== null ? $sql : $this->getSql();
+        $sql = $sql !== null ? $sql : new Sql($this->getDb());
         $select = $sql->select();
         $_termTaxonomyService = $this->termTaxonomyService();
         

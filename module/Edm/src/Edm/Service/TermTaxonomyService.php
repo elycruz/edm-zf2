@@ -24,7 +24,6 @@ class TermTaxonomyService extends AbstractService {
         if ($serviceLocator != null) {
             $this->setServiceLocator($serviceLocator);
         }
-        $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new TermTaxonomy());
     }

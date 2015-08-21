@@ -40,7 +40,6 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
     protected $hasher;
 
     public function __construct() {
-        $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new User());
     }

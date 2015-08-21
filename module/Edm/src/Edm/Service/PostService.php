@@ -38,7 +38,6 @@ implements \Edm\UserAware,
     );
 
     public function __construct() {
-        $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new Post());
     }

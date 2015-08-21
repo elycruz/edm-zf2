@@ -1,0 +1,10 @@
+<php
+/*
+AbstractCrudService
+	create (AbstractModel $model)   :Edm\Service\AbstractCrudService
+	read   (array $where)   		:Edm\Service\AbstractCrudService
+	update (AbstractModel $model)   :Edm\Service\AbstractCrudService
+	delete (AbstractModel $model)   :Edm\Service\AbstractCrudService
+	select (AbstractModel $select)  	 :Zend\Db\Sql\Sql
+	sql	   (Zend\Db\Sql\Sql $sql = null) :Zend\Db\Sql\Sql
+*/

@@ -9,7 +9,7 @@ use Zend\Config\Config,
  * Abstract Model
  * @author ElyDeLaCruz
  */
-class AbstractModel {
+class AbstractModel extends \ArrayObject {
     
     /**
      * Valid keys for model
@@ -145,8 +145,6 @@ class AbstractModel {
         return $retVal;
     }
     
-    public function getArrayCopy () {
-        
-    }
+    public function getArrayCopy () {}
     
 }

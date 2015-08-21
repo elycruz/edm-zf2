@@ -48,7 +48,6 @@ implements \Edm\UserAware,
     protected $typeAliasesAndTables = null;
     
     public function __construct() {
-        $this->sql = new Sql($this->getDb());
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype(new ViewModule());
         $this->typeAliasesAndTables = 
