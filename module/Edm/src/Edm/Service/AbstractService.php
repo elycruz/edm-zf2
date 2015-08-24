@@ -115,7 +115,7 @@ abstract class AbstractService implements
     public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_RESULT_SET_TO_ARRAY) {
         $dbDataHelper = $this->getDbDataHelper();
         $retVal = null;
-        
+
         // Is current index in result set valid
          $validRslt = $rslt->valid();
          if (!$validRslt) {
@@ -125,7 +125,7 @@ abstract class AbstractService implements
          if (empty($current)) {
              return null;
          }
-         
+
         // Get data
         $data = $current->toArray();
 
@@ -143,15 +143,19 @@ abstract class AbstractService implements
             case self::FETCH_RESULT_SET:
                     $retVal = (new ResultSet())->initialize($rslt);
                 break;
-            case self::FETCH_RESULT_SET_TO_ARRAY: 
-            default: 
+            case self::FETCH_RESULT_SET_TO_ARRAY:
+            default:
                 $retVal = $this->cleanResultSetToArray($rslt);
             break;
         }
-        
+
         return $retVal;
     }
 
+    /**
+     * Factory for generating `Sql` objects using edm's db adapter.
+     * @return Zend\Db\Sql\Sql
+     */
     public function sql () {
         return new Sql($this->getDb());
     }

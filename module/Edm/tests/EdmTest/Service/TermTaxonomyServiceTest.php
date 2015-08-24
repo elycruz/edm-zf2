@@ -8,6 +8,8 @@
 
 namespace EdmTest\Service;
 
+use Edm\Model\Term;
+use Edm\Model\TermTaxonomy;
 use EdmTest\Bootstrap,
     Edm\Service\TermTaxonomyServiceAwareTrait,
     Edm\Service\UserServiceAwareTrait,
@@ -35,6 +37,19 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
 
     protected function setUp() {
         $this->setServiceLocator(Bootstrap::getServiceManager());
+        $this->removeCreatedDbEntries();
+    }
+
+    public function removeCreatedDbEntries () {
+        $service = $this->termTaxonomyService();
+        $rowToDelete = $service->getByAlias('hello-world', 'uncategorized')->current();
+        $row2ToDelete = $service->getByAlias('hello-world2', 'uncategorized')->current();
+        if ($rowToDelete) {
+            $this->termTaxonomyService()->deleteItem($rowToDelete->term_taxonomy_id);
+        }
+        if ($row2ToDelete) {
+            $this->termTaxonomyService()->deleteItem($row2ToDelete->term_taxonomy_id);
+        }
     }
 
     public function testGetById () {
@@ -85,34 +100,86 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
             'Should select "0" rows when no matches are found.');
     }
 
-    public function createItem () {
+    public function testCreateItem () {
+        $self = $this;
+        $service = $this->termTaxonomyService();
+        $data = array(
+            'term' => [
+                'name' => 'Hello World',
+                'alias' => 'hello-world'
+            ],
+            'term-taxonomy' => [
+                'term_alias' => 'hello-world',
+                'taxonomy' => 'uncategorized',
+                'description' => 'None.'
+            ]
+        );
+        $service->createItem($data)
+                ->then(function ($id) use ($service, $self) {
+                    $self->assertEquals(1, $service->getById($id)->count());
+                }, function ($reason) use ($service, $self) {
+                    $self->assertInstanceOf('\Exception', $reason);
+                });
+    }
+//
+//    public function testUpdateItem () {
+//        $service = $this->termTaxonomyService();
+//        $data = array(
+//            'term' => [
+//                'name' => 'Hello World 2',
+//                'alias' => 'hello-world2'
+//            ],
+//            'term-taxonomy' => [
+//                'term_alias' => 'hello-world2',
+//                'taxonomy' => 'uncategorized',
+//                'description' => 'None.'
+//            ]
+//        );
+//        $service->createItem($data)
+//            ->then(function ($id) use ($service) {
+//                $data = array(
+//                    'term' => [
+//                        'name' => 'Ola Mundo',
+//                        'alias' => 'hello-world2'
+//                    ],
+//                    'term-taxonomy' => [
+//                        'term_alias' => 'hello-world2',
+//                        'taxonomy' => 'uncategorized',
+//                        'description' => ''
+//                    ]
+//                );
+//                return $service->createItem($id, $data);
+//            })
+//            ->then(function ($id) use ($service) {
+//                $this->assertEquals('Ola Mundo', $service->getById($id)->current()->term_name);
+//            }, function ($reason) {
+//                var_dump($reason);
+//            });
+//
+//
+//    }
+//
+//    public function testDeleteItem () {
+//        $service = $this->termTaxonomyService();
+//        $rowToDelete = $service->getByAlias('hello-world', 'uncategorized')->current();
+//        $this->termTaxonomyService()->deleteItem($rowToDelete->term_taxonomy_id);
+//    }
+
+    public function testGetTermFormData () {
         $this->termTaxonomyService()
             ;
     }
 
-    public function updateItem () {
-        $this->termTaxonomyService()
-            ;
+    public function testGetTermTaxonomyTable () {
+        $this->assertInstanceOf('Edm\Db\Table\TermTaxonomyTable',
+            $this->termTaxonomyService()->getTermTaxonomyTable(),
+            'Return value should match class Edm\Db\Table\TermTaxonomyTable');
     }
 
-    public function deleteItem () {
-        $this->termTaxonomyService()
-            ;
-    }
-
-    public function getTermFormData () {
-        $this->termTaxonomyService()
-            ;
-    }
-
-    public function getTermTaxonomyTable () {
-        $this->termTaxonomyService()
-            ;
-    }
-
-    public function getTermTable () {
-        $this->termTaxonomyService()
-            ;
+    public function testGetTermTable () {
+        $this->assertInstanceOf('Edm\Db\Table\TermTable',
+            $this->termTaxonomyService()->getTermTable(),
+            'Return value should match class Edm\Db\Table\TermTable');
     }
 
     public function testDbConnection () {
@@ -123,6 +190,7 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     protected function tearDown () {
+//        $this->removeCreatedDbEntries();
         $this->termTaxonomyService()->setListOrderForId(1, 1);
     }
 }

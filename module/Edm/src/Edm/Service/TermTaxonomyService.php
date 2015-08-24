@@ -1,11 +1,15 @@
 <?php
+/**
+ * @todo start using a leading '_' for private and protected class members.
+ */
 
 namespace Edm\Service;
 
 use Edm\Service\AbstractService,
     Edm\Model\TermTaxonomy,
     Zend\Db\ResultSet\ResultSet,
-    Zend\Db\Sql\Sql;
+    Zend\Db\Sql\Sql,
+    GuzzleHttp\Promise\Promise;
 
 /**
  * @author ElyDeLaCruz
@@ -17,6 +21,7 @@ class TermTaxonomyService extends AbstractService {
     protected $termTaxTable;
     protected $termTable_alias = 'term';
     protected $termTaxTable_alias = 'termTax';
+    protected $termTaxProxyTable_alias = 'termTaxProxy';
     protected $termTaxProxyTableName = 'term_taxonomies_proxy';
     protected $resultSet;
 
@@ -54,8 +59,8 @@ class TermTaxonomyService extends AbstractService {
         $options1 = array(
             'fetchMode' => self::FETCH_FIRST_AS_ARRAY,
             'where' => array(
-                $this->termTaxTable_alias . '.taxonomy' => $taxonomy,
-                $this->termTaxTable_alias . '.term_alias' => $alias ));
+                $this->getTermTaxTableAlias() . '.taxonomy' => $taxonomy,
+                $this->getTermTaxTableAlias() . '.term_alias' => $alias ));
         
         // If options
         $options = is_array($options) ? 
@@ -124,10 +129,10 @@ class TermTaxonomyService extends AbstractService {
         // @todo implement return values only for current role level?
         return $select
             // Term Taxonomy
-            ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
+            ->from(array($this->getTermTaxTableAlias() => $this->getTermTaxonomyTable()->table))
 
             // Term (for term)
-            ->join(array('term' => $this->getTermTable()->table), 
+            ->join(array($this->getTermTableAlias() => $this->getTermTable()->table),
                     'term.alias=' . $this->termTaxTable_alias . '.term_alias', 
                     array('term_name' => 'name', 'term_group_alias'))
 
@@ -142,12 +147,13 @@ class TermTaxonomyService extends AbstractService {
 //                    array('taxonomy_name' => 'name'))
 
             // Count table
-            ->join(array('termTaxProxy' => $this->termTaxProxyTableName), 
+            ->join(array($this->getTermTaxProxyTableAlias() => $this->termTaxProxyTableName),
                     'termTaxProxy.term_taxonomy_id=termTax.term_taxonomy_id', 
                     array('childCount', 'assocItemCount'));
     }
 
     public function createItem(array $data) {
+
         // Throw error if term or term-taxonomy not set
         if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
@@ -167,7 +173,7 @@ class TermTaxonomyService extends AbstractService {
         }
         
         // If empty access group remove it's key
-            if (empty($termTax['accessGroup'])) {
+        if (empty($termTax['accessGroup'])) {
             unset($termTax['accessGroup']);
         }
         
@@ -178,32 +184,36 @@ class TermTaxonomyService extends AbstractService {
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
 
-        // Begin transaction
-        $conn->beginTransaction();
+        $promise = new Promise(function () use (&$promise, $conn, $termTax, $term) {
 
-        // Try db insertions
-        try {
-            // Process Term and rollback if failure
-            $termRslt = $this->getTermFromData($term);
+            // Begin transaction
+            $conn->beginTransaction();
 
-            // Set term tax term alias just in case
-            $termTax['term_alias'] = $termRslt->alias;
+            // Try db insertions
+            try {
+                // Process Term and rollback if failure
+                $termRslt = $this->_getTermFromData($term);
 
-            // Process Term Taxonomy 
-            $termTaxRslt = $this->getTermTaxonomyTable()
-                    ->createItem($termTax);
-            
-            // Commit changes
-            $conn->commit();
+                // Set term tax term alias just in case
+                $termTax['term_alias'] = $termRslt->alias;
 
-            // Return success message
-            return $termTaxRslt;
-        } 
-        catch (\Exception $e) {
-            // Rollback changes
-            $conn->rollback();
-            return $e;
-        }
+                // Process Term Taxonomy
+                $termTaxRslt = $this->getTermTaxonomyTable()->createItem($termTax);
+
+                // Commit changes
+                $conn->commit();
+
+                // Return success message
+                $promise->resolve($termTaxRslt);
+            }
+            catch (\Exception $e) {
+                // Rollback changes
+                $conn->rollback();
+                $promise->reject($e);
+            }
+        });
+
+        return $promise;
     }
 
     public function updateItem($id, $data) {
@@ -229,36 +239,35 @@ class TermTaxonomyService extends AbstractService {
 
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
-            
-        // Begin transaction
-        $conn->beginTransaction();
+        return $promise = new Promise(function () use (&$promise, $id, $conn, $termTax, $term) {
+            // Begin transaction
+            $conn->beginTransaction();
+            try {
 
-        // Try db updates
-        try {
+                // Process Term and rollback if failure
+                $termRslt = $this->_getTermFromData($term);
 
-            // Process Term and rollback if failure
-            $termRslt = $this->getTermFromData($term);
+                // Set term tax term alias just in case
+                $termTax['term_alias'] = $termRslt->alias;
 
-            // Set term tax term alias just in case
-            $termTax['term_alias'] = $termRslt->alias;
+                // Process Term Taxonomy
+                $termTaxRslt = $this->getTermTaxonomyTable()->updateItem($id, $termTax);
 
-            // Process Term Taxonomy 
-            $termTaxRslt = $this->getTermTaxonomyTable()
-                    ->updateItem($id, $termTax);
+                // Commit changes
+                $conn->commit();
 
-            // Commit changes
-            $conn->commit();
-
-            // Return success message
-            return $termTaxRslt;
-        } catch (\Exception $e) {
-            // Rollback changes
-            $conn->rollback();
-            return $e;
-        }
+                $promise->resolve($termTaxRslt);
+            }
+            catch (\Exception $e) {
+                $conn->rollback();
+                $promise->reject($e);
+            }
+        });
     }
 
     public function deleteItem($id) {
+        $retVal = false;
+
         // Throw error if term or term-taxonomy not set
         if (!is_numeric((int) $id)) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' expects ' .
@@ -270,58 +279,16 @@ class TermTaxonomyService extends AbstractService {
 
         // Begin transaction
         $conn->beginTransaction();
-
-        // Try db updates
         try {
-
-            // Process Term Taxonomy 
-            $termTaxRslt = $this->getTermTaxonomyTable()
-                    ->deleteItem($id);
-
-            // Commit changes
+            $termTaxRslt = $this->getTermTaxonomyTable()->deleteItem($id);
             $conn->commit();
-
-            // Return success message
-            return $termTaxRslt;
-        } catch (\Exception $e) {
-            // Rollback changes
+            $retVal = $termTaxRslt;
+        }
+        catch (\Exception $e) {
             $conn->rollback();
-            return $e;
+            $retVal = $e;
         }
-    }
-
-    /**
-     * Get term from data and create it if it doesn't exists
-     * @param mixed [array, object] $termData gets cast as (object) 
-     * @return mixed Edm\Model\Term | array
-     */
-    public function getTermFromData($termData) {
-        // Convert from array if necessary
-        if (is_array($termData)) {
-            $termData = (object) $this->getDbDataHelper()
-                            ->escapeTuple($termData);
-        }
-
-        // Get term table
-        $termTable = $this->getTermTable();
-
-        // Check if term already exists
-        $term = $termTable->getByAlias($termData->alias);
-
-        // Create term if empty
-        if (empty($term)) {
-            $rslt = $termTable->insert((array) $termData);
-            if (empty($rslt)) {
-                return false;
-            }
-            $term = $termTable->getByAlias($termData->alias);
-        }
-        // Update term if data and term are differen
-        else if ((!empty($term->name) && $term->name !== $termData->name)) {
-            $termTable->updateItem($term->alias, $term->toArray());
-            $term->name = $termData->name;
-        }
-        return $term;
+        return $retVal;
     }
 
     /**
@@ -350,6 +317,88 @@ class TermTaxonomyService extends AbstractService {
             $this->termTable->setServiceLocator($locator);
         }
         return $this->termTable;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTermTableAlias()
+    {
+        return $this->termTable_alias;
+    }
+
+    /**
+     * @param string $termTable_alias
+     */
+    public function setTermTableAlias($termTable_alias)
+    {
+        $this->termTable_alias = $termTable_alias;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTermTaxTableAlias()
+    {
+        return $this->termTaxTable_alias;
+    }
+
+    /**
+     * @param string $termTaxTable_alias
+     */
+    public function setTermTaxTableAlias($termTaxTable_alias)
+    {
+        $this->termTaxTable_alias = $termTaxTable_alias;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTermTaxProxyTableAlias()
+    {
+        return $this->termTaxProxyTable_alias;
+    }
+
+    /**
+     * @param string $termTaxProxyTable_alias
+     */
+    public function setTermTaxProxyTableAlias($termTaxProxyTable_alias)
+    {
+        $this->termTaxProxyTable_alias = $termTaxProxyTable_alias;
+    }
+
+    /**
+     * Get term from data and create it if it doesn't exists
+     * @param mixed [array, object] $termData gets cast as (object)
+     * @return mixed Edm\Model\Term | array
+     */
+    protected function _getTermFromData($termData) {
+        // Convert from array if necessary
+        if (is_array($termData)) {
+            $termData = (object) $this->getDbDataHelper()
+                ->escapeTuple($termData);
+        }
+
+        // Get term table
+        $termTable = $this->getTermTable();
+
+        // Check if term already exists
+        $term = $termTable->getByAlias($termData->alias);
+
+        // Create term if empty
+        if (empty($term)) {
+            $rslt = $termTable->insert((array) $termData);
+            if (empty($rslt)) {
+                return false;
+            }
+            $term = $termTable->getByAlias($termData->alias);
+        }
+        // Update term if data and term are different
+        else if ((!empty($term->name) && $term->name !== $termData->name)) {
+            $termTable->updateItem($term->alias, $term->toArray());
+            $term->name = $termData->name;
+        }
+        return $term;
     }
 
 }
