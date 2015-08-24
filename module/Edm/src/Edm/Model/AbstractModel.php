@@ -61,6 +61,9 @@ class AbstractModel extends \ArrayObject implements ModelInterface{
     public function toArray ($omitNull = true) {
         $retVal = array();
         foreach ($this->validKeys as $key) {
+            if (!$this->has($key)) {
+                continue;
+            }
             $val = $this->{$key};
             if ($omitNull && !isset($val)) {
                 continue;
@@ -70,7 +73,7 @@ class AbstractModel extends \ArrayObject implements ModelInterface{
         return $retVal;
     }
 
-    public function has (string $key) {
+    public function has ($key) {
         return array_key_exists($key, $this) === 1 ? true : false;
     }
 

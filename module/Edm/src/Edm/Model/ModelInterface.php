@@ -9,7 +9,6 @@
 namespace Edm\Model;
 
 interface ModelInterface {
-
-    public function has(string $key);
+    public function has($key);
     public function toArray();
 }

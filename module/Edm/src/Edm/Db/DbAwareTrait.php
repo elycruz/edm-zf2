@@ -22,7 +22,7 @@ trait DbAwareTrait {
     
     /**
      * Get database adapter
-     * @return Zend\Db\Adapter\Adapter
+     * @return Zend\Db\Adapter\AdapterInterface
      */
     public function getDb() {
         if (empty($this->db)) {

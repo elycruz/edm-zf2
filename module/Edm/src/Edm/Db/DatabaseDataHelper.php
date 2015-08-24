@@ -76,25 +76,22 @@ implements DbDataHelper {
      * @return array
      */
     public function escapeTuple($tuple, $skipFields = null) {
-        $new_array = array();
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
-            if (is_array($skipFields)) {
-                if (in_array($key, $skipFields)) {
-                    continue;
-                }
+            if (is_array($skipFields) && in_array($key, $skipFields)) {
+                continue;
             }
-            if (is_array($key)) {
-                $new_array[] = $this->escapeTuple($key);
+            else  if (is_array($key)) {
+                $tuple->{$key} = $this->escapeTuple($key);
             }
             else if (is_array($val) && !is_array($key)) {
-                $new_array[$key] = $this->escapeTuple($val);
+                $tuple->{$key} = $this->escapeTuple($val);
             }
             else {
-                $new_array[$key] = $this->mega_escape_string($val);
+                $tuple{$key} = $this->mega_escape_string($val);
             }
         }
-        return $new_array;
+        return $tuple;
     }
 
     /**
@@ -116,7 +113,7 @@ implements DbDataHelper {
 
     /**
      * Un-escapes our values from our db via the Service layer
-     * @param array $values
+     * @param array $tuple
      * @return array
      */
     public function reverseEscapeTuple($tuple) {
@@ -152,7 +149,8 @@ implements DbDataHelper {
     /**
      * Takes a string and returns a valid alias (can be used for xml nodeName
      * and other none space qualifying string)
-     * @param String $string
+     * @param string $str
+     * @throws \Exception
      * @return String /^[\-\_a-z\d]{5,255}$/ to lower case
      */
     public function getValidAlias($str) {

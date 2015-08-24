@@ -115,20 +115,31 @@ class TermTaxonomyService extends AbstractService {
      *      parent_name
      *      parent_alias
      *      taxonomy_name
+     * @param Zend\Db\Sql\Sql | null $sql
      * @return Zend\Db\Sql\Select
      */
     public function getSelect($sql = null) {
-        $sql = $sql !== null ? $sql : $this->getSql();
+        $sql = $sql !== null ? $sql : $this->sql();
         $select = $sql->select();
         // @todo implement return values only for current role level?
         return $select
             // Term Taxonomy
             ->from(array('termTax' => $this->getTermTaxonomyTable()->table))
 
-            // Term
+            // Term (for term)
             ->join(array('term' => $this->getTermTable()->table), 
                     'term.alias=' . $this->termTaxTable_alias . '.term_alias', 
                     array('term_name' => 'name', 'term_group_alias'))
+
+            // Term (for taxonomy)
+//            ->join(array('term' => $this->getTermTable()->table),
+//                    'term.alias=' . $this->termTaxTable_alias . '.taxonomy',
+//                    array('taxonomy_name' => 'name'))
+
+            // Term (for parent)
+//            ->join(array('term' => $this->getTermTable()->table),
+//                    'term.alias=' . $this->termTaxTable_alias . '.taxonomy',
+//                    array('taxonomy_name' => 'name'))
 
             // Count table
             ->join(array('termTaxProxy' => $this->termTaxProxyTableName), 

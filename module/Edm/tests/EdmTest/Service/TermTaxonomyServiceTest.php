@@ -42,9 +42,9 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetByAlias () {
-        $rslt = $this->termTaxonomyService()->getByAlias('taxonomy')->current();
+        $row = $this->termTaxonomyService()->getByAlias('taxonomy')->current();
         foreach ($this->props as $key => $value) {
-            $this->assertArrayHasKey($value, $rslt);
+            $this->assertArrayHasKey($value, $row);
         }
     }
 
@@ -56,8 +56,16 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetSelect () {
-        $this->termTaxonomyService()
-            ;
+        $this->termTaxonomyService();
+    }
+
+    public function testRead () {
+        $service = $this->termTaxonomyService();
+        $resultSet = $service->read(
+            array('where' => array('termTax.taxonomy' => 'user-group'))
+        );
+        $this->assertEquals($resultSet->count(), 9,
+            'Should select the exact number for items with taxonomy "user-group".');
     }
 
     public function createItem () {

@@ -9,8 +9,8 @@ use Edm\Db\DbAware,
     Edm\Db\DbDataHelperAwareTrait,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Zend\Db\ResultSet\ResultSet,
+    Zend\Db\Sql\Sql,
     \stdClass;
-use Zend\Db\Sql\Sql;
 
 abstract class AbstractService implements
     ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
@@ -25,11 +25,17 @@ abstract class AbstractService implements
     const FETCH_RESULT_SET_TO_ARRAY = 4;
 
     /**
+     * Db Result Set.
+     * @var Zend\Db\ResultSet\ResultSet
+     */
+    protected $resultSet;
+
+    /**
      * Return Options as stdClass
      * @param mixed $options
      * @return \stdClass
      */
-    public function normalizeMethodOptions($options = null) {
+    public function normalizeSeedOptions($options = null) {
         // Expect Array Object as options else convert
         if (is_array($options)) {
             $options = (object) $options;
@@ -46,7 +52,7 @@ abstract class AbstractService implements
      * @param \stdClass $options
      * @return \stdClass
      */
-    public function seedOptionsForSelect(stdClass $options) {
+    public function seedOptionsForSelect($options) {
         // Sql
         $sql = !empty($options->sql) ? $options->sql : new Sql($this->getDb());
 
@@ -80,17 +86,12 @@ abstract class AbstractService implements
 
     /**
      * Read from db using "get select" and "get sql"
-     * @param mixed $options
-     * @return mixed array result | array
+     * @param mixed|array|stdClass $options
+     * @return  Zend\Db\ResultSet\ResultSet
      */
     public function read($options = null) {
-        // Normalize/get options object and seed it with default select params
-        $options = $this->seedOptionsForSelect(
-            $this->normalizeMethodOptions($options));
-
-        // Get results
-        return $this->resultSet->initialize(
-            $options->sql->prepareStatementForSqlObject(
+        $options = $this->seedOptionsForSelect($this->normalizeSeedOptions($options));
+        return $this->resultSet->initialize($options->sql->prepareStatementForSqlObject(
                 $options->select)->execute());
     }
 
@@ -149,6 +150,10 @@ abstract class AbstractService implements
         }
         
         return $retVal;
+    }
+
+    public function sql () {
+        return new Sql($this->getDb());
     }
     
 }
