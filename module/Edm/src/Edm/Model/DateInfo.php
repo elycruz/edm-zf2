@@ -27,12 +27,6 @@ class DateInfo extends AbstractModel implements InputFilterAwareInterface {
         'checkedOutById',
     );
 
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-    }
-
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;
     }

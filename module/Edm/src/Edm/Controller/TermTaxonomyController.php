@@ -40,10 +40,10 @@ implements TermTaxonomyServiceAware {
         $sortBy = $this->getAndSetParam('sortBy', 'term_alias');
         
         // Term tax service
-        $_termTaxonomyService = $this->termTaxonomyService();
+        $termTaxonomyService = $this->termTaxonomyService();
 
         // Select 
-        $select = $_termTaxonomyService->getSelect();
+        $select = $termTaxonomyService->getSelect();
 
         // Where part of query
         $where = array();
@@ -74,10 +74,10 @@ implements TermTaxonomyServiceAware {
         // Order by
         $select->order($sortBy . ' ' . $sort);
         
-        // Paginator $_termTaxonomyService->getDb()
+        // Paginator $termTaxonomyService->getDb()
         $paginator = new Paginator(
                 new DbSelect($select, 
-                    $_termTaxonomyService->getTermTaxonomyTable()->getAdapter()));
+                    $termTaxonomyService->getTermTaxonomyTable()->getAdapter()));
         $paginator->setItemCountPerPage($itemCountPerPage)
                 ->setCurrentPageNumber($pageNumber);
 
@@ -126,7 +126,7 @@ implements TermTaxonomyServiceAware {
         }
 
         // Get Term Taxonomy service
-        $_termTaxonomyService = $this->termTaxonomyService();
+        $termTaxonomyService = $this->termTaxonomyService();
 
         // Get data
         $data = $view->form->getData();
@@ -134,7 +134,7 @@ implements TermTaxonomyServiceAware {
         $termData = (object) $data['term'];
 
         // Check if term taxonomy already exists
-        $termTaxCheck = $_termTaxonomyService->getByAlias(
+        $termTaxCheck = $termTaxonomyService->getByAlias(
                 $termData->alias, $termTaxData->taxonomy);
         if (!empty($termTaxCheck)) {
             $fm->setNamespace('error')->addMessage('Term Taxonomy "" already ' .
@@ -143,7 +143,7 @@ implements TermTaxonomyServiceAware {
         }
         
         // Create term taxonomy
-        $rslt = $_termTaxonomyService->createItem($data);
+        $rslt = $termTaxonomyService->createItem($data);
 
         // Send success message to user
         if (is_numeric($rslt) && !empty($rslt)) {
@@ -189,7 +189,7 @@ implements TermTaxonomyServiceAware {
         $id = $this->getParam('itemId');
 
         // Put data into model
-        $_termTaxonomyService = $this->termTaxonomyService();
+        $termTaxonomyService = $this->termTaxonomyService();
 
         // Setup form
         $form = new TermTaxonomyForm('term-taxonomy-form', array(
@@ -199,7 +199,7 @@ implements TermTaxonomyServiceAware {
         $view->form = $form;
 
         // Check if term already exists if not bail
-        $existingTermTax = new TermTaxonomy($_termTaxonomyService->getById($id));
+        $existingTermTax = new TermTaxonomy($termTaxonomyService->getById($id));
         if (empty($existingTermTax)) {
             $fm->setNamespace('error')->addMessage('Term Taxonomy with id "'
                     . $id . '" doesn\'t exist in database.');
@@ -244,7 +244,7 @@ implements TermTaxonomyServiceAware {
         $term = (object) $data['term'];
         
         // Update term in db
-        $rslt = $_termTaxonomyService->updateItem($id, $data);
+        $rslt = $termTaxonomyService->updateItem($id, $data);
         
         // Send success message to user
         if (is_numeric($rslt)) {
@@ -300,10 +300,10 @@ implements TermTaxonomyServiceAware {
         }
 
         // Get term table
-        $_termTaxonomyService = $this->termTaxonomyService();
+        $termTaxonomyService = $this->termTaxonomyService();
 
         // Check if term already exists
-        $termTaxRslt = $_termTaxonomyService->getById($id);
+        $termTaxRslt = $termTaxonomyService->getById($id);
         if (empty($termTaxRslt)) {
             // If not send message and bail
             $fm->setNamespace('error')->addMessage('Term Taxonomy Id "' .
@@ -315,7 +315,7 @@ implements TermTaxonomyServiceAware {
         $termTax = new TermTaxonomy($termTaxRslt);
         
         // Delete term in db
-        $rslt = $_termTaxonomyService->deleteItem($termTax->term_taxonomy_id);
+        $rslt = $termTaxonomyService->deleteItem($termTax->term_taxonomy_id);
 
         // Send success message to user
         if ($rslt) {
@@ -349,8 +349,8 @@ implements TermTaxonomyServiceAware {
         $listOrder = $this->getParam('listOrder');
         
         // Get term tax
-        $_termTaxonomyService = $this->termTaxonomyService();
-        $termTax = new TermTaxonomy ($_termTaxonomyService->getById($id));
+        $termTaxonomyService = $this->termTaxonomyService();
+        $termTax = new TermTaxonomy ($termTaxonomyService->getById($id));
         $fm = $this->initFlashMessenger();
         
         // Set error message if term tax not found
@@ -363,7 +363,7 @@ implements TermTaxonomyServiceAware {
         }
 
         // Update listorder
-        $rslt = $_termTaxonomyService->setListOrderForId($id, $listOrder);
+        $rslt = $termTaxonomyService->setListOrderForId($id, $listOrder);
         
         // Send success message to user
         if (!empty($rslt)) {

@@ -263,7 +263,7 @@ implements \Edm\UserAware,
     public function getSelect($sql = null) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
-        $_termTaxonomyService = $this->termTaxonomyService();
+        $termTaxonomyService = $this->termTaxonomyService();
         
         // @todo implement return values only for current role level
         $select
@@ -276,12 +276,12 @@ implements \Edm\UserAware,
                     'mixedTermRel.object_id=viewModule.view_module_id')
 
             // Term Taxonomy
-            ->join(array('termTax' => $_termTaxonomyService->getTermTaxonomyTable()->getTable()),
+            ->join(array('termTax' => $termTaxonomyService->getTermTaxonomyTable()->getTable()),
                     'termTax.term_taxonomy_id=mixedTermRel.term_taxonomy_id',
                     array('term_alias'))
 
             // Term
-            ->join(array('term' => $_termTaxonomyService->getTermTable()->getTable()),
+            ->join(array('term' => $termTaxonomyService->getTermTable()->getTable()),
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
         
         // Secondary Table

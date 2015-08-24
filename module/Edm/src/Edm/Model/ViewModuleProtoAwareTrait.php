@@ -10,7 +10,6 @@ use Edm\Model\ViewModule;
 
 /**
  * Description of HasViewModuleTrait
- * @overrides exchangeArray
  * @author ElyDeLaCruz
  */
 trait ViewModuleProtoAwareTrait {
@@ -41,25 +40,6 @@ trait ViewModuleProtoAwareTrait {
         }
         return $this->viewModuleProto;
     }
-    
-    /**
-     * Exchange array overriden to divide data between implementer proto model and view module proto model
-     * @param array $data
-     * @return \Edm\Model\AbstractModel
-     */
-    public function exchangeArray(array $data) {
-        $viewModule = $this->getViewModuleProto();
-        $viewModuleValidKeys = $viewModule->getValidKeys();
-        foreach ($data as $key => $val) {
-            if (in_array($key, $this->validKeys)) {
-                $this->{$key} = $val;
-            }
-            else if (in_array($key, $viewModuleValidKeys)) {
-                $viewModule->{$key} = $val;
-            }
-        }
-        $this->viewModuleProto = $viewModule;
-        return $this;
-    }
+
 }
 

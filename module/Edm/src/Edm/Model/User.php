@@ -5,12 +5,9 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface,
-    Edm\Model\Contact,
-    Edm\Model\DateInfo,
-    Edm\Model\AbstractModel;
+    Zend\InputFilter\InputFilterInterface;
 
-class User extends AbstractModel implements InputFilterAwareInterface {
+class User extends AbstractModel implements InputFilterAwareInterface, ModelInterface {
 
     /**
      * User role.
@@ -73,7 +70,7 @@ class User extends AbstractModel implements InputFilterAwareInterface {
      * @var Edm\Model\DateInfo
      */
     protected $dateInfoProto;
-    
+
     /**
      * Constructor
      * @param {mixed|Array|numm} $data - default null
@@ -87,6 +84,7 @@ class User extends AbstractModel implements InputFilterAwareInterface {
     /**
      * Sets our input filter.
      * @param \Zend\InputFilter\InputFilterInterface $inputFilter
+     * @return null;
      */
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;
@@ -161,32 +159,32 @@ class User extends AbstractModel implements InputFilterAwareInterface {
 
         return $retVal;
     }
-    
-    /**
-     * Exchange array overriden to divide data between user data, contact data, and date info data
-     * @param array $data
-     * @return \Edm\Model\AbstractModel
-     */
-    public function exchangeArray(array $data) {
-        $contact = $this->getContactProto();
-        $dateInfo = $this->getDateInfoProto();
-        $contactValidKeys = $contact->getValidKeys();
-        $dateInfoValidKeys = $dateInfo->getValidKeys();
-        foreach ($data as $key => $val) {
-            if (in_array($key, $this->validKeys)) {
-                $this->{$key} = $val;
-            }
-            else if (in_array($key, $contactValidKeys)) {
-                $contact->{$key} = $val;
-            }
-            else if (in_array($key, $dateInfoValidKeys)) {
-                $contact->{$key} = $val;
-            }
-        }
-        $this->contactProto = $contact;
-        return $this;
-    }
-    
+//
+//    /**
+//     * Exchange array overriden to divide data between user data, contact data, and date info data
+//     * @param array $data
+//     * @return \Edm\Model\AbstractModel
+//     */
+//    public function exchangeArray(array $data) {
+//        $contact = $this->getContactProto();
+//        $dateInfo = $this->getDateInfoProto();
+//        $contactValidKeys = $contact->getValidKeys();
+//        $dateInfoValidKeys = $dateInfo->getValidKeys();
+//        foreach ($data as $key => $val) {
+//            if (in_array($key, $this->validKeys)) {
+//                $this->{$key} = $val;
+//            }
+//            else if (in_array($key, $contactValidKeys)) {
+//                $contact->{$key} = $val;
+//            }
+//            else if (in_array($key, $dateInfoValidKeys)) {
+//                $contact->{$key} = $val;
+//            }
+//        }
+//        $this->contactProto = $contact;
+//        return $this;
+//    }
+
     /**
      * Gets Contact Proto
      * @param array $data

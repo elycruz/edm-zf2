@@ -15,10 +15,5 @@ class TermTaxonomyProxy extends AbstractModel {
         'assocItemCount',
         'childCount'
     );
-    
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-    }
+
 }

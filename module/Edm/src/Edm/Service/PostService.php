@@ -253,7 +253,7 @@ implements \Edm\UserAware,
     public function getSelect($sql = null) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
-        $_termTaxonomyService = $this->termTaxonomyService();
+        $termTaxonomyService = $this->termTaxonomyService();
         // @todo implement return values only for current role level
         return $select
                 ->from(array('post' => $this->getPostTable()->table))
@@ -268,12 +268,12 @@ implements \Edm\UserAware,
                     'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'))
                 
             // Term Taxonomy
-            ->join(array('termTax' => $_termTaxonomyService->getTermTaxonomyTable()->table),
+            ->join(array('termTax' => $termTaxonomyService->getTermTaxonomyTable()->table),
                     'termTax.term_taxonomy_id=postTermRel.term_taxonomy_id',
                     array('term_alias'))
                 
             // Term
-            ->join(array('term' => $_termTaxonomyService->getTermTable()->table),
+            ->join(array('term' => $termTaxonomyService->getTermTable()->table),
                     'term.alias=termTax.term_alias', array('term_name' => 'name'));
     }
 

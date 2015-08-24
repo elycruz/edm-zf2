@@ -51,12 +51,6 @@ class Page extends AbstractModel implements InputFilterAwareInterface {
      */
     protected $inputFilter = null;
 
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-    }
-
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;
     }
@@ -228,32 +222,6 @@ class Page extends AbstractModel implements InputFilterAwareInterface {
         return $retVal;
     }
 
-    /**
-     * Exchange array overriden to divide data between user data and mixedTermRel data
-     * @param array $data
-     * @return \Edm\Model\AbstractModel
-     */
-    public function exchangeArray(array $data) {
-        $mixedTermRel = $this->getMixedTermRelProto();
-        $mixedTermRelValidKeys = $mixedTermRel->getValidKeys();
-        $menuPageRel = $this->getMenuPageRelProto();
-        $menuPageRelValidKeys = $menuPageRel->getValidKeys();
-        foreach ($data as $key => $val) {
-            if (in_array($key, $this->validKeys)) {
-                $this->{$key} = $val;
-            } 
-            else if (in_array($key, $mixedTermRelValidKeys)) {
-                $mixedTermRel->{$key} = $val;
-            }
-            else if (in_array($key, $menuPageRelValidKeys)) {
-                $menuPageRel->{$key} = $val;
-            }
-        }
-        $this->mixedTermRelProto = $mixedTermRel;
-        $this->menuPageRelProto = $menuPageRel;
-        return $this;
-    }
-    
     /**
      * Mixed Term Rel Proto
      * @return Edm\Model\MixedTermRel

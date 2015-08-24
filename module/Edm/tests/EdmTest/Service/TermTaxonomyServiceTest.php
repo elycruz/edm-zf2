@@ -19,21 +19,39 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
         UserServiceAwareTrait,
         ServiceLocatorAwareTrait;
 
+    public $props = array(
+        'term_taxonomy_id',
+        'term_alias',
+        'taxonomy',
+        'description',
+        'childCount',
+        'assocItemCount',
+        'listOrder',
+        'parent_id',
+            // Joined keys
+        'term_name',
+        'term_group_alias'
+        );
+
     protected function setUp() {
         $this->setServiceLocator(Bootstrap::getServiceManager());
     }
 
     public function testGetById () {
-        $this->assertCount(10, $this->termTaxonomyService()->getById(1));
+        $this->assertEquals(11, $this->termTaxonomyService()->getById(1)->getFieldCount());
     }
 
     public function testGetByAlias () {
-        $this->assertCount(10, $this->termTaxonomyService()->getByAlias('taxonomy'));
+        $rslt = $this->termTaxonomyService()->getByAlias('taxonomy')->current();
+        foreach ($this->props as $key => $value) {
+            $this->assertArrayHasKey($value, $rslt);
+        }
     }
 
     public function testSetListOrderId () {
         $this->termTaxonomyService()->setListOrderForId(1, 1000);
-        $this->assertEquals($this->termTaxonomyService()->getById(1)['listOrder'], 1000,
+        $result = $this->termTaxonomyService()->getById(1)->current();
+        $this->assertEquals($result->listOrder, 1000,
             'Updated list order should be updated in database.');
     }
 

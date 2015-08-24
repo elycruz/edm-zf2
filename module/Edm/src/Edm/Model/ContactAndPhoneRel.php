@@ -15,9 +15,4 @@ class ContactAndPhoneRel extends AbstractModel {
         'phone_id'
     );
 
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-    }
 }

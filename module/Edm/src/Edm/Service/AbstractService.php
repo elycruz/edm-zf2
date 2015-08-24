@@ -10,6 +10,7 @@ use Edm\Db\DbAware,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Zend\Db\ResultSet\ResultSet,
     \stdClass;
+use Zend\Db\Sql\Sql;
 
 abstract class AbstractService implements
     ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
@@ -47,7 +48,7 @@ abstract class AbstractService implements
      */
     public function seedOptionsForSelect(stdClass $options) {
         // Sql
-        $sql = !empty($options->sql) ? $options->sql : $this->getSql();
+        $sql = !empty($options->sql) ? $options->sql : new Sql($this->getDb());
 
         // Select
         if (isset($options->select)) {
@@ -88,11 +89,9 @@ abstract class AbstractService implements
             $this->normalizeMethodOptions($options));
 
         // Get results
-        $rslt = $this->resultSet->initialize(
+        return $this->resultSet->initialize(
             $options->sql->prepareStatementForSqlObject(
                 $options->select)->execute());
-
-        return $this->fetchFromResult($rslt, $options->fetchMode);
     }
 
     abstract protected function getSelect();

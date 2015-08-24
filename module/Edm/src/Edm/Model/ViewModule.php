@@ -71,12 +71,6 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         'userParams'
     );
 
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-    }
-
     /**
      * Sets our input filter
      * @param \Zend\InputFilter\InputFilterInterface $inputFilter
@@ -236,29 +230,6 @@ class ViewModule extends AbstractModel implements InputFilterAwareInterface {
         $this->inputFilter = $retVal;
 
         return $retVal;
-    }
-
-    /**
-     * Exchange array overriden to divide data between user data and mixedTermRel data
-     * @param array $data
-     * @return \Edm\Model\AbstractModel
-     */
-    public function exchangeArray(array $data) {
-        $mixedTermRel = $this->getMixedTermRelProto();
-        $mixedTermRelValidKeys = $mixedTermRel->getValidKeys();
-        $secondaryProto = $this->getSecondaryProto();
-        foreach ($data as $key => $val) {
-            if (in_array($key, $this->validKeys)) {
-                $this->{$key} = $val;
-            } else if (in_array($key, $mixedTermRelValidKeys)) {
-                $mixedTermRel->{$key} = $val;
-            } else if (!empty($secondaryProto) &&
-                    in_array($key, $secondaryProto->getValidKeys())) {
-                $secondaryProto->{$key} = $val;
-            }
-        }
-        $this->mixedTermRelProto = $mixedTermRel;
-        return $this;
     }
 
     /**

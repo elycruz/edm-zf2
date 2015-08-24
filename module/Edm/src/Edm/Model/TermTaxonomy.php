@@ -5,8 +5,7 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel;
+    Zend\InputFilter\InputFilterInterface;
 
 class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
 
@@ -30,13 +29,6 @@ class TermTaxonomy extends AbstractModel implements InputFilterAwareInterface {
         // Custom keys
         'children'
     );
-
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-        $this->getInputFilter();
-    }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;

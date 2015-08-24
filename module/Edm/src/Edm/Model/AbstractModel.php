@@ -9,7 +9,7 @@ use Zend\Config\Config,
  * Abstract Model
  * @author ElyDeLaCruz
  */
-class AbstractModel extends \ArrayObject {
+class AbstractModel extends \ArrayObject implements ModelInterface{
     
     /**
      * Valid keys for model
@@ -28,51 +28,20 @@ class AbstractModel extends \ArrayObject {
      * @var Edm\InputFilter\DefaultInputOptions
      */
     protected static $defaultInputOptions;
+
+    /**
+     * Proto names to use when calling to array to generate values.
+     * @var array
+     */
+    protected $protoNames;
     
     /**
      * Constructor
      * @param array $data
+     * @param int $flags
      */
-    public function __construct(array $data = null) {
-        
-        // Set default values
-        if (!empty($data)) {
-            $this->exchangeArray($data);
-        }
-    }
-
-    /**
-     * Exchange array
-     * @param array $data
-     * @return \Edm\Model\AbstractModel
-     */
-    public function exchangeArray(array $data) {
-        foreach ($data as $key => $val) {
-            if (in_array($key, $this->validKeys)) {
-                $this->{$key} = $val;
-            }
-        }
-        return $this;
-    }
-    
-    /**
-     * Setter
-     * @param string $name
-     * @param mixed $value
-     */
-    public function __set($name, $value) {
-        $this->{$name} = $value;
-    }
-
-    /**
-     * Getter
-     * @param string $name
-     */
-    public function __get($name) {
-        if (!isset($this->{$name})) {
-            $this->{$name} = null;
-        }
-        return $this->{$name};
+    public function __construct(array $data = null, $flags = 0) {
+        parent::__construct($data === null ? array() : $data, $flags == 0 ? \ArrayObject::ARRAY_AS_PROPS : $flags);
     }
 
     /**
@@ -100,7 +69,11 @@ class AbstractModel extends \ArrayObject {
         }
         return $retVal;
     }
-    
+
+    public function has (string $key) {
+        return array_key_exists($key, $this) === 1 ? true : false;
+    }
+
     public static function setDefaultInputOptions (Config $options) {
         self::$defaultInputOptions = $options;
     }
@@ -144,7 +117,5 @@ class AbstractModel extends \ArrayObject {
         
         return $retVal;
     }
-    
-    public function getArrayCopy () {}
-    
+
 }

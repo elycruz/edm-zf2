@@ -49,12 +49,6 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
      * @var Edm\Model\PostTermRel
      */
     protected $postTermRelProto;
-    
-    public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-    }
 
     public function setInputFilter(InputFilterInterface $inputFilter) {
         $this->inputFilter = $inputFilter;
@@ -166,30 +160,6 @@ class Post extends AbstractModel implements InputFilterAwareInterface {
         $this->inputFilter = $retVal;
 
         return $retVal;
-    }
-    
-    /**
-     * Exchange array overriden to divide data between user data and postTermRel data
-     * @param array $data
-     * @return \Edm\Model\AbstractModel
-     */
-    public function exchangeArray(array $data) {
-        $postTermRel = $this->getPostTermRelProto();
-        $postTermRelValidKeys = $postTermRel->getValidKeys();
-        $dateInfo = $this->getDateInfoProto();
-        $dateInfoValidKeys = $dateInfo->getValidKeys();
-        foreach ($data as $key => $val) {
-            if (in_array($key, $this->validKeys)) {
-                $this->{$key} = $val;
-            }
-            else if (in_array($key, $postTermRelValidKeys)) {
-                $postTermRel->{$key} = $val;
-            }
-            else if (in_array($key, $dateInfoValidKeys)) {
-                $dateInfo->{$key} = $val;
-            }
-        }
-        return $this;
     }
     
     /**

@@ -46,10 +46,7 @@ class Menu extends AbstractModel implements InputFilterAwareInterface, FieldsInF
     protected $inputFilter = null;
 
     public function __construct($data = null) {
-        if (is_array($data)) {
-            $this->exchangeArray($data);
-        }
-        
+
         // Set fields in form
         $this->setFieldsInForm(array(
             'minDepth',

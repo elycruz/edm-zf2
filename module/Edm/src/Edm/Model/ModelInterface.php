@@ -8,9 +8,8 @@
 
 namespace Edm\Model;
 
-
 interface ModelInterface {
-    public function exchangeArray (array $data = null);
-    public function getArrayCopy (array $keys = null);
-    public function getValidKeys ();
+
+    public function has(string $key);
+    public function toArray();
 }
