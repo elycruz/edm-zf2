@@ -56,16 +56,33 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetSelect () {
-        $this->termTaxonomyService();
+        $this->assertInstanceOf('Zend\Db\Sql\Select',
+            $this->termTaxonomyService()->getSelect());
     }
 
     public function testRead () {
+        // Get service
         $service = $this->termTaxonomyService();
+
+        // Fetch existing matches
         $resultSet = $service->read(
             array('where' => array('termTax.taxonomy' => 'user-group'))
         );
+
+        // Test result set interface
+        $this->assertInstanceOf('Zend\Db\ResultSet\ResultSet', $resultSet,
+            'Should return a "Zend\Db\ResultSet\ResultSet".');
+
+        // Existing row matches count
         $this->assertEquals($resultSet->count(), 9,
             'Should select the exact number for items with taxonomy "user-group".');
+
+        // Fetch non existing matches
+        $resultSet = $service->read(array('where' => array('termTax.taxonomy' => 'hello-world')));
+
+        // Non existing row matches count
+        $this->assertEquals($resultSet->count(), 0,
+            'Should select "0" rows when no matches are found.');
     }
 
     public function createItem () {

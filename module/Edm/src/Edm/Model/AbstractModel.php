@@ -73,6 +73,11 @@ class AbstractModel extends \ArrayObject implements ModelInterface{
         return $retVal;
     }
 
+    /**
+     * Check if key exists on object.
+     * @param $key string
+     * @return bool
+     */
     public function has ($key) {
         return array_key_exists($key, $this) === 1 ? true : false;
     }
