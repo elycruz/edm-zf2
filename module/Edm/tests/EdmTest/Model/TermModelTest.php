@@ -12,12 +12,6 @@ use EdmTest\Bootstrap,
     Edm\ServiceManager\ServiceLocatorAwareTrait,
     Edm\Model\Term;
 
-class TermModelTest extends \PHPUnit_Framework_TestCase {
-
-    public $validFields = [
-        'alias',
-        'name',
-        'term_group_alias'
-    ];
+class TermAndAbstractModelTest extends \PHPUnit_Framework_TestCase {
 
 }

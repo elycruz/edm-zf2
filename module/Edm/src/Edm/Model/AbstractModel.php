@@ -80,7 +80,7 @@ class AbstractModel extends \ArrayObject implements ModelInterface{
      */
     public function has ($key) {
         return array_key_exists($key, $this) === 1
-            || $this->{$key};
+            || isset($this->{$key});
     }
 
     public static function setDefaultInputOptions (Config $options) {
