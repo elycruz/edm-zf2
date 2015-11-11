@@ -101,7 +101,6 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testCreateItem () {
-        $self = $this;
         $service = $this->termTaxonomyService();
         $data = array(
             'term' => [
@@ -114,11 +113,12 @@ class TermTaxonomyServiceTest extends \PHPUnit_Framework_TestCase {
                 'description' => 'None.'
             ]
         );
+
         $service->createItem($data)
-                ->then(function ($id) use ($service, $self) {
-                    $self->assertEquals(1, $service->getById($id)->count());
-                }, function ($reason) use ($service, $self) {
-                    $self->assertInstanceOf('\Exception', $reason);
+                ->then(function ($id) use ($service) {
+                    $this->assertEquals(1, $service->getById($id)->count());
+                }, function ($reason) use ($service) {
+                    $this->assertInstanceOf('\Exception', $reason);
                 });
     }
 //
