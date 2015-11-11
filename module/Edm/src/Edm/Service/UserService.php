@@ -277,8 +277,11 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
      * @todo figure out what to do about authservice and pbkdf2_hasher (maybe compose a new auth service that uses the pbkdf2 hasher to do it's job
      * @return boolean
      */
-    public function loginUser(User $user, 
-            $identityColumn = 'screenName', $credentialColumn = 'password') {
+    public function loginUser(
+            User $user,
+            $identityColumn = 'screenName',
+            $credentialColumn = 'password'
+    ) {
         
         // Get auth adapater
         $authService = $this->getAuthService();
@@ -287,16 +290,16 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
         $authAdapter = new DbTableWithCallback(
                 $this->getDb(), 
                 $this->getUserTable()->table, 
-                'screenName', 
-                'password',
+                $identityColumn,
+                $credentialColumn,
                 function ($a, $b) {
                     $hasher = new Pbkdf2Hasher();
                     return $hasher->validate_against_hash($b, $a);
                 });
 
         // Set preliminaries before check
-        $authAdapter->setIdentity($user->screenName);
-        $authAdapter->setCredential($user->password);
+        $authAdapter->setIdentity($user['screenName']);
+        $authAdapter->setCredential($user['password']);
         $authAdapter->getDbSelect()->where(array('status' => 'activated'));
         $rslt = $authService->authenticate($authAdapter);
 

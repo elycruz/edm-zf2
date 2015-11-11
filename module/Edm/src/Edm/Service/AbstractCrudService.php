@@ -41,11 +41,13 @@ implements Edm_Service_Internal_CrudInterface
     /**
      * Reads the service using the return value of getSelect() as its default 
      * select object.
-     * @param string $where
-     * @param int $fetchMode default Zend_Db::FETCH_* 
-     * @param int $sort
-     * @param string $sortBy
-     * @param Zend_Db_Select $select
+     * @param array options {
+     *      string $where,
+     *      int $fetchMode default Zend_Db::FETCH_*,
+     *      int $sort,
+     *      string $sortBy,
+     *      Zend_Db_Select $select,
+     * }
      * @return array
      */
     public function read(array $options = null) {

@@ -79,7 +79,8 @@ class AbstractModel extends \ArrayObject implements ModelInterface{
      * @return bool
      */
     public function has ($key) {
-        return array_key_exists($key, $this) === 1 ? true : false;
+        return array_key_exists($key, $this) === 1
+            || $this->{$key};
     }
 
     public static function setDefaultInputOptions (Config $options) {
