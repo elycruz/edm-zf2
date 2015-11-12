@@ -2,10 +2,18 @@
 
 namespace Edm\Db\TableGateway;
 
-use Edm\Db\TableGateway\BaseTableGatewayInterface;
-use Zend\Db\TableGateway\TableGateway;
+use Zend\Db\TableGateway\Feature\FeatureSet,
+    Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
+    Zend\Db\ResultSet\ResultSet,
+    Zend\Db\TableGateway\TableGateway,
+    Zend\ServiceManager\ServiceLocatorAwareTrait,
+    Zend\ServiceManager\ServiceLocatorAwareInterface;
 
-class BaseTableGateway extends TableGateway implements BaseTableGatewayInterfaceInterface {
+class BaseTableGateway extends TableGateway implements
+    BaseTableGatewayInterface,
+    ServiceLocatorAwareInterface {
+
+    use ServiceLocatorAwareTrait;
 
     /**
      * Table Alias 
@@ -24,13 +32,38 @@ class BaseTableGateway extends TableGateway implements BaseTableGatewayInterface
      */
     protected $alias;
 
-    public function __construct($tableName, $tableAlias) {
-        $this->table = $tableName;
-        $this->alias = $tableAlias;
+    /**
+     * String of model class to pass as a prototype to the result set object for this table.
+     * @var \string
+     */
+    protected $modelClass;
+
+    /**
+     * Table prefix if any (appended to default table name
+     * if this class is extended or if you pass in a `$tableName`).
+     * @var \string
+     */
+    protected $tablePrefix;
+
+    public function __construct($tableNamePrefix = null, $tableName = null, $tableAlias = null) {
+
+        if ($tableName) {
+            $this->table = $tableName;
+        }
+
+        if ($tableAlias) {
+            $this->alias = $tableAlias;
+        }
+
+        if ($tableNamePrefix) {
+            $this->tablePrefix = $tableNamePrefix;
+            $this->table = $tableNamePrefix . $this->table;
+        }
+
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
-        $resultSetProto->setArrayObjectPrototype(new ucase($tableAlias));
+        $resultSetProto->setArrayObjectPrototype(new $this->modelClass());
         $this->resultSetPrototype = $resultSetProto;
         $this->initialize();
     }

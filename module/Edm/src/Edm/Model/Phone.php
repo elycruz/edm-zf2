@@ -5,10 +5,9 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel;
+    Zend\InputFilter\InputFilterInterface;
 
-class Term extends AbstractModel 
+class Phone extends AbstractModel
 implements InputFilterAwareInterface {
     
     protected $inputFilter = null;

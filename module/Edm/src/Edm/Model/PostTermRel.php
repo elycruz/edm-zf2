@@ -5,8 +5,7 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel;
+    Zend\InputFilter\InputFilterInterface;
 
 class PostTermRel extends AbstractModel implements InputFilterAwareInterface {
 

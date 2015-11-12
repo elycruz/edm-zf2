@@ -11,7 +11,7 @@ namespace Edm\Db\TableGateway;
  *
  * @author ElyDeLaCruz
  */
-interface TableGatewayInterface {
-    public function setAlias ($alias);
+interface BaseTableGatewayInterface {
+    public function setAlias (\string $alias);
     public function getAlias ();
 }

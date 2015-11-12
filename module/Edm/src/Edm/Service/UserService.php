@@ -21,7 +21,7 @@ class UserService extends AbstractService implements \Edm\UserAware, \Edm\Db\Com
 
     use \Edm\UserAwareTrait,
         \Edm\Db\CompositeDataColumnAwareTrait,
-        \Edm\Db\Table\DateInfoTableAwareTrait;
+        \Edm\Db\TableGateway\DateInfoTableAwareTrait;
 
     protected $userTable;
     protected $contactTable;

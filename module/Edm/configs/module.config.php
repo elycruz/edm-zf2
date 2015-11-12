@@ -40,15 +40,15 @@ return array(
             'Edm\Service\PageService'           => 'Edm\Service\PageService',
 
             // Db invokables
-            'Edm\Db\DatabaseDataHelper'         => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Db\Table\TermTable'            => 'Edm\Db\Table\TermTable',
-            'Edm\Db\Table\TermTaxonomyTable'    => 'Edm\Db\Table\TermTaxonomyTable',
-            'Edm\Db\Table\UserTable'            => 'Edm\Db\Table\UserTable',
-            'Edm\Db\Table\PostTable'            => 'Edm\Db\Table\PostTable',
-            'Edm\Db\Table\ContactTable'         => 'Edm\Db\Table\ContactTable',
+            'Edm\Db\DatabaseDataHelper'             => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Db\TableGateway\TermTable'         => 'Edm\Db\TableGateway\TermTable',
+            'Edm\Db\TableGateway\TermTaxonomyTable' => 'Edm\Db\TableGateway\TermTaxonomyTable',
+            'Edm\Db\TableGateway\UserTable'         => 'Edm\Db\TableGateway\UserTable',
+            'Edm\Db\TableGateway\PostTable'         => 'Edm\Db\TableGateway\PostTable',
+            'Edm\Db\TableGateway\ContactTable'      => 'Edm\Db\TableGateway\ContactTable',
             
             // Form invokables
-            'Edm\Form\TermTaxonomyForm'         => 'Edm\Form\TermTaxonomyForm',
+            'Edm\Form\TermTaxonomyForm' => 'Edm\Form\TermTaxonomyForm',
             
             // Config invokables
             // --------------------------------------------------------------

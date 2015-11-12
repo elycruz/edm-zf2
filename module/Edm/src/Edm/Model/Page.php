@@ -5,10 +5,7 @@ namespace Edm\Model;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter,
     Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface,
-    Edm\Model\AbstractModel,
-    Edm\Model\MixedTermRel,
-    Edm\Model\MenuPageRel;
+    Zend\InputFilter\InputFilterInterface;
 
 
 /**
