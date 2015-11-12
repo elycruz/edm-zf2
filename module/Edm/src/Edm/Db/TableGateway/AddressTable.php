@@ -1,8 +1,8 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
+use BaseTableGateway,
 //    Zend\Db\Adapter\Adapter,
 //    Zend\Db\ResultSet\ResultSetInterface,
 //    Zend\Db\Sql\Sql
@@ -11,7 +11,7 @@ use Edm\Db\Table\AbstractTable,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;;
 
-class AddressTable extends AbstractTable {
+class AddressTable extends BaseTableGateway {
 
     protected $alias = 'address';
     
@@ -25,9 +25,7 @@ class AddressTable extends AbstractTable {
         $this->initialize();
     }
 
-    public function createItem(array $data) {
-        return $this->insert($data);
-    }
+    // `createItem` already defined by parent class
 
     public function updateItem($id, array $data) {
         return $this->update($data, array('address_id' => $id));
@@ -37,12 +35,8 @@ class AddressTable extends AbstractTable {
         return $this->delete(array('address_id' => $id));
     }
 
-    public function read() {
-        return $this->select();
-    }
-
     public function getById($id) {
-        return $this->getBy(array('address_id' => $id));
+        return $this->getFirstBy(array('address_id' => $id));
     }
     
 }

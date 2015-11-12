@@ -1,8 +1,8 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
+use Edm\Db\Table\BaseTableGateway,
     Edm\Model\ViewModule,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
@@ -13,7 +13,7 @@ use Edm\Db\Table\AbstractTable,
  *
  * @author ElyDeLaCruz
  */
-class ViewModuleTable extends AbstractTable {
+class ViewModuleTable extends BaseTableGateway {
 
     protected $table = 'view_modules';
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
+use Edm\Db\Table\BaseTableGateway,
     Edm\Model\Term,
     Zend\Db\ResultSet\ResultSet,
 //    Zend\Db\Adapter\Adapter,
@@ -11,7 +11,7 @@ use Edm\Db\Table\AbstractTable,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 //    Zend\Db\Sql\Sql;
 
-class TermTable extends AbstractTable {
+class TermTable extends BaseTableGateway {
 
     protected $alias = 'term';
     
@@ -42,7 +42,7 @@ class TermTable extends AbstractTable {
     }
 
     public function getByAlias($alias) {
-        return $this->getBy(array('alias' => $alias));
+        return $this->getFirstBy(array('alias' => $alias));
     }
 
 }

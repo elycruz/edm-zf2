@@ -1,23 +1,23 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
-    Edm\Model\User,
+use Edm\Db\Table\BaseTableGateway,
+    Edm\Model\TermTaxonomy,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
-class UserTable extends AbstractTable {
-
-    protected $alias = 'user';
+class TermTaxonomyTable extends BaseTableGateway {
+    
+    protected $alias = 'termTaxonomy';
     
     public function __construct() {
-        $this->table = 'users';
+        $this->table = 'term_taxonomies';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
-        $resultSetProto->setArrayObjectPrototype(new User());
+        $resultSetProto->setArrayObjectPrototype(new TermTaxonomy());
         $this->resultSetPrototype = $resultSetProto;
         $this->initialize();
     }
@@ -28,12 +28,12 @@ class UserTable extends AbstractTable {
     }
 
     public function updateItem($id, array $data) {
-        $this->update($data, array('user_id' => $id));
+        $this->update($data, array('term_taxonomy_id' => $id));
         return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function deleteItem($id) {
-        return $this->delete(array('user_id' => $id));
+        return $this->delete(array('term_taxonomy_id' => $id));
     }
 
     public function read() {
@@ -41,12 +41,7 @@ class UserTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('user_id' => $id));
-    }
-    
-    public function updateLastLoginForId ($id) {
-        $today = new \Zend\Stdlib\DateTime();
-        $this->updateItem($id, array('lastLogin' => $today->getTimestamp()));
+        return $this->getFirstBy(array('term_taxonomy_id' => $id));
     }
     
 }

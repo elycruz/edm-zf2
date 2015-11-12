@@ -1,6 +1,6 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
 /**
  * Description of DateInfoTableAware

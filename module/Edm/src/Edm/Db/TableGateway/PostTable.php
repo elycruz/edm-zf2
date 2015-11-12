@@ -1,23 +1,23 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
-    Edm\Model\TermTaxonomy,
+use Edm\Db\Table\BaseTableGateway,
+    Edm\Model\Post,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
-class TermTaxonomyTable extends AbstractTable {
-    
-    protected $alias = 'termTaxonomy';
+class PostTable extends BaseTableGateway {
+
+    protected $alias = 'post';
     
     public function __construct() {
-        $this->table = 'term_taxonomies';
+        $this->table = 'posts';
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
-        $resultSetProto->setArrayObjectPrototype(new TermTaxonomy());
+        $resultSetProto->setArrayObjectPrototype(new Post());
         $this->resultSetPrototype = $resultSetProto;
         $this->initialize();
     }
@@ -28,12 +28,12 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function updateItem($id, array $data) {
-        $this->update($data, array('term_taxonomy_id' => $id));
+        $this->update($data, array('post_id' => $id));
         return $this->getAdapter()->getDriver()->getLastGeneratedValue();
     }
 
     public function deleteItem($id) {
-        return $this->delete(array('term_taxonomy_id' => $id));
+        return $this->delete(array('post_id' => $id));
     }
 
     public function read() {
@@ -41,7 +41,8 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('term_taxonomy_id' => $id));
+        return $this->getFirstBy(array('post_id' => $id));
     }
+    
     
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
+use Edm\Db\Table\BaseTableGateway,
 //    Zend\Db\Adapter\Adapter,
 //    Zend\Db\ResultSet\ResultSetInterface,
 //    Zend\Db\Sql\Sql
@@ -11,7 +11,7 @@ use Edm\Db\Table\AbstractTable,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;;
 
-class TermTaxonomyTable extends AbstractTable {
+class TermTaxonomyTable extends BaseTableGateway {
 
     protected $alias = 'phone';
     
@@ -42,7 +42,7 @@ class TermTaxonomyTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('term_taxonomy_id' => $id));
+        return $this->getFirstBy(array('term_taxonomy_id' => $id));
     }
     
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
+use Edm\Db\TableGateway\BaseTableGateway,
     Edm\Model\MixedTermRel,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
@@ -13,7 +13,7 @@ use Edm\Db\Table\AbstractTable,
  *
  * @author ElyDeLaCruz
  */
-class MixedTermRel extends AbstractTable {
+class MixedTermRelTable extends BaseTableGateway {
 
     protected $table = 'mixed_term_relationships';
     

@@ -1,14 +1,14 @@
 <?php
 
-namespace Edm\Db\Table;
+namespace Edm\Db\TableGateway;
 
-use Edm\Db\Table\AbstractTable,
+use Edm\Db\Table\BaseTableGateway,
     Edm\Model\Contact,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature;
 
-class ContactTable extends AbstractTable {
+class ContactTable extends BaseTableGateway {
     
     protected $alias = 'contact';
     
@@ -41,7 +41,7 @@ class ContactTable extends AbstractTable {
     }
 
     public function getById($id) {
-        return $this->getBy(array('contact_id' => $id));
+        return $this->getFirstBy(array('contact_id' => $id));
     }
     
 }
