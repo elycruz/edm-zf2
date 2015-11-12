@@ -45,9 +45,15 @@ class TermController extends AbstractController {
         // Set actual page (happens to fix exceeded page number set by user)
         $view->itemsTotal = $paginator->getTotalItemCount();
 
+
+        // @todo update reverseEscapeTuples to handle ArrayIterator and ArrayObject objects
+        $results = array();
+        foreach ($paginator->getCurrentItems() as $item) {
+            $results[] = $item->getArrayCopy();
+        }
+
         // Send results
-        $view->results = $this->getDbDataHelper()->reverseEscapeTuples(
-                $paginator->getCurrentItems());
+        $view->results = $this->getDbDataHelper()->reverseEscapeTuples($results);
         $view->setTerminal(true);
         return $view;
     }
@@ -294,7 +300,7 @@ class TermController extends AbstractController {
 
     /**
      * Gets our Term model
-     * @return Edm\Db\Table\TermTable
+     * @return \Edm\Db\TableGateway\TermTable
      */
     public function getTermTable() {
         if (empty($this->termTable)) {
