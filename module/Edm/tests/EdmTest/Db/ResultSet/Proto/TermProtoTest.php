@@ -8,8 +8,7 @@
 
 namespace EdmTest\Db\ResultSet\Proto;
 
-use EdmTest\Bootstrap,
-    Edm\Db\ResultSet\Proto\TermProto;
+use Edm\Db\ResultSet\Proto\TermProto;
 
 class TermProtoTest extends \PHPUnit_Framework_TestCase  {
 
@@ -20,10 +19,6 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
     public $invalidKeys = [
         'hello', 'world', 'all', 'your', 'base', 'are', 'belong', 'to', 'us'
     ];
-
-//    public static function setUpBeforeClass () {
-//        $locator = Bootstrap::getServiceManager();
-//    }
 
     public function forTruthyTestsProvider () {
         $numItems = 3;
@@ -103,6 +98,15 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
         }
     }
 
+    public function testGetValidKeys () {
+        $termProto = new TermProto();
+        $protoValidKeys = $termProto->getValidKeys();
+        foreach ($this->validKeys as $key) {
+            $this->assertEquals(true, in_array($key, $protoValidKeys),
+                'A term proto should contain key "' . $key . '".');
+        }
+    }
+
     /**
      * @dataProvider forFalsyTestsProvider
      */
@@ -112,9 +116,6 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
                 'Term proto should not have a set "' . $key . '" key.');
         }
     }
-
-//    public function tearDown () {
-//    }
 
     public static function tearDownAfterClass() {
     }

@@ -3,13 +3,15 @@
 namespace Edm\Db\ResultSet\Proto;
 
 use Zend\Config\Config,
-    Edm\InputFilter\DefaultInputOptions;
+    Edm\InputFilter\DefaultInputOptions,
+    Edm\InputFilter\DefaultInputOptionsAware;
 
 /**
  * Abstract Model
  * @author ElyDeLaCruz
  */
-class AbstractProto extends \ArrayObject implements ProtoInterface{
+class AbstractProto extends \ArrayObject
+    implements ProtoInterface, DefaultInputOptionsAware {
     
     /**
      * Valid keys for model
@@ -18,14 +20,14 @@ class AbstractProto extends \ArrayObject implements ProtoInterface{
     protected $validKeys;
     
     /**
-     * Not allowed for updates (ommitted from updates)
+     * Not allowed for RDBMS updates.
      * @var array
      */
     protected $notAllowedForUpdate;
     
     /**
      * Default input options
-     * @var Edm\InputFilter\DefaultInputOptions
+     * @var \Edm\InputFilter\DefaultInputOptions
      */
     protected static $defaultInputOptions;
 
@@ -51,7 +53,15 @@ class AbstractProto extends \ArrayObject implements ProtoInterface{
     public function getValidKeys () {
         return $this->validKeys;
     }
-    
+
+    /**
+     * Returns a list of fields not allowed for RDBMS update.
+     * @return array
+     */
+    public function getNotAllowedForUpdate () {
+        return $this->notAllowedForUpdate;
+    }
+
     /**
      * Returns model as array with only set values.
      * Any fields which do not have set values won't be returned in the array.
