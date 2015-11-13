@@ -7,7 +7,7 @@
  * @requires edm-db-mysql (installed) with local credentials for it (local.php etc.)
  */
 
-namespace EdmTest\Db\Table;
+namespace EdmTest\Db\TableGateway;
 
 use EdmTest\Bootstrap,
     Edm\ServiceManager\ServiceLocatorAwareTrait;
@@ -17,7 +17,7 @@ use EdmTest\Bootstrap,
  * Basic test to ensure that correct classes are being used by Edm\Db\TableGateway\TermTable.
  * Note** Full tests are not needed since TermTable's existing methods will be removed.
  * and it itself is pretty much just wrapping Zend\Db\TableGateway\TableGateway and nothing more.
- * @package EdmTest\Db\Table
+ * @package EdmTest\Db\TableGateway
  */
 class TermTableTest extends \PHPUnit_Framework_TestCase  {
 
@@ -93,9 +93,15 @@ class TermTableTest extends \PHPUnit_Framework_TestCase  {
 
         // Test that our created item is fetchable/exists-in-table:
         $this->assertCount(3, $resultSet, 'Should have "' + count($resultSet) + '" items created for test.');
+
+        // Falsy result set
+        $resultSet = $termTable->select(['term_group_alias' => 'hello_world']);
+
+        // Falsy test
+        $this->assertCount(0, $resultSet, 'Should have "0" items in result set.');
     }
 
-    public function testSelect () {
+    public function testSelectAndResultSet () {
         // Get table
         $termTable = $this->termTable();
 
@@ -108,6 +114,15 @@ class TermTableTest extends \PHPUnit_Framework_TestCase  {
 
         // Test that our created item is fetchable/exists-in-table:
         $this->assertCount(3, $resultSet, 'Should have "' + count($resultSet) + '" items created for test.');
+
+        // Falsy result set
+        $resultSet = $termTable->select(['term_group_alias' => 'hello_world']);
+
+        // Falsy test
+        $this->assertCount(0, $resultSet, '`$resultSet` should have "0" items in it.');
+        $this->assertEquals(false, $resultSet->current(), '`current()` should return `false` when no items in result set.');
+
+        // @note Other methods of ResultSet will not be tested here as ResultSet is a ZF component (which is already tested)
     }
 
     public function testResultSetProto () {
@@ -153,10 +168,6 @@ class TermTableTest extends \PHPUnit_Framework_TestCase  {
 
     public function termTable () {
         return self::$termTable;
-    }
-
-    public function dbConnection () {
-        return self::$dbConn;
     }
 
     public function deleteDbTestEntries () {
