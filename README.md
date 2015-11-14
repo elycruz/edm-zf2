@@ -16,6 +16,10 @@ More documentation coming soon.
         - [ ] - Tests for `Edm\Db\TableGateway`.
         - [ ] - Tests for `Edm\Db\ResultSet\Proto`.
     - [X] - Tests for `Edm\InputFilter\DefaultInputOptions`.
+- [ ] - Re-evaluate how 'aliases' are used in the EDM system.
+- [ ] - Add UML diagrams of system.
+- [ ] - Add UML diagrams of the database (edm-db-mysql) as it stands.
+- [ ] - Add RDBMS as git sub-module to the project.
 
 #### Other:
  - [ ] - Look into using `Expressive`

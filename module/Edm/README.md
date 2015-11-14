@@ -14,7 +14,7 @@ Setting Up Your VHOST
 =====================
 
 The following is a sample VHOST you might want to consider for your project.
-
+```
 <VirtualHost *:80>
    DocumentRoot "H:/Workspace/Edm/testing/public"
    ServerName .local
@@ -30,3 +30,4 @@ The following is a sample VHOST you might want to consider for your project.
    </Directory>
 
 </VirtualHost>
+```
