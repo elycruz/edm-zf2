@@ -1,5 +1,10 @@
 edmzf2
 ===========================================
+## DEPRECATED BRANCH!  FOR REFERENCE ONLY!
+### superseded by new `master` branch
+
+#### Note:  This branch was originally developed with out any testing put in place, no TDD or BDD, and was originally developed using zend framework 1.  The new version is developed using zend framework 2 and is following a TDD approach to developing the data/content management system.
+
 Edm - The Extensible Data Management System
 
 ### Todos:
