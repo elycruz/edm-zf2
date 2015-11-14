@@ -235,9 +235,10 @@ class DatabaseDataHelper implements DbDataHelper {
     /**
      * Reverse escape a collection of rows/tuples
      * @param array $tuples
+     * @param null|array $skipFields - Fields to not reverse-escape.
      * @return array
      */
-    public function reverseEscapeTuples($tuples) {
+    public function reverseEscapeTuples($tuples, $skipFields = null) {
         $new_array = array();
         // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {
@@ -246,19 +247,4 @@ class DatabaseDataHelper implements DbDataHelper {
         return $new_array;
     }
 
-    /**
-     * Takes a string and returns a valid alias (can be used for xml nodeName
-     * and other none space qualifying string)
-     * @param string $str
-     * @throws \Exception
-     * @return String /^[\-\_a-z\d]{5,255}$/ to lower case
-     */
-    public function getValidAlias($str) {
-        if (strlen($str) <= 200 && strlen($str) > 0) {
-            return preg_replace('/[^\-a-z\d\_]/i', '-', strtolower(trim($str)));
-        } else {
-            throw new \Exception('Valid `Aliases` must be less than ' .
-                'or equal to 200 Characters in length.');
-        }
-    }
 }
