@@ -1,6 +1,11 @@
 edmzf2
 ===========================================
-Edm - Extensible Data Management System.
+## DEPRECATED BRANCH!  FOR REFERENCE ONLY!
+### superseded by new `master` branch
+
+#### Note:  This branch was originally developed with out any testing put in place, no TDD or BDD, and was originally developed using zend framework 1.  The new version is developed using zend framework 2 and is following a TDD approach to developing the data/content management system.
+
+Edm - The Extensible Data Management System
 
 The system is written with Zend Framework 2 and mysql for it's database (see elycruz/edm-db-mysql).
 Also the system will follow a TDD approach where we test first and write service and business process code later.
