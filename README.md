@@ -3,14 +3,19 @@ edmzf2
 Edm - Extensible Data Management System.
 
 The system is written with Zend Framework 2 and mysql for it's database (see elycruz/edm-db-mysql).
+Also the system will follow a TDD approach where we test first and write service and business process code later.
 
-More documentation comming soon.
+More documentation coming soon.
 
 ### Todos:
 
 #### 0.3.0 MVP
- - [ ] - Finish all tests for `Edm\Db\TableGateway\*`.
- - [ ] - Finish all tests for `Edm\Db\ResultSet\Proto\*`.
+- [ ] - Add tests:
+    - [ ] - Tests for `Edm\Db`:
+        - [ ] - Tests for `Edm\Db\DatabaseDataHelper`.
+        - [ ] - Tests for `Edm\Db\TableGateway`.
+        - [ ] - Tests for `Edm\Db\ResultSet\Proto`.
+    - [X] - Tests for `Edm\InputFilter\DefaultInputOptions`.
 
 #### Other:
  - [ ] - Look into using `Expressive`

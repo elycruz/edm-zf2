@@ -9,6 +9,6 @@
 namespace Edm\InputFilter;
 
 interface DefaultInputOptionsAware {
-    public function getDefaultInputOptions ();
-    public function getDefaultInputOptionsByKey ($key, array $defaults);
+    public static function getDefaultInputOptions ();
+    public static function getDefaultInputOptionsByKey ($key, array $defaults);
 }

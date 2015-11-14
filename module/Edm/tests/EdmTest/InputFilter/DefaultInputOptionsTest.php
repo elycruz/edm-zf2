@@ -4,8 +4,9 @@
  * User: Ely
  * Date: 11/13/2015
  * Time: 3:44 PM
+ * Description: These tests just check for expected keys in config
+ * (@see ./module/Edm/configs/default.input.options.php);
  */
-
 
 namespace EdmTest\InputFilter;
 
