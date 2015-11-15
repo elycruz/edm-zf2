@@ -11,14 +11,21 @@ namespace Edm\Filter;
 use Zend\Filter\FilterInterface;
 
 /**
- * Class DashSeparatedString
+ * Class Slug
  * Filters a string with of 1-200 characters in length and conforms it
  * to a valid 'dash-separated' string or a valid alias/url-slug formatted string.
  * @note Can be called as a function.
  * @author Ely De La Cruz <elycruz - at - elycruz - dot - com>
+ * @see description https://en.wikipedia.org/wiki/Semantic_URL#Slug
  * @package Edm\Filter
  */
-class DashSeparatedString implements FilterInterface {
+class Slug implements FilterInterface {
+
+    /**
+     * Allowed characters regex.
+     * @var string
+     */
+    protected $allowedCharsRegex = '/[^a-z\d\-\_]/i';
 
     /**
      * Calls `filter` method and filters string.
@@ -39,17 +46,18 @@ class DashSeparatedString implements FilterInterface {
     public function filter ($value) {
         $filterName = '`' . __CLASS__ . '->' . __FUNCTION__ . '`';
         if (!is_string($value)) {
-            throw new \Exception($filterName . ' only accepts strings.  Value received: ' . $value);
-
+            throw new \Exception($filterName . ' only accepts strings.');
         }
         else if (is_string($value) && strlen($value) <= 200 && strlen($value) > 0) {
-            $value = preg_replace('/[^\-a-z\d\_]/i', '-', strtolower(trim(trim($value), '-')));
+            $value = trim(preg_replace($this->allowedCharsRegex, '-', strtolower(trim($value))), '-');
+            $value = preg_replace('/\-{2,}/', '-', $value);
         }
         else {
-            throw new \Exception($filterName .' requires valid candidate ' .
-                '`dash-separated` strings to be 0-200 ' .
-                'characters in length.  Value received: ' . $value);
+            throw new \Exception($filterName . ' requires valid candidate ' .
+                '`dash-separated` strings to be 1-200 ' .
+                'characters in length.');
         }
         return $value;
     }
+
 }

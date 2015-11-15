@@ -13,12 +13,21 @@ More documentation coming soon.
 - [ ] - Add tests:
     - [ ] - Tests for `Edm\Db`:
         - [ ] - Tests for `Edm\Db\DatabaseDataHelper`.
-        - [ ] - Tests for `Edm\Db\TableGateway`.
+        - [ ] - Tests for `Edm\Db\TableGateway`:
         - [ ] - Tests for `Edm\Db\ResultSet\Proto`.
+            - [ ] - Test for `Edm\Db\ResultSet\Proto\TermProto`.
     - [X] - Tests for `Edm\InputFilter\DefaultInputOptions`.
-- [ ] - Re-evaluate how 'aliases' are used in the EDM system.
-        Resources:
-	- valid url characters stackoverflow: (http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links) 
+    - [X] - Tests for `Edm\Filter`:
+        - [X] - Tests for `Edm\Filter\Alias`.
+        - [X] - Tests for `Edm\Filter\Slug`.
+- [X] - Re-evaluate how 'aliases' are used in the EDM system.
+    Resources:
+        - valid url characters stackoverflow: (http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links)
+    Findings:
+        - Slugs are the same as object aliases (dash separated words with no punctuation).
+        - Slugs can be used the same way we use aliases in our edm application.
+        - Slug/alias (https://en.wikipedia.org/wiki/Semantic_URL#Slug)
+        - Slug (https://en.wikipedia.org/wiki/Slug_(publishing))
 - [ ] - Add UML diagrams of system.
 - [ ] - Add UML diagrams of the database (edm-db-mysql) as it stands.
 - [ ] - Add RDBMS as git sub-module to the project.
