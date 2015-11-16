@@ -2,10 +2,12 @@
 
 namespace Edm\Db\TableGateway;
 
+use Edm\Db\ResultSet\Proto\TermTaxonomyProto;
+
 class TermTaxonomyTable extends BaseTableGateway {
 
-    protected $table = 'termTaxonomy';
-    protected $alias = 'term_taxonomies';
-    protected $modelClass = \Edm\Model\TermTaxonomy;
+    protected $table = 'term_taxonomies';
+    protected $alias = 'termTaxonomy';
+    protected $modelClass = TermTaxonomyProto;
 
 }

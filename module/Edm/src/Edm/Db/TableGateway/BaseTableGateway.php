@@ -68,8 +68,12 @@ class BaseTableGateway extends TableGateway implements
         $this->initialize();
     }
 
-    public function getFirstBy(array $by) {
-        return $this->select($by)->current();
+    public function getOneWhere(array $where) {
+        return $this->select($where)->current();
+    }
+
+    public function getManyWhere(array $where) {
+
     }
 
     public function getAlias() {

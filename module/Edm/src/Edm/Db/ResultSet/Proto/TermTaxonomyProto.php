@@ -11,7 +11,7 @@ namespace Edm\Db\ResultSet\Proto;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter;
 
-class TermTaxonomy extends AbstractProto  {
+class TermTaxonomyProto extends AbstractProto  {
 
     protected $validKeys = array(
         'term_taxonomy_id',
