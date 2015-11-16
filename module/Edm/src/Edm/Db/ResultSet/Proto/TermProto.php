@@ -3,13 +3,9 @@
 namespace Edm\Db\ResultSet\Proto;
 
 use Zend\InputFilter\Factory as InputFactory,
-    Zend\InputFilter\InputFilter,
-    Zend\InputFilter\InputFilterAwareInterface,
-    Zend\InputFilter\InputFilterInterface;
+    Zend\InputFilter\InputFilter;
 
-class TermProto extends AbstractProto implements InputFilterAwareInterface {
-
-    protected $inputFilter = null;
+class TermProto extends AbstractProto {
 
     public $validKeys = array(
         'term_group_alias',
@@ -17,16 +13,13 @@ class TermProto extends AbstractProto implements InputFilterAwareInterface {
         'name',
     );
 
-    public function setInputFilter(InputFilterInterface $inputFilter) {
-        $this->inputFilter = $inputFilter;
-    }
-
     public function getInputFilter() {
+        // If input filter is set return it
         if ($this->inputFilter !== null) {
             return $this->inputFilter;
         }
 
-        $retVal = $this->inputFilter = new InputFilter();
+        $retVal = new InputFilter();
         $factory = new InputFactory();
 
         // Name
@@ -53,7 +46,7 @@ class TermProto extends AbstractProto implements InputFilterAwareInterface {
                     )
         )));
 
-        $this->inputFilter = $retVal;
+        $this->setInputFilter($retVal);
 
         return $retVal;
     }

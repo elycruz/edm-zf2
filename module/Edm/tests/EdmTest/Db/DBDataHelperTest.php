@@ -8,18 +8,18 @@
 
 namespace EdmTest\Db;
 
-use Edm\Db\DatabaseDataHelper;
+use Edm\Db\DbDataHelper;
 
 class DBDataHelperTest  extends \PHPUnit_Framework_TestCase  {
 
     public static $dbDataHelper;
 
     public static function setUpBeforeClass () {
-        self::$dbDataHelper = new DatabaseDataHelper();
+        self::$dbDataHelper = new DbDataHelper();
     }
 
     /**
-     * @return \Edm\Db\DatabaseDataHelper
+     * @return \Edm\Db\DbDataHelper
      */
     public function dbDataHelper () {
         return self::$dbDataHelper;

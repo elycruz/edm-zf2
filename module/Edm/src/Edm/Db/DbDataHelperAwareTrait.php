@@ -1,13 +1,6 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 namespace Edm\Db;
-
-use Edm\Db\DatabaseDataHelper,
- Edm\Db\DbDataHelper;
 
 /**
  * Description of DbDataHelperTrait
@@ -17,14 +10,20 @@ use Edm\Db\DatabaseDataHelper,
 trait DbDataHelperAwareTrait {
     
     public $dbDataHelper;
-    
-    public function setDbDataHelper(DbDataHelper $dbDataHelper) {
+
+    /**
+     * @param \Edm\Db\DbDataHelperInterface $dbDataHelper
+     */
+    public function setDbDataHelper(DbDataHelperInterface $dbDataHelper) {
         $this->dbDataHelper = $dbDataHelper;
     }
 
+    /**
+     * @return \Edm\Db\DbDataHelper
+     */
     public function getDbDataHelper() {
         if (empty($this->dbDataHelper)) {
-            $this->dbDataHelper = new DatabaseDataHelper();
+            $this->dbDataHelper = new DbDataHelper();
         }
         return $this->dbDataHelper;
     }

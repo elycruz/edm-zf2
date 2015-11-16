@@ -4,14 +4,19 @@ namespace Edm\Db\ResultSet\Proto;
 
 use Zend\Config\Config,
     Edm\InputFilter\DefaultInputOptions,
-    Edm\InputFilter\DefaultInputOptionsAware;
+    Edm\InputFilter\DefaultInputOptionsAware,
+    Zend\InputFilter\InputFilterAwareInterface,
+    Zend\InputFilter\InputFilterInterface;
 
 /**
  * Abstract Model
  * @author ElyDeLaCruz
  */
-class AbstractProto extends \ArrayObject
-    implements ProtoInterface, DefaultInputOptionsAware {
+abstract class AbstractProto extends \ArrayObject
+    implements
+    ProtoInterface,
+    DefaultInputOptionsAware,
+    InputFilterAwareInterface {
     
     /**
      * Valid keys for model
@@ -24,7 +29,7 @@ class AbstractProto extends \ArrayObject
      * @var array
      */
     protected $notAllowedForUpdate;
-    
+
     /**
      * Default input options
      * @var \Edm\InputFilter\DefaultInputOptions
@@ -36,6 +41,12 @@ class AbstractProto extends \ArrayObject
      * @var array
      */
     protected $protoNames;
+
+    /**
+     * Input Filter.
+     * @var \Zend\InputFilter\InputFilterInterface
+     */
+    protected $inputFilter = null;
     
     /**
      * Constructor
@@ -93,10 +104,16 @@ class AbstractProto extends \ArrayObject
             || isset($this->{$key});
     }
 
+    /**
+     * @param Config $options
+     */
     public static function setDefaultInputOptions (Config $options) {
         self::$defaultInputOptions = $options;
     }
-    
+
+    /**
+     * @return DefaultInputOptions
+     */
     public static function getDefaultInputOptions () {
         if (empty(self::$defaultInputOptions)) {
             self::$defaultInputOptions = new DefaultInputOptions();
@@ -137,4 +154,20 @@ class AbstractProto extends \ArrayObject
         return $retVal;
     }
 
+
+    /**
+     * @param InputFilterInterface $inputFilter
+     * @return \Zend\InputFilter\InputFilterAwareInterface
+     */
+    public function setInputFilter(InputFilterInterface $inputFilter) {
+        $this->inputFilter = $inputFilter;
+        return $this;
+    }
+
+    /**
+     * @return \Zend\InputFilter\InputFilterInterface
+     */
+    public function getInputFilter () {
+        return $this->inputFilter;
+    }
 }
