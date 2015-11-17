@@ -9,9 +9,10 @@
 namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
-    Edm\Db\ResultSet\Proto\TermTaxonomyProto;
+    Edm\Db\ResultSet\Proto\TermTaxonomyProto,
+    Zend\Db\Sql\Sql;
 
-class TermTaxonomyService extends AbstractService {
+class TermTaxonomyService extends AbstractCrudService {
 
     protected $termTable;
     protected $termTaxTable;
@@ -90,7 +91,7 @@ class TermTaxonomyService extends AbstractService {
      * @return mixed boolean | ?
      * @throws \Exception
      */
-    public function setListOrderForId(\int $id, \int $listOrder) {
+    public function setListOrderForId($id, $listOrder) {
         return $this->getTermTaxonomyTable()->update(
             ['listOrder' => $listOrder], ['term_taxonomy_id' => $id]
         );
@@ -103,7 +104,7 @@ class TermTaxonomyService extends AbstractService {
      * @param \Zend\Db\Sql\Sql $sql
      * @return \Zend\Db\Sql\Select
      */
-    public function getSelect($sql = null) {
+    public function getSelect(Sql $sql = null) {
         $sql = isset($sql) ? $sql : $this->getSql();
         $select = $sql->select();
         $termTaxTable = $this->getTermTaxonomyTable();
@@ -184,7 +185,7 @@ class TermTaxonomyService extends AbstractService {
         }
     }
 
-    public function update($id, $data) {
+    public function update($id, TermTaxonomyProto $data) {
         // Throw error if term or term-taxonomy not set
         if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .

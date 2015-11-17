@@ -106,8 +106,9 @@ abstract class AbstractCrudService implements
     }
 
     /**
+     * @param Sql $sql
      * @return \Zend\Db\Sql\Select
      */
-    abstract public function getSelect();
+    abstract public function getSelect(Sql $sql = null);
 
 }
