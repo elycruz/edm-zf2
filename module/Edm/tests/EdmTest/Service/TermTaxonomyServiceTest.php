@@ -9,7 +9,9 @@
 
 namespace EdmTest\Service;
 
-use EdmTest\Bootstrap;
+use EdmTest\Bootstrap,
+    Edm\Db\ResultSet\Proto\TermProto,
+    Edm\Db\ResultSet\Proto\TermTaxonomyProto;
 
 class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
 
@@ -117,6 +119,28 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $termTaxService->setListOrderById(1, $oldListOrder);
         $rslt = $termTaxService->getById(1);
         $this->assertEquals($oldListOrder, $rslt->listOrder);
+    }
+
+    public function testGetSelect () {
+        $select = $this->termTaxService()->getSelect();
+        $this->assertInstanceOf('Zend\Db\Sql\Select', $select);
+    }
+
+    public function testCreate () {
+//        $testTaxonomy = new TermTaxonomyProto([
+//            'term_alias' => 'some-term-taxonomy-here',
+//            'taxonomy' => 'uncategorized',
+//            'description' => '',
+//            'accessGroup' => 'cms-manager'
+//        ]);
+//
+//        $testTaxonomy->term = new TermProto([
+//            'name' => 'Some Term Taxonomy Here',
+//            'alias' => 'some-term-taxonomy-here',
+//            'term_group_alias' => 'edm-term-taxonomy-service-test'
+//        ]);
+//
+//        $this->termTaxService()->create($testTaxonomy);
     }
 
     public function testGetTermTaxonomyTable () {

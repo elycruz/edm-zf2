@@ -40,7 +40,7 @@ return array(
             'Edm\\Service\\PageService'           => 'Edm\\Service\\PageService',
 
             // Db invokables
-            'Edm\\Db\\DatabaseDataHelper'             => 'Edm\\Db\\DatabaseDataHelper',
+            'Edm\\Db\\DatabaseDataHelper'              => 'Edm\\Db\\DatabaseDataHelper',
             'Edm\\Db\\TableGateway\\TermTable'         => 'Edm\\Db\\TableGateway\\TermTable',
             'Edm\\Db\\TableGateway\\TermTaxonomyTable' => 'Edm\\Db\\TableGateway\\TermTaxonomyTable',
             'Edm\\Db\\TableGateway\\TermTaxonomyProxyTable' => 'Edm\\Db\\TableGateway\\TermTaxonomyProxyTable',
@@ -49,8 +49,9 @@ return array(
             'Edm\\Db\\TableGateway\\ContactTable'      => 'Edm\\Db\\TableGateway\\ContactTable',
             
             // Form invokables
-            'Edm\\Form\\TermTaxonomyForm' => 'Edm\\Form\\TermTaxonomyForm',
-            
+            'Edm\\Form\\TermForm'           => 'Edm\\Form\\TermForm',
+            'Edm\\Form\\TermTaxonomyForm'   => 'Edm\\Form\\TermTaxonomyForm',
+
             // Config invokables
             // --------------------------------------------------------------
             // Shared global input filter options (mostly validators and filters)
