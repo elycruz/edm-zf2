@@ -4,13 +4,13 @@
  * User: Ely
  * Date: 11/16/2015
  * Time: 8:20 AM
+ * @todo Look further into ZF's implementation of the ResultSet object and it's uses.
  */
 
 namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
-    Edm\Db\ResultSet\Proto\TermTaxonomyProto,
-    Zend\Db\Sql\Sql;
+    Edm\Db\ResultSet\Proto\TermTaxonomyProto;
 
 class TermTaxonomyService extends AbstractCrudService {
 
@@ -93,7 +93,7 @@ class TermTaxonomyService extends AbstractCrudService {
      * @return mixed boolean | ?
      * @throws \Exception
      */
-    public function setListOrderForId($id, $listOrder) {
+    public function setListOrderById($id, $listOrder) {
         return $this->getTermTaxonomyTable()->update(
             ['listOrder' => $listOrder], ['term_taxonomy_id' => $id]
         );
@@ -342,6 +342,10 @@ class TermTaxonomyService extends AbstractCrudService {
         return $this->termTable;
     }
 
+    /**
+     * Term Taxonomy Proto.
+     * @return \Edm\Db\ResultSet\Proto\TermTaxonomyProto
+     */
     public function getTermTaxonomyProto () {
         return $this->termTaxonomyProto;
     }
