@@ -92,10 +92,4 @@ class TermTaxonomyProto extends AbstractProto  {
         return $this->inputFilter;
     }
 
-    public function exchangeArray ($inputData) {
-
-    }
-
-
-
 }

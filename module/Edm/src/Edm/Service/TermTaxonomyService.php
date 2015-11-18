@@ -17,6 +17,7 @@ class TermTaxonomyService extends AbstractCrudService {
     protected $termTable;
     protected $termTaxTable;
     protected $termTaxProxyTable;
+    protected $termTaxonomyProto;
     protected $termTable_alias = 'term';
     protected $termTaxTable_alias = 'termTaxonomy';
     protected $termTaxProxyTable_alias = 'termTaxonomyProxy';
@@ -26,8 +27,9 @@ class TermTaxonomyService extends AbstractCrudService {
         if ($serviceLocator != null) {
             $this->setServiceLocator($serviceLocator);
         }
+        $this->termTaxonomyProto = new TermTaxonomyProto();
         $this->resultSet = new ResultSet();
-        $this->resultSet->setArrayObjectPrototype(new TermTaxonomyProto());
+        $this->resultSet->setArrayObjectPrototype($this->termTaxonomyProto);
     }
 
     /**
@@ -104,25 +106,26 @@ class TermTaxonomyService extends AbstractCrudService {
      * @param \Zend\Db\Sql\Sql $sql
      * @return \Zend\Db\Sql\Select
      */
-    public function getSelect(Sql $sql = null) {
+    public function getSelect($sql = null) {
         $sql = isset($sql) ? $sql : $this->getSql();
         $select = $sql->select();
         $termTaxTable = $this->getTermTaxonomyTable();
         $termTaxProxyTable = $this->getTermTaxonomyProxyTable();
         $termTable = $this->getTermTable();
+        $termTaxTableAlias = $termTaxTable->alias;
         return $select
             // Term Taxonomy
-            ->from([$termTaxTable->alias => $termTaxTable->table])
+            ->from([$termTaxTableAlias => $termTaxTable->table])
 
             // Term
             ->join([$termTable->alias => $termTable->table],
-                $termTable->alias . '.alias=' . $termTaxTable->alias . '.term_alias',
+                $termTable->alias . '.alias=' . $termTaxTableAlias . '.term_alias',
                 ['term_name' => 'name', 'term_group_alias'])
 
             // Count table
             ->join([$termTaxProxyTable->alias => $termTaxProxyTable->table],
                 $termTaxProxyTable->alias . '.term_taxonomy_id' .
-                '=' . $termTaxTable->alias . '.term_taxonomy_id',
+                '=' . $termTaxTableAlias . '.term_taxonomy_id',
                 ['childCount', 'assocItemCount']);
     }
 
@@ -309,10 +312,8 @@ class TermTaxonomyService extends AbstractCrudService {
      */
     public function getTermTaxonomyTable() {
         if (empty($this->termTaxTable)) {
-            $locator = $this->getServiceLocator();
             $this->termTaxTable = $this->getServiceLocator()
-                ->get('Edm\Db\TableGateway\TermTaxonomyTable');
-            $this->termTaxTable->setServiceLocator($locator);
+                ->get('Edm\\Db\\TableGateway\\TermTaxonomyTable');
         }
         return $this->termTaxTable;
     }
@@ -323,10 +324,8 @@ class TermTaxonomyService extends AbstractCrudService {
      */
     public function getTermTaxonomyProxyTable() {
         if (empty($this->termTaxProxyTable)) {
-            $locator = $this->getServiceLocator();
             $this->termTaxProxyTable = $this->getServiceLocator()
                 ->get('Edm\Db\TableGateway\TermTaxonomyProxyTable');
-            $this->termTaxProxyTable->setServiceLocator($locator);
         }
         return $this->termTaxProxyTable;
     }
@@ -337,12 +336,14 @@ class TermTaxonomyService extends AbstractCrudService {
      */
     public function getTermTable() {
         if (empty($this->termTable)) {
-            $locator = $this->getServiceLocator();
             $this->termTable = $this->getServiceLocator()
                 ->get('Edm\Db\TableGateway\TermTable');
-            $this->termTable->setServiceLocator($locator);
         }
         return $this->termTable;
+    }
+
+    public function getTermTaxonomyProto () {
+        return $this->termTaxonomyProto;
     }
 
 }

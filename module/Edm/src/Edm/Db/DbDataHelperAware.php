@@ -9,8 +9,8 @@ interface DbDataHelperAware {
     public function getDbDataHelper();
 
     /**
-     * @param DbDataHelper $dbDataHelper
-     * @return \Edm\Db\DataHelperAware
+     * @param DbDataHelperInterface $dbDataHelper
+     * @return \Edm\Db\DbDataHelperAware
      */
-    public function setDbDataHelper(DbDataHelper $dbDataHelper);
+    public function setDbDataHelper(DbDataHelperInterface $dbDataHelper);
 }
