@@ -61,6 +61,9 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('Edm\\Service\\TermTaxonomyService', self::$termTaxService);
     }
 
+    /**
+     * @return \Edm\Service\TermTaxonomyService
+     */
     public function termTaxService () {
         return self::$termTaxService;
     }
@@ -127,20 +130,36 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     }
 
     public function testCreate () {
-//        $testTaxonomy = new TermTaxonomyProto([
-//            'term_alias' => 'some-term-taxonomy-here',
-//            'taxonomy' => 'uncategorized',
-//            'description' => '',
-//            'accessGroup' => 'cms-manager'
-//        ]);
-//
-//        $testTaxonomy->term = new TermProto([
-//            'name' => 'Some Term Taxonomy Here',
-//            'alias' => 'some-term-taxonomy-here',
-//            'term_group_alias' => 'edm-term-taxonomy-service-test'
-//        ]);
-//
-//        $this->termTaxService()->create($testTaxonomy);
+        $testTaxonomy = new TermTaxonomyProto([
+            'term_alias' => 'some-term-taxonomy-here',
+            'taxonomy' => 'uncategorized',
+            'description' => '',
+            'accessGroup' => 'cms-manager'
+        ]);
+
+        $testTaxonomy->term = new TermProto([
+            'name' => 'Some Term Taxonomy Here',
+            'alias' => 'some-term-taxonomy-here',
+            'term_group_alias' => 'edm-term-taxonomy-service-test'
+        ]);
+
+        // Create test term taxonomy
+        $retVal = $this->termTaxService()->create($testTaxonomy);
+
+        // Assert an 'id' was returned from `create` process
+        $this->assertEquals(true, is_numeric($retVal));
+
+        // Return result of creation process
+        return $retVal;
+    }
+
+    /**
+     * @depends testCreate
+     * @param int $id
+     * @throws \Exception
+     */
+    public function testDelete ($id) {
+        $this->assertEquals(true, is_numeric($this->termTaxService()->delete($id)));
     }
 
     public function testGetTermTaxonomyTable () {
@@ -175,4 +194,3 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('\\Zend\\Db\\ResultSet\\ResultSet', $rsltSet);
     }
 }
-

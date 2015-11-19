@@ -10,7 +10,8 @@
 namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
-    Edm\Db\ResultSet\Proto\TermTaxonomyProto;
+    Edm\Db\ResultSet\Proto\TermTaxonomyProto,
+    Edm\Db\ResultSet\Proto\TermProto;
 
 class TermTaxonomyService extends AbstractCrudService {
 
@@ -143,6 +144,9 @@ class TermTaxonomyService extends AbstractCrudService {
                 '"term-taxonomy" keys.');
         }
 
+        // Set return value
+        $retVal = null;
+
         // Get db data helper for cleaning
         $dbDataHelper = $this->getDbDataHelper();
 
@@ -184,17 +188,20 @@ class TermTaxonomyService extends AbstractCrudService {
             // Process Term Taxonomy
             $this->getTermTaxonomyTable()->insert($termTax->toArray());
 
+            $retVal = $conn->getLastGeneratedValue();
+
             // Commit changes
             $conn->commit();
-
-            // Return last inserted id
-            return $driver->getLastGeneratedValue();
         }
         catch (\Exception $e) {
             // Rollback changes
             $conn->rollback();
-            return $e;
+
+            $retVal = $e;
         }
+
+        // Return result
+        return $retVal;
     }
 
     public function update($id, TermTaxonomyProto $termTaxonomy) {
@@ -265,6 +272,23 @@ class TermTaxonomyService extends AbstractCrudService {
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
 
+        // Find taxonomy to delete
+        $foundTermTaxonomy = $this->getById($id);
+
+        // If term taxonomy to delete is not found throw error for now
+        // @todo decide what to do here except throwing an error
+        if (empty($foundTermTaxonomy)) {
+            throw new \Exception('Invalid id passed in for term taxonomy delete.');
+        }
+
+        // Check for other usages of term_alias
+        $otherRslts = $this->read([
+            'where' => ['term_alias' => $foundTermTaxonomy->term_alias]
+        ]);
+
+        // If term of term taxonomy to delete is not being used anywhere else delete it
+        $deleteTerm = $otherRslts->count() == 1;
+
         // Begin transaction
         $conn->beginTransaction();
 
@@ -275,11 +299,17 @@ class TermTaxonomyService extends AbstractCrudService {
             $this->getTermTaxonomyTable()
                 ->delete(['term_taxonomy_id' => $id]);
 
-            // Commit changes
-            $conn->commit();
+            // Delete 'term' if necessary
+            if ($deleteTerm) {
+                $this->getTermTable()
+                    ->delete(['alias' => $foundTermTaxonomy->term_alias]);
+            }
 
             // Return last generated/updated value (primary key)
             $retVal = $driver->getLastGeneratedValue();
+
+            // Commit changes
+            $conn->commit();
         }
         catch (\Exception $e) {
 
