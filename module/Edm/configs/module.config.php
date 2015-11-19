@@ -25,7 +25,7 @@ defined('EDM_TOKEN_SEED') ||
 
 // Edm Alias Pattern
 defined('EDM_ALIAS_PATTERN') ||
-    define('EDM_ALIAS_PATTERN', '/^[a-z\_]+[a-z\d\-\_]*/i');
+    define('EDM_ALIAS_PATTERN', '/^[a-z\d\-\_]*/i');
 
 // Module Configuration
 return array(

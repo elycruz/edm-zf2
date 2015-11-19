@@ -17,11 +17,8 @@ class TermFieldset extends Fieldset {
         // Parent construct
         parent::__construct($name, $options);
 
-        // Term object
-        $term = new TermProto();
-
         // Set object to bind fieldset to
-        $this->setObject($term);
+        $this->setObject(new TermProto());
 
         // Name
         $this->add(array(
