@@ -130,14 +130,13 @@ abstract class AbstractProto extends \ArrayObject
                 break;
         }
 
-        // Nest self data in an array for usage with our forms which use fieldsets
-        // and require us to set the data on our forms in the form of
-        // [ 'model' => [...], 'otherModel' => [...] ] // Where 'model' is also the name of our fieldsets
-        if ($operation === AbstractProto::FOR_OPERATION_FORM) {
-            $retVal = [
-                $this->getFormKey() => $retVal
-            ];
-        }
+        // Filter Based on Operation here
+//
+//        $retVal = [
+//            $this->getFormKey() => $retVal
+//        ];
+
+
         return $retVal;
     }
 
@@ -172,6 +171,25 @@ abstract class AbstractProto extends \ArrayObject
      */
     public function toArrayNested ($outArray, $operation) {
 
+    }
+
+    public function filterArrayBasedOnOp ($array, $operation) {
+
+        switch ($operation) {
+            case AbstractProto::FOR_OPERATION_DB:
+//                $array = array_filter(function ($key, $value) {
+//
+//                });
+                break;
+            case AbstractProto::FOR_OPERATION_DB_INSERT:
+                break;
+            case AbstractProto::FOR_OPERATION_DB_UPDATE:
+                break;
+            case AbstractProto::FOR_OPERATION_FORM:
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -263,5 +281,6 @@ abstract class AbstractProto extends \ArrayObject
     public function getInputFilter () {
         return $this->inputFilter;
     }
+
 
 }
