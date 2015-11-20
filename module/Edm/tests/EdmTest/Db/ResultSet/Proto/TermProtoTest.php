@@ -98,9 +98,9 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
         }
     }
 
-    public function testGetValidKeys () {
+    public function testGetAllowedKeysForProto () {
         $termProto = new TermProto();
-        $protoValidKeys = $termProto->getValidKeys();
+        $protoValidKeys = $termProto->getAllowedKeysForProto();
         foreach ($this->validKeys as $key) {
             $this->assertEquals(true, in_array($key, $protoValidKeys),
                 'A term proto should contain key "' . $key . '".');

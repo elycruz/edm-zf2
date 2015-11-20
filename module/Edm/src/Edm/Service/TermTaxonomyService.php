@@ -344,8 +344,8 @@ class TermTaxonomyService extends AbstractCrudService {
             $term = $termTable->getOneWhere(['alias' => $termData->alias]);
         }
         // Update term if data and term are different
-        else if ((!empty($term->name) && $term->name !== $termData->name)) {
-            $term->name = $termData->name;
+        else if ((!empty($termData->name) && $termData->name !== $term->name)) {
+            $term->exchangeArray($termData->toArray());
             $termTable->update(['term_alias' => $term->alias], $term->toArray());
         }
         return $term;

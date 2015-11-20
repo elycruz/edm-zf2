@@ -13,7 +13,11 @@ use Zend\InputFilter\Factory as InputFactory,
 
 class TermTaxonomyProto extends AbstractProto  {
 
-    protected $validKeys = array(
+    /**
+     * Allowed keys for setting properties on this array object
+     * @var array
+     */
+    protected $allowedKeysForProto = array(
         'term_taxonomy_id',
         'term_alias',
         'taxonomy',
@@ -21,16 +25,36 @@ class TermTaxonomyProto extends AbstractProto  {
         'childCount',
         'assocItemCount',
         'listOrder',
-        'parent_id',
+        'parent_id'
+    );
+
+    /**
+     * @var TermProto
+     */
+    protected $termProto;
+
+    /**
+     * @var TermTaxonomyProxyProto
+     */
+    protected $termTaxonomyProxyProto;
+
+    /**
+     * Keys to unset on export to array.
+     * @var array
+     */
+    protected $notAllowedForDb = [
         // Joined keys
         'term_name',
         'term_group_alias',
         'taxonomy_name',
         'parent_name',
         'parent_alias',
+
         // Custom keys
         'children'
-    );
+    ];
+
+    protected $_formKey = 'termTaxonomy';
 
     public function getInputFilter() {
 
@@ -89,7 +113,43 @@ class TermTaxonomyProto extends AbstractProto  {
                 )
             )));
 
-        return $this->inputFilter;
+        return $inputFilter;
+    }
+
+    /**
+     * @param TermProto $termProto
+     * @return TermProto
+     */
+    public function getTermProto ($termProto = null) {
+        if (isset($termProto)) {
+            $this->termProto = $termProto;
+        }
+        else if (!isset($this->termProto)) {
+            $this->termProto = new TermProto();
+        }
+        return $this->termProto;
+    }
+
+    /**
+     * @param TermTaxonomyProxyProto $termTaxonomyProxyProto
+     * @return TermTaxonomyProxyProto
+     */
+    public function getTermTaxonomyProxyProto ($termTaxonomyProxyProto = null) {
+        if (isset($termTaxonomyProxyProto)) {
+            $this->termTaxonomyProxyProto = $termTaxonomyProxyProto;
+        }
+        else if (!isset($this->termTaxonomyProxyProto)) {
+            $this->termTaxonomyProxyProto = new TermTaxonomyProxyProto();
+        }
+        return $this->termTaxonomyProxyProto;
+    }
+
+    public function exchangeArray ($input) {
+        $this->termProto =
+            $this->setAllowedKeysOnProto($input, $this->getTermProto());
+        $this->termTaxonomyProxyProto =
+            $this->setAllowedKeysOnProto($input, $this->getTermTaxonomyProxyProto());
+        $this->setAllowedKeysOnProto($input, $this);
     }
 
 }
