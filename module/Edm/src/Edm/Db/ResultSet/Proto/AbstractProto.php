@@ -46,7 +46,7 @@ abstract class AbstractProto extends \ArrayObject
      * Keys to omit on export to array.
      * @var array
      */
-    protected $notAllowedForDb;
+    protected $notAllowedKeysForDb;
 
     /**
      * Proto names to use when calling to array to generate values.
@@ -109,12 +109,15 @@ abstract class AbstractProto extends \ArrayObject
     /**
      * Returns model as array with only set values.
      * Any fields which do not have set values won't be returned in the array.
-     * @param string $operation - Operation [Update,Insert,Db,Form].  If set removes the 'notAllowedForUpdate', 'notAllowedForInsert', 'notAllowedForDb' keys from the exported array.
+     * @param string $operation - Operation [Update,Insert,Db,Form].  If set removes the 'notAllowedForUpdate', 'notAllowedForInsert', 'notAllowedKeysForDb' keys from the exported array.
      * @param int $mode - Default AbstractProto::TO_ARRAY_SHALLOW (returns immediate key => value pairs but not nested ones (sub/own protos etc.)).
      * @return array
      */
     public function toArray ($operation = null, $mode = AbstractProto::TO_ARRAY_SHALLOW) {
+        // Array to return (we start with an empty array then populate it)
         $retVal = array();
+
+        // Operate on proto based on $mode
         switch ($mode) {
             case AbstractProto::TO_ARRAY_SHALLOW :
                 $retVal = $this->toArrayShallow($retVal, $mode);
@@ -131,13 +134,7 @@ abstract class AbstractProto extends \ArrayObject
         }
 
         // Filter Based on Operation here
-//
-//        $retVal = [
-//            $this->getFormKey() => $retVal
-//        ];
-
-
-        return $retVal;
+        return $this->filterArrayBasedOnOp($retVal, $operation);
     }
 
     /**
@@ -173,23 +170,29 @@ abstract class AbstractProto extends \ArrayObject
 
     }
 
-    public function filterArrayBasedOnOp ($array, $operation) {
-
-        switch ($operation) {
-            case AbstractProto::FOR_OPERATION_DB:
-//                $array = array_filter(function ($key, $value) {
-//
-//                });
-                break;
-            case AbstractProto::FOR_OPERATION_DB_INSERT:
-                break;
-            case AbstractProto::FOR_OPERATION_DB_UPDATE:
-                break;
-            case AbstractProto::FOR_OPERATION_FORM:
-                break;
-            default:
-                break;
+    public function filterArrayBasedOnOp ($array, $operation = AbstractProto::FOR_OPERATION_FORM) {
+        // If operation is not set then return the unfiltered array
+        if (!isset($operation) || $operation === AbstractProto::FOR_OPERATION_FORM) {
+            return $array;
         }
+
+        // Ensure operation is one of ours else throw an exception
+        if (   $operation !== AbstractProto::FOR_OPERATION_DB
+            || $operation !== AbstractProto::FOR_OPERATION_DB_INSERT
+            || $operation !== AbstractProto::FOR_OPERATION_DB_UPDATE
+            || $operation !== AbstractProto::FOR_OPERATION_DB_FORM
+            ) {
+            throw new Exception('"' . $operation .'" is not one of the defined operations ' .
+                'for the `toArray` method of the `'. __CLASS__ . '` class.');
+        }
+
+        // Get array keys to filter against
+        $notAllowedForOp = $this->{'notAllowedKeysFor' . $operation};
+
+        // Return filtered array
+        return array_filter($array, function ($key) use ($notAllowedForOp) {
+            return !isset($notAllowedForOp[$key]);
+        });
     }
 
     /**
