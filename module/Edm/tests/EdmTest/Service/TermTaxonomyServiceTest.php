@@ -17,6 +17,8 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
 
     public static $termTaxService;
 
+    public static $idsToCleanup = [];
+
     public $requiredTermTaxProtoKeys = [
         'term_taxonomy_id',
         'term_alias',
@@ -149,32 +151,55 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         // Assert an 'id' was returned from `create` process
         $this->assertEquals(true, is_numeric($retVal));
 
+        self::$idsToCleanup[] = $retVal;
+
         // Return result of creation process
         return $retVal;
     }
 
-    public function testUpdate () {
-//        $data = [
-//            'term-taxonomy' => [
-//                'description' => 'Some description here',
-//                'accessGroup' => 'user'
-//            ],
-//            'term' => [
-//                'name' => 'Some Term Taxonomy Hereio bob'
-//            ]];
-//
-//        // Create test term taxonomy
-//        $retVal = $this->termTaxService()->update($data);
-//
-//        // Assert an 'id' was returned from `create` process
-//        $this->assertEquals(true, is_numeric($retVal));
-//
-//        // Return result of creation process
-//        return $retVal;
+    /**
+     * @depends testCreate
+     * @param int $id
+     */
+    public function testUpdate ($id) {
+        // Get data for update
+        $newData = [
+            'term-taxonomy' => [
+                'description' => 'Some description here',
+                'accessGroup' => 'user'
+            ],
+            'term' => [
+                'name' => 'Some Term Taxonomy Hereio bob'
+            ]];
+
+        // Get term taxonomy service
+        $termTaxService = $this->termTaxService();
+
+        $originalRslt = $termTaxService->getById($id);
+        $data = array_merge($originalRslt->toArray(TermTaxonomyProto::FOR_OPERATION_FORM), $newData);
+
+        var_dump($data);
+
+        // Create test term taxonomy
+        $retVal = $termTaxService->update($id, $data);
+
+        // Assert an 'id' was returned from `create` process
+        $this->assertEquals(true, is_numeric($retVal));
+
+        // Get updated row
+        $rslt = $termTaxService->getById($id);
+
+        // Assert that updates were made
+        $this->assertEquals($data['term-taxonomy']['description'], $rslt->description);
+        $this->assertEquals($data['term-taxonomy']['accessGroup'], $rslt->accessGroup);
+        $this->assertEquals($data['term']['name'], $rslt->term->name);
+
+        // Return result of creation process
+        return $retVal;
     }
 
     /**
-     * @depends testCreate
+     * @depends testUpdate
      * @param int $id
      * @throws \Exception
      */
@@ -213,4 +238,11 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     protected function assertCorrectResultSetClass ($rsltSet) {
         $this->assertInstanceOf('\\Zend\\Db\\ResultSet\\ResultSet', $rsltSet);
     }
+
+    public static function tearDownAfterClass () {
+        foreach (self::$idsToCleanup as $id) { 
+            self::$termTaxService->delete($id);
+        }
+    }
+
 }

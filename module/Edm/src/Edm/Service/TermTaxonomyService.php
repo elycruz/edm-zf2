@@ -223,8 +223,15 @@ class TermTaxonomyService extends AbstractCrudService {
 
         // Clean data
         $dbDataHelper = $this->getDbDataHelper();
-        $termTax = $dbDataHelper->escapeTuple($data);
-        $term = $termTax['term'];
+        $data = $dbDataHelper->escapeTuple($data);
+        $termTax = $data['term-taxonomy'];
+        $term = $data['term'];
+
+        // Set term's alias if it is not set
+        // assumes termTax has term_alias field.
+        if (!isset($term['alias'])) {
+            $term['alias'] = $termTax['term_alias'];
+        }
 
         // Normalize description
         $desc = $termTax['description'];
@@ -238,34 +245,36 @@ class TermTaxonomyService extends AbstractCrudService {
         $conn = $this->getDb()->getDriver()->getConnection();
 
         // Begin transaction
-        $conn->beginTransaction();
+        //$conn->beginTransaction();
 
         // Try db updates
-        try {
+        //try {
 
             // Process Term and rollback if failure
             $termRslt = $this->lazyLoadTerm($term);
 
             // Set term tax term alias just in case
-            $termTax->term_alias = $termRslt->alias;
+            $termTax['term_alias'] = $termRslt->alias;
 
             // Process Term Taxonomy
-            $termTaxRslt = $this->getTermTaxonomyTable()
+            $this->getTermTaxonomyTable()
                 ->update(['term_taxonomy_id' => $id], $termTax);
 
+            $termTaxRslt = $conn->getLastGeneratedValue();
+
             // Commit changes
-            $conn->commit();
+            //$conn->commit();
 
             // Return success message
             return $termTaxRslt;
-        }
+       /* }
         catch (\Exception $e) {
             // Rollback changes
             $conn->rollback();
 
             // Return exception
             return $e;
-        }
+        }*/
     }
 
     public function delete($id) {
@@ -342,7 +351,7 @@ class TermTaxonomyService extends AbstractCrudService {
         // Get term table
         $termTable = $this->getTermTable();
 
-        // Check if term already exists
+           // Check if term already exists
         $term = $termTable->select(['alias' => $termData['alias']])->current();
 
         // Create term if empty

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @note Proto's shouldn't be nested more than one level deep.
+ */
+
 namespace Edm\Db\ResultSet\Proto;
 
 use Zend\Config\Config,
@@ -52,7 +56,7 @@ abstract class AbstractProto extends \ArrayObject
      * Proto names to use when calling to array to generate values.
      * @var array
      */
-    protected $nestedProtoGetters;
+    protected $subProtoGetters;
 
     /**
      * Input Filter.
@@ -117,6 +121,11 @@ abstract class AbstractProto extends \ArrayObject
         // Array to return (we start with an empty array then populate it)
         $retVal = array();
 
+        // If for form then return a nested version
+        if ($operation === AbstractProto::FOR_OPERATION_FORM) {
+            return $this->toArrayNested($retVal);
+        }
+
         // Operate on proto based on $mode
         switch ($mode) {
             case AbstractProto::TO_ARRAY_SHALLOW :
@@ -139,10 +148,9 @@ abstract class AbstractProto extends \ArrayObject
 
     /**
      * @param array $outArray
-     * @param string $operation - Db operation alias if data is needed for db
      * @return array
      */
-    public function toArrayShallow ($outArray, $operation) {
+    public function toArrayShallow ($outArray = []) {
         foreach ($this->allowedKeysForProto as $key) {
             if (!$this->has($key)) {
                 continue;
@@ -154,20 +162,26 @@ abstract class AbstractProto extends \ArrayObject
 
     /**
      * @param array $outArray
-     * @param string $operation - Db operation alias if data is needed for db
      * @return array
      */
-    public function toArrayFlattened ($outArray, $operation) {
+    public function toArrayFlattened ($outArray) {
 
     }
 
     /**
      * @param array $outArray
-     * @param string $operation - Db operation alias if data is needed for db
      * @return array
      */
-    public function toArrayNested ($outArray, $operation) {
-
+    public function toArrayNested ($outArray = []) {
+        $selfOut = $outArray[$this->getFormKey()] = [];
+        $allowedKeys = $this->getAllowedKeysOnProto();
+        foreach ($allowedKeys as $key) {
+            $selfOut[$key] = $this->{$key};
+        }
+        $this->forEachSubProtos(function ($subProto) use ($outArray) {
+            $outArray[$subProto->getFormKey()] = $subProto->toArrayShallow();
+        });
+        return $outArray;
     }
 
     public function filterArrayBasedOnOp ($array, $operation = AbstractProto::FOR_OPERATION_FORM) {
@@ -202,6 +216,19 @@ abstract class AbstractProto extends \ArrayObject
      */
     public function has ($key) {
         return isset($this->{$key});
+    }
+
+    /**
+     * @param array $input
+     * @return array
+     */
+    public function exchangeArray ($input) {
+        $oldArray = $this->toArray();
+        $this->forEachSubProtos(function ($subProto) use ($input, $this){
+            $this->setAllowedKeysOnProto($input, $subProto);
+        });
+        $this->setAllowedKeysOnProto($input, $this);
+        return $oldArray;
     }
 
     /**
@@ -285,5 +312,17 @@ abstract class AbstractProto extends \ArrayObject
         return $this->inputFilter;
     }
 
+    public function forEachSubProtos (callable $callback) {
+        $out = [];
+        if (!isset($this->subProtoGetters) && is_array($this->subProtoGetters)) {
+            foreach ($this->subProtoGetters as $getter) {
+                $subProto = $this->{$getter}();
+                call_user_func($callback, [$subProto]);
+                $out[] = $subProto;
+            }
+        }
+        return $out;
+    }
 
 }
+

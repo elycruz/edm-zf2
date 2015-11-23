@@ -56,6 +56,10 @@ class TermTaxonomyProto extends AbstractProto  {
 
     protected $_formKey = 'termTaxonomy';
 
+    protected $subProtos = [
+        'termProto',
+    ];
+    
     public function getInputFilter() {
 
         if ($this->inputFilter !== null) {
@@ -142,14 +146,6 @@ class TermTaxonomyProto extends AbstractProto  {
             $this->termTaxonomyProxyProto = new TermTaxonomyProxyProto();
         }
         return $this->termTaxonomyProxyProto;
-    }
-
-    public function exchangeArray ($input) {
-        $this->termProto =
-            $this->setAllowedKeysOnProto($input, $this->getTermProto());
-        $this->termTaxonomyProxyProto =
-            $this->setAllowedKeysOnProto($input, $this->getTermTaxonomyProxyProto());
-        $this->setAllowedKeysOnProto($input, $this);
     }
 
 }
