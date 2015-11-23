@@ -153,6 +153,26 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         return $retVal;
     }
 
+    public function testUpdate () {
+//        $data = [
+//            'term-taxonomy' => [
+//                'description' => 'Some description here',
+//                'accessGroup' => 'user'
+//            ],
+//            'term' => [
+//                'name' => 'Some Term Taxonomy Hereio bob'
+//            ]];
+//
+//        // Create test term taxonomy
+//        $retVal = $this->termTaxService()->update($data);
+//
+//        // Assert an 'id' was returned from `create` process
+//        $this->assertEquals(true, is_numeric($retVal));
+//
+//        // Return result of creation process
+//        return $retVal;
+    }
+
     /**
      * @depends testCreate
      * @param int $id
