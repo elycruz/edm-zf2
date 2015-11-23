@@ -71,32 +71,38 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider forTruthyTestsProvider
+     * @param TermProto $item
      */
-    public function testHasAndToArrayForTruthyValues($item)
+    public function testHasMethod ($item) {
+        $allowedKeys = $this->allowedKeysForProto;
+        foreach ($allowedKeys as $key) {
+            $this->assertEquals(true, $item->has($key));
+        }
+    }
+
+    /**
+     * @dataProvider forFalsyTestsProvider
+     * @param TermProto $item
+     */
+    public function testHasMethodFails ($item) {
+        $allowedKeys = $this->allowedKeysForProto;
+        foreach ($allowedKeys as $key) {
+            $this->assertEquals(false, $item->has($key));
+        }
+    }
+
+    /**
+     * @dataProvider forTruthyTestsProvider
+     * @param TermProto $item
+     */
+    public function testToArrayForTruthyValues($item)
     {
         // For `toArray` tests
         $rslt = $item->toArray();
 
         // Test for valid keys
         foreach ($this->allowedKeysForProto as $key) {
-            // Test `has` method
-            $this->assertEquals(true, $item->has($key),
-                'Term proto should have a set "' . $key . '" key.');
-
-            // Test `toArray` method
             $this->assertEquals(true, array_key_exists($key, $rslt),
-                'Term proto\'s `toArray` method for this case should\'nt ' .
-                'return an array with valid term proto keys.');
-        }
-
-        // Test for invalid keys
-        foreach ($this->invalidKeys as $key) {
-            // Test `has` method
-            $this->assertEquals(false, $item->has($key),
-                'Term proto should not have a set "' . $key . '" key.');
-
-            // Test `toArray` method
-            $this->assertEquals(false, array_key_exists($key, $rslt),
                 'Term proto\'s `toArray` method for this case should\'nt ' .
                 'return an array with valid term proto keys.');
         }
@@ -106,18 +112,10 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase
      * @dataProvider forFalsyTestsProvider
      * @param TermProto $item
      */
-    public function testHasAndToArrayWithFalsyValues($item)
+    public function testToArrayWithFalsyValues($item)
     {
-        $toArrayRslt = $item->toArray();
-
         // Test empty `toArray` result
-        $this->assertCount(0, $toArrayRslt);
-
-        // Test has method
-        foreach ($this->allowedKeysForProto as $key) {
-            $this->assertEquals(false, $item->has($key),
-                'Term proto should not have a set "' . $key . '" key.');
-        }
+        $this->assertCount(0, $item->toArray());
     }
 
     /**
@@ -152,4 +150,5 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase
     public static function tearDownAfterClass()
     {
     }
+
 }

@@ -10,8 +10,7 @@
 namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
-    Edm\Db\ResultSet\Proto\TermTaxonomyProto,
-    Edm\Db\ResultSet\Proto\TermProto;
+    Edm\Db\ResultSet\Proto\TermTaxonomyProto;
 
 class TermTaxonomyService extends AbstractCrudService {
 
@@ -131,17 +130,17 @@ class TermTaxonomyService extends AbstractCrudService {
     }
 
     /**
-     * @param TermTaxonomyProto $data
+     * @param array $data
      * @return \Exception|int
      * @throws \Edm\Db\Exception
      * @throws \Exception
      */
-    public function create(TermTaxonomyProto $data) {
+    public function create($data) {
         // Throw error if term or term-taxonomy not set
-        if (!isset($data->term)) {
+        if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
-                'parameter "$data" to contain a "term" and ' .
-                '"term-taxonomy" keys.');
+                'parameter "$data" to contain a "term" and a ' .
+                '"term-taxonomy" key.');
         }
 
         // Set return value
@@ -151,24 +150,27 @@ class TermTaxonomyService extends AbstractCrudService {
         $dbDataHelper = $this->getDbDataHelper();
 
         // Clean incoming data
-        $termTax = $dbDataHelper->escapeTuple($data);
+        $data = $dbDataHelper->escapeTuple($data);
 
-        // Get term model/proto
-        $term = $termTax->term;
+        // Get term data
+        $term = $data['term'];
+
+        // Get term taxonomy data
+        $termTax = $data['term-taxonomy'];
 
         // If parent is not greater than 0 then don't allow it to get flushed in our `toArray` call
-        if (isset($termTax->parent_id) && !is_numeric($termTax->parent_id)) {
-            unset($termTax->parent_id);
+        if (isset($termTax['parent_id']) && !is_numeric($termTax['parent_id'])) {
+            unset($termTax['parent_id']);
         }
 
         // If empty access group remove it's key
-        if (empty($termTax->accessGroup)) {
-            unset($termTax->accessGroup);
+        if (empty($termTax['accessGroup'])) {
+            unset($termTax['accessGroup']);
         }
 
         // Normalize description
-        $desc = $termTax->description;
-        $termTax->description = isset($desc) ? $desc : '';
+        $desc = $termTax['description'];
+        $termTax['description'] = isset($desc) ? $desc : '';
 
         // Get database platform object
         $driver = $this->getDb()->getDriver();
@@ -183,10 +185,10 @@ class TermTaxonomyService extends AbstractCrudService {
             $termRslt = $this->lazyLoadTerm($term);
 
             // Set term tax 'term alias' just in case they are different
-            $termTax->term_alias = $termRslt->alias;
+            $termTax['term_alias'] = $termRslt->alias;
 
             // Process Term Taxonomy
-            $this->getTermTaxonomyTable()->insert($termTax->toArray());
+            $this->getTermTaxonomyTable()->insert($termTax);
 
             $retVal = $conn->getLastGeneratedValue();
 
@@ -197,6 +199,7 @@ class TermTaxonomyService extends AbstractCrudService {
             // Rollback changes
             $conn->rollback();
 
+            // Return caught exception
             $retVal = $e;
         }
 
@@ -204,25 +207,32 @@ class TermTaxonomyService extends AbstractCrudService {
         return $retVal;
     }
 
-    public function update($id, TermTaxonomyProto $termTaxonomy) {
+    /**
+     * @param int $id
+     * @param array $data
+     * @return \Exception|int
+     * @throws \Exception
+     */
+    public function update($id, $data) {
         // Throw error if term or term-taxonomy not set
-        if (!isset($termTaxonomy->term)) {
+        if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
-                ' the passed in term taxonomy proto to contain a set "term" key.');
+                'parameter "$data" to contain a "term" and a ' .
+                '"term-taxonomy" key.');
         }
 
         // Clean data
         $dbDataHelper = $this->getDbDataHelper();
-        $termTax = $dbDataHelper->escapeTuple($termTaxonomy);
-        $term = $termTax->term;
+        $termTax = $dbDataHelper->escapeTuple($data);
+        $term = $termTax['term'];
 
         // Normalize description
-        $desc = $termTax->description;
-        $termTax->description = $desc ? $desc : '';
+        $desc = $termTax['description'];
+        $termTax['description'] = $desc ? $desc : '';
 
         // Normalize parent id
-        $termTax->parent_id = !empty($termTax->parent_id) ?
-            $termTax->parent_id : 0;
+        $termTax['parent_id'] = !empty($termTax['parent_id']) ?
+            $termTax['parent_id'] : 0;
 
         // Get database platform object
         $conn = $this->getDb()->getDriver()->getConnection();
@@ -241,8 +251,7 @@ class TermTaxonomyService extends AbstractCrudService {
 
             // Process Term Taxonomy
             $termTaxRslt = $this->getTermTaxonomyTable()
-                ->update(['term_taxonomy_id' => $id],
-                    $termTax->toArray());
+                ->update(['term_taxonomy_id' => $id], $termTax);
 
             // Commit changes
             $conn->commit();
@@ -325,28 +334,29 @@ class TermTaxonomyService extends AbstractCrudService {
 
     /**
      * Fetch term proto from db.  If it is not there create it and return.
-     * @param TermProto $termData
+     * @todo add escaping to this lazy loading functionality.
+     * @param array $termData
      * @return \Edm\Db\ResultSet\Proto\TermProto
      */
-    public function lazyLoadTerm(TermProto $termData) {
+    public function lazyLoadTerm($termData) {
         // Get term table
         $termTable = $this->getTermTable();
 
         // Check if term already exists
-        $term = $termTable->select(['alias' => $termData->alias])->current();
+        $term = $termTable->select(['alias' => $termData['alias']])->current();
 
         // Create term if empty
         if (empty($term)) {
-            $rslt = $termTable->insert($termData->toArray());
+            $rslt = $termTable->insert($termData);
             if (empty($rslt)) {
                 return false;
             }
-            $term = $termTable->getOneWhere(['alias' => $termData->alias]);
+            $term = $termTable->getOneWhere(['alias' => $termData['alias']]);
         }
         // Update term if data and term are different
-        else if ((!empty($termData->name) && $termData->name !== $term->name)) {
-            $term->exchangeArray($termData->toArray());
-            $termTable->update(['term_alias' => $term->alias], $term->toArray());
+        else if ((!empty($termData['name']) && $termData['name'] !== $term->name)) {
+            $term->exchangeArray($termData);
+            $termTable->update(['alias' => $term->alias], $term->toArray());
         }
         return $term;
     }

@@ -130,21 +130,21 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     }
 
     public function testCreate () {
-        $testTaxonomy = new TermTaxonomyProto([
-            'term_alias' => 'some-term-taxonomy-here',
-            'taxonomy' => 'uncategorized',
-            'description' => '',
-            'accessGroup' => 'cms-manager'
-        ]);
-
-        $testTaxonomy->term = new TermProto([
-            'name' => 'Some Term Taxonomy Here',
-            'alias' => 'some-term-taxonomy-here',
-            'term_group_alias' => 'edm-term-taxonomy-service-test'
-        ]);
+        $data = [
+            'term-taxonomy' => [
+                'term_alias' => 'some-term-taxonomy-here',
+                'taxonomy' => 'uncategorized',
+                'description' => '',
+                'accessGroup' => 'cms-manager'
+            ],
+            'term' => [
+                'name' => 'Some Term Taxonomy Here',
+                'alias' => 'some-term-taxonomy-here',
+                'term_group_alias' => 'edm-term-taxonomy-service-test'
+            ]];
 
         // Create test term taxonomy
-        $retVal = $this->termTaxService()->create($testTaxonomy);
+        $retVal = $this->termTaxService()->create($data);
 
         // Assert an 'id' was returned from `create` process
         $this->assertEquals(true, is_numeric($retVal));
