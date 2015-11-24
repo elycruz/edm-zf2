@@ -13,7 +13,7 @@ use Zend\Config\Config,
     Zend\InputFilter\InputFilterInterface;
 
 /**
- * Abstract Model
+ * Abstract result set prototype.
  * @author ElyDeLaCruz
  */
 abstract class AbstractProto extends \ArrayObject
@@ -47,12 +47,6 @@ abstract class AbstractProto extends \ArrayObject
     protected $notAllowedKeysForInsert;
 
     /**
-     * Keys to omit on export to array.
-     * @var array
-     */
-    protected $notAllowedKeysForDb;
-
-    /**
      * Proto names to use when calling to array to generate values.
      * @var array
      */
@@ -76,7 +70,8 @@ abstract class AbstractProto extends \ArrayObject
      * @param int $flags
      */
     public function __construct(array $data = null, $flags = 0) {
-        parent::__construct($data === null ? array() : $data, $flags == 0 ? \ArrayObject::ARRAY_AS_PROPS : $flags);
+        parent::__construct([], $flags == 0 ? \ArrayObject::ARRAY_AS_PROPS : $flags);
+        $this->exchangeArray(is_array($data) ? $data : []);
     }
 
     /**
@@ -111,102 +106,88 @@ abstract class AbstractProto extends \ArrayObject
     }
 
     /**
-     * Returns model as array with only set values.
-     * Any fields which do not have set values won't be returned in the array.
-     * @param string $operation - Operation [Update,Insert,Db,Form].  If set removes the 'notAllowedForUpdate', 'notAllowedForInsert', 'notAllowedKeysForDb' keys from the exported array.
-     * @param int $mode - Default AbstractProto::TO_ARRAY_SHALLOW (returns immediate key => value pairs but not nested ones (sub/own protos etc.)).
      * @return array
      */
-    public function toArray ($operation = null, $mode = AbstractProto::TO_ARRAY_SHALLOW) {
-        // Array to return (we start with an empty array then populate it)
-        $retVal = array();
-
-        // If for form then return a nested version
-        if ($operation === AbstractProto::FOR_OPERATION_FORM) {
-            return $this->toArrayNested($retVal);
-        }
-
-        // Operate on proto based on $mode
-        switch ($mode) {
-            case AbstractProto::TO_ARRAY_SHALLOW :
-                $retVal = $this->toArrayShallow($retVal, $mode);
-                break;
-            case AbstractProto::TO_ARRAY_FLATTENED :
-                $retVal = $this->toArrayFlattened($retVal, $mode);
-                break;
-            case AbstractProto::TO_ARRAY_NESTED :
-                $retVal = $this->toArrayNested($retVal, $mode);
-                break;
-            default:
-                $retVal = $this->toArrayShallow($retVal, $mode);
-                break;
-        }
-
-        // Filter Based on Operation here
-        return $this->filterArrayBasedOnOp($retVal, $operation);
+    public function getSubProtoGetters() {
+        return $this->subProtoGetters;
     }
 
     /**
-     * @param array $outArray
+     * Returns model as array with only set values.
+     * Any fields which do not have set values won't be returned in the array.
+     * @param string $operation - Operation [Update,Insert,Db,Form].
+     *  If set removes the 'notAllowedForUpdate', 'notAllowedForInsert',
+     *  'notAllowedKeysForDb' keys from the exported array.
      * @return array
      */
-    public function toArrayShallow ($outArray = []) {
+    public function toArray ($operation = null) {
+        $outArray = [];
         foreach ($this->allowedKeysForProto as $key) {
             if (!$this->has($key)) {
                 continue;
             }
             $outArray[$key] = $this->{$key};
         }
-        return $outArray;
+
+        // Filter Based on Operation here
+        return $this->filterArrayBasedOnOp($outArray, $operation);
     }
 
     /**
-     * @param array $outArray
+     * @param string $operation
      * @return array
      */
-    public function toArrayFlattened ($outArray) {
+    public function toArrayNested ($operation = null) {
+        // Declare out array
+        $outArray = [];
 
-    }
+        // Get self out
+        $selfOut = $this->toArray($operation);
 
-    /**
-     * @param array $outArray
-     * @return array
-     */
-    public function toArrayNested ($outArray = []) {
-        $selfOut = $outArray[$this->getFormKey()] = [];
-        $allowedKeys = $this->getAllowedKeysOnProto();
-        foreach ($allowedKeys as $key) {
-            $selfOut[$key] = $this->{$key};
-        }
-        $this->forEachSubProtos(function ($subProto) use ($outArray) {
-            $outArray[$subProto->getFormKey()] = $subProto->toArrayShallow();
+        // For each in sub protos nest their arrays
+        $this->forEachInSubProtos(function ($subProto) use (&$outArray, $operation) {
+            $outArray[$subProto->getFormKey()] = $subProto->toArray($operation);
         });
+
+        // Filter Based on Operation here
+        $outArray = $this->filterArrayBasedOnOp($outArray, $operation);
+
+        // Set self on out array
+        $outArray[$this->getFormKey()] = $selfOut;
+
+        // Return array
         return $outArray;
     }
 
-    public function filterArrayBasedOnOp ($array, $operation = AbstractProto::FOR_OPERATION_FORM) {
+    /**
+     * @param array $array
+     * @param string $operation
+     * @return array
+     * @throws \Exception
+     */
+    public function filterArrayBasedOnOp ($array, $operation = null) {
         // If operation is not set then return the unfiltered array
-        if (!isset($operation) || $operation === AbstractProto::FOR_OPERATION_FORM) {
+        if (!isset($operation)) {
             return $array;
         }
 
-        // Ensure operation is one of ours else throw an exception
-        if (   $operation !== AbstractProto::FOR_OPERATION_DB
-            || $operation !== AbstractProto::FOR_OPERATION_DB_INSERT
-            || $operation !== AbstractProto::FOR_OPERATION_DB_UPDATE
-            || $operation !== AbstractProto::FOR_OPERATION_DB_FORM
-            ) {
-            throw new Exception('"' . $operation .'" is not one of the defined operations ' .
-                'for the `toArray` method of the `'. __CLASS__ . '` class.');
-        }
+//        // Ensure operation is one of ours else throw an exception
+//        if (   $operation !== AbstractProto::FOR_OPERATION_DB
+//            || $operation !== AbstractProto::FOR_OPERATION_DB_INSERT
+//            || $operation !== AbstractProto::FOR_OPERATION_DB_UPDATE
+//            || $operation !== AbstractProto::FOR_OPERATION_DB_FORM
+//            ) {
+//            throw new \Exception('"' . $operation .'" is not one of the defined operations ' .
+//                'for the `toArray` method of the `'. __CLASS__ . '` class.');
+//        }
 
         // Get array keys to filter against
         $notAllowedForOp = $this->{'notAllowedKeysFor' . $operation};
 
         // Return filtered array
         return array_filter($array, function ($key) use ($notAllowedForOp) {
-            return !isset($notAllowedForOp[$key]);
-        });
+            return !in_array($key, $notAllowedForOp);
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     /**
@@ -224,7 +205,7 @@ abstract class AbstractProto extends \ArrayObject
      */
     public function exchangeArray ($input) {
         $oldArray = $this->toArray();
-        $this->forEachSubProtos(function ($subProto) use ($input, $this){
+        $this->forEachInSubProtos(function ($subProto) use ($input){
             $this->setAllowedKeysOnProto($input, $subProto);
         });
         $this->setAllowedKeysOnProto($input, $this);
@@ -312,12 +293,16 @@ abstract class AbstractProto extends \ArrayObject
         return $this->inputFilter;
     }
 
-    public function forEachSubProtos (callable $callback) {
+    /**
+     * @param callable $callback
+     * @return array
+     */
+    public function forEachInSubProtos (callable $callback) {
         $out = [];
-        if (!isset($this->subProtoGetters) && is_array($this->subProtoGetters)) {
+        if (isset($this->subProtoGetters) && is_array($this->subProtoGetters)) {
             foreach ($this->subProtoGetters as $getter) {
                 $subProto = $this->{$getter}();
-                call_user_func($callback, [$subProto]);
+                call_user_func($callback, $subProto);
                 $out[] = $subProto;
             }
         }

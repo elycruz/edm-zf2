@@ -245,10 +245,10 @@ class TermTaxonomyService extends AbstractCrudService {
         $conn = $this->getDb()->getDriver()->getConnection();
 
         // Begin transaction
-        //$conn->beginTransaction();
+        $conn->beginTransaction();
 
         // Try db updates
-        //try {
+        try {
 
             // Process Term and rollback if failure
             $termRslt = $this->lazyLoadTerm($term);
@@ -267,14 +267,14 @@ class TermTaxonomyService extends AbstractCrudService {
 
             // Return success message
             return $termTaxRslt;
-       /* }
+       }
         catch (\Exception $e) {
             // Rollback changes
             $conn->rollback();
 
             // Return exception
             return $e;
-        }*/
+        }
     }
 
     public function delete($id) {

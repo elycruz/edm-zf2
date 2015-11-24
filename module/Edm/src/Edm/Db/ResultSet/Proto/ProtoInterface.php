@@ -11,13 +11,6 @@ namespace Edm\Db\ResultSet\Proto;
 interface ProtoInterface {
 
     /**
-     * Modes for `toArray` method:
-     ********************************************/
-    const TO_ARRAY_SHALLOW = 0;
-    const TO_ARRAY_FLATTENED = 1;
-    const TO_ARRAY_NESTED = 2;
-
-    /**
      * Operations for `toArray` method
      * or use cases for `toArray` method:
      ********************************************/
@@ -27,9 +20,14 @@ interface ProtoInterface {
     const FOR_OPERATION_FORM = 'Form';
 
     public function has($key);
-    public function toArray($operation = null, $mode = AbstractProto::TO_ARRAY_SHALLOW);
+    public function toArray($operation = null);
+    public function toArrayNested($operation = null);
     public function getAllowedKeysForProto();
     public function getNotAllowedKeysForInsert();
     public function getNotAllowedKeysForUpdate();
+    public function getSubProtoGetters();
     public function setAllowedKeysOnProto($inputData, $proto);
+//    public function filterArrayBasedOnOp ($array, $operation = null);
+    public function forEachInSubProtos (callable $callback);
+
 }

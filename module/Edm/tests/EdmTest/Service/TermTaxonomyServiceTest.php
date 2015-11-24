@@ -160,6 +160,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     /**
      * @depends testCreate
      * @param int $id
+     * @return int
      */
     public function testUpdate ($id) {
         // Get data for update
@@ -178,7 +179,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $originalRslt = $termTaxService->getById($id);
         $data = array_merge($originalRslt->toArray(TermTaxonomyProto::FOR_OPERATION_FORM), $newData);
 
-        var_dump($data);
+//        var_dump($data);
 
         // Create test term taxonomy
         $retVal = $termTaxService->update($id, $data);

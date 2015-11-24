@@ -22,11 +22,24 @@ class TermTaxonomyProto extends AbstractProto  {
         'term_alias',
         'taxonomy',
         'description',
-        'childCount',
-        'assocItemCount',
+        'accessGroup',
         'listOrder',
         'parent_id'
     );
+
+    /**
+     * @var array
+     */
+    protected $notAllowedKeysForInsert = [
+        'term_taxonomy_id'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $notAllowedKeysForUpdate = [
+        'term_taxonomy_id'
+    ];
 
     /**
      * @var TermProto
@@ -39,27 +52,21 @@ class TermTaxonomyProto extends AbstractProto  {
     protected $termTaxonomyProxyProto;
 
     /**
-     * Keys to unset on export to array.
-     * @var array
+     * @var string
      */
-    protected $notAllowedForDb = [
-        // Joined keys
-        'term_name',
-        'term_group_alias',
-        'taxonomy_name',
-        'parent_name',
-        'parent_alias',
-
-        // Custom keys
-        'children'
-    ];
-
     protected $_formKey = 'termTaxonomy';
 
-    protected $subProtos = [
-        'termProto',
+    /**
+     * @var array
+     */
+    protected $subProtoGetters = [
+        'getTermProto',
+        'getTermTaxonomyProxyProto',
     ];
-    
+
+    /**
+     * @return InputFilter|\Zend\InputFilter\InputFilterInterface
+     */
     public function getInputFilter() {
 
         if ($this->inputFilter !== null) {
