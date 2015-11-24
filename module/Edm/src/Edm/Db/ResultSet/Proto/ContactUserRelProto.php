@@ -13,4 +13,9 @@ class ContactUserRelProto extends AbstractProto {
         'email'
     ];
 
+    /**
+     * @var string
+     */
+    protected $_formKey = 'contactUserRel';
+
 }

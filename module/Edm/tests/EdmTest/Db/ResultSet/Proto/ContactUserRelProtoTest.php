@@ -9,5 +9,10 @@ class ContactUserRelProtoTest extends \PHPUnit_Framework_TestCase {
         $proto = new ContactUserRelProto();
         $this->assertArraySubset(['screenName', 'email'], $proto->getAllowedKeysForProto());
     }
+
+    public function testFormKey () {
+        $proto = new ContactUserRelProto();
+        $this->assertEquals('contactUserRel', $proto->getFormKey());
+    }
 }
 
