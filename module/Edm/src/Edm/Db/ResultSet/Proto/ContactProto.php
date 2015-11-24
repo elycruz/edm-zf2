@@ -36,14 +36,21 @@ class ContactProto extends AbstractProto {
     );
 
     /**
+     * @var array
+     */
+    protected $_notAllowedKeysForUpdate = array(
+        'contact_id'
+    );
+
+    /**
      * @var string
      */
     protected $_formKey = 'contact';
 
     public function getInputFilter() {
 
-        if ($this->inputFilter !== null) {
-            return $this->inputFilter;
+        if ($this->_inputFilter !== null) {
+            return $this->_inputFilter;
         }
 
         $retVal = new InputFilter();
@@ -112,7 +119,7 @@ class ContactProto extends AbstractProto {
 //                'required' => false
 //        ))));
 
-        $this->inputFilter = $retVal;
+        $this->_inputFilter = $retVal;
 
         return $retVal;
     }

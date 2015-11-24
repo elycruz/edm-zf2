@@ -19,6 +19,10 @@ class DateInfoProto extends AbstractProto {
         'checkedOutById',
     );
 
+    protected $_notAllowedKeysForUpdate = array(
+        'date_info_id'
+    );
+
     protected $_formKey = 'dateInfo';
 
     public function getInputFilter() {

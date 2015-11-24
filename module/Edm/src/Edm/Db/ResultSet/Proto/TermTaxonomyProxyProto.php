@@ -8,7 +8,6 @@
 
 namespace Edm\Db\ResultSet\Proto;
 
-
 class TermTaxonomyProxyProto extends AbstractProto {
     /**
      * Valid Keys for Model
@@ -20,6 +19,16 @@ class TermTaxonomyProxyProto extends AbstractProto {
         'childCount'
     );
 
+    /**
+     * @var array
+     */
+    protected $_notAllowedKeysForUpdate = array(
+        'term_taxonomy_id'
+    );
+
+    /**
+     * @var string
+     */
     protected $_formKey = 'termTaxonomyProxy';
 
 }
