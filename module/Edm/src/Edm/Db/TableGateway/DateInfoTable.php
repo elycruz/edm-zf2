@@ -6,6 +6,6 @@ class DateInfoTable extends BaseTableGateway {
 
     protected $alias = 'dateInfo';
     protected $table = 'date_info';
-    protected $modelClass = \Edm\Model\DateInfo;
+    protected $modelClass = 'Edm\Db\ResultSet\Proto\DateInfoProto';
 
 }
