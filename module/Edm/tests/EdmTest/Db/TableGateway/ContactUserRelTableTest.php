@@ -16,7 +16,12 @@ class ContactUserRelTableTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testTableName () {
-        $this->assertEquals('user_contacts_relationships', $this->contactUserRelTable()->table);
+        $this->assertEquals('user_contact_relationships', $this->contactUserRelTable()->table);
+    }
+
+    public function testModelClass () {
+        $this->assertEquals('Edm\Db\ResultSet\Proto\ContactUserRelProto',
+            $this->contactUserRelTable()->modelClass);
     }
 
     public function contactUserRelTable () {

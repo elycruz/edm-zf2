@@ -73,7 +73,7 @@ class BaseTableGateway extends TableGateway {
                 return $this->table;
             case 'alias':
                 return $this->alias;
-            case 'modelClass':
+            case 'modelclass':
                 return $this->modelClass;
         }
         if ($this->featureSet->canCallMagicGet($property)) {
