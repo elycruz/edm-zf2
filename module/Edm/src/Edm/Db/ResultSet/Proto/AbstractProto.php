@@ -208,7 +208,7 @@ abstract class AbstractProto extends \ArrayObject
         $this->forEachInSubProtos(function ($subProto) use ($input){
             $this->setAllowedKeysOnProto($input, $subProto);
         });
-        $this->setAllowedKeysOnProto($input, $this);
+        $this->setAllowedKeysOnProto($input);
         return $oldArray;
     }
 
@@ -217,7 +217,8 @@ abstract class AbstractProto extends \ArrayObject
      * @param ProtoInterface $proto
      * @return ProtoInterface $proto
      */
-    public function setAllowedKeysOnProto($inputData, $proto) {
+    public function setAllowedKeysOnProto($inputData, $proto = null) {
+        $proto = $proto === null ? $this : $proto;
         $validKeys = $proto->getAllowedKeysForProto();
         foreach ($validKeys as $key) {
             if (isset($inputData[$key])) {
@@ -250,7 +251,7 @@ abstract class AbstractProto extends \ArrayObject
      * @param array $defaults
      * @return array
      */
-    public static function getDefaultInputOptionsByKey ($key, array $defaults) {
+    public static function getDefaultInputOptionsByKey ($key, array $defaults = null) {
         $retVal = null;
         $options = self::getDefaultInputOptions();
 

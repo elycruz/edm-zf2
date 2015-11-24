@@ -14,6 +14,7 @@ namespace EdmTest\Db\ResultSet\Proto;
 
 use Edm\Db\ResultSet\Proto\ProtoInterface;
 use Edm\Db\ResultSet\Proto\TermTaxonomyProto;
+use Zend\Config\Config;
 use Zend\InputFilter\InputFilter;
 
 class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
@@ -35,6 +36,15 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
      * @var string
      */
     public $formKey = 'termTaxonomy';
+
+    /**
+     * @var array
+     */
+    public $defaultInputOptionKeys = [
+        'id', 'int', 'alias', 'short-alias', 'name', 'short-name',
+        'boolean', 'email', 'password', 'html_id', 'html_class',
+        'description', 'screen-name', 'activation-key'
+    ];
 
     /**
      * @return TermTaxonomyProto
@@ -91,7 +101,25 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
      * @return array<[ [string], [string], [string] ]>
      */
     public function setAllowedKeysOnProtoProvider () {
-        return [[ [], [], [] ]];
+        $refTermTaxonomy = new TermTaxonomyProto();
+        $data = [];
+        $allowedKeys = $refTermTaxonomy->getAllowedKeysForProto();
+        $invalidKeys = ['a', 'e', 'i', 'o', 'u', 'and', 'some', 'times', 'y'];
+        $i = 0;
+
+        // Set valid keys
+        foreach ($allowedKeys as $key) {
+            $data[$key] = 'Some data here ' . $i;
+            $i += 1;
+        }
+
+        // Set invalid keys
+        foreach ($invalidKeys as $key) {
+            $data[$key] = 'Invalid data here ' . $i;
+            $i += 1;
+        }
+
+        return [[ $data, $allowedKeys, $invalidKeys ]];
     }
 
     /**
@@ -243,7 +271,24 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
      * @param array $invalidKeys
      */
     public function testSetAllowedKeysOnProto (array $data, array $allowedKeys, array $invalidKeys) {
+        // Get term taxonomy
         $termTaxonomy = new TermTaxonomyProto();
+
+        // Set allowed keys on proto
+        $rslt = $termTaxonomy->setAllowedKeysOnProto($data);
+
+        // Assert method returns proto
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\TermTaxonomyProto', $rslt);
+
+        // Assert proto has valid keys
+        foreach ($allowedKeys as $key) {
+            $this->assertEquals(true, $termTaxonomy->has($key));
+        }
+
+        // Assert proto doesn't have invalid keys
+        foreach ($invalidKeys as $key) {
+            $this->assertEquals(false, $termTaxonomy->has($key));
+        }
     }
 
     /**
@@ -318,6 +363,34 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
         // Ensure that keys are set directly on array and not nested
         foreach($allowedKeys as $key) {
             $this->assertEquals(true, isset($rslt[$key]));
+        }
+    }
+
+    /*-------------------------------------------------------------------*
+     * AbstractProto methods and statics
+     * @note these tests will be moved out of here at a later date.
+     * @todo move these tests out of here.
+     *-------------------------------------------------------------------*/
+
+    /**
+     * @dataProvider emptyTermTaxonomyProvider
+     * @param TermTaxonomyProto $termTaxonomy
+     */
+    public function testSetDefaultInputOptions (TermTaxonomyProto $termTaxonomy) {
+        $oldInputOptions = TermTaxonomyProto::getDefaultInputOptions();
+        TermTaxonomyProto::setDefaultInputOptions(new Config([]));
+        $this->assertInstanceOf('Zend\Config\Config', TermTaxonomyProto::getDefaultInputOptions());
+        $this->assertInstanceOf('Edm\InputFilter\DefaultInputOptionsAware', $termTaxonomy);
+        TermTaxonomyProto::setDefaultInputOptions($oldInputOptions);
+    }
+
+    public function testGetDefaultInputOptions () {
+        $this->assertInstanceOf('Zend\Config\Config', TermTaxonomyProto::getDefaultInputOptions());
+    }
+
+    public function testGetDefaultInputOptionsByKey () {
+        foreach ($this->defaultInputOptionKeys as $key) {
+            $this->assertEquals(true, is_array(TermTaxonomyProto::getDefaultInputOptionsByKey($key)));
         }
     }
 

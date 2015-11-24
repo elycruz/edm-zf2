@@ -12,7 +12,6 @@ use Edm\Db\ResultSet\Proto\TermProto;
 
 class TermProtoTest extends \PHPUnit_Framework_TestCase
 {
-
     public $allowedKeysForProto = [
         'name', 'alias', 'term_group_alias'
     ];
