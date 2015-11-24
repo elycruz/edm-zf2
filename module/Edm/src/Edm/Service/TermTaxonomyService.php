@@ -136,11 +136,11 @@ class TermTaxonomyService extends AbstractCrudService {
      * @throws \Exception
      */
     public function create($data) {
-        // Throw error if term or term-taxonomy not set
-        if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
+        // Throw error if term or termTaxonomy not set
+        if (!isset($data['term']) || !isset($data['termTaxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
                 'parameter "$data" to contain a "term" and a ' .
-                '"term-taxonomy" key.');
+                '"termTaxonomy" key.');
         }
 
         // Set return value
@@ -156,7 +156,7 @@ class TermTaxonomyService extends AbstractCrudService {
         $term = $data['term'];
 
         // Get term taxonomy data
-        $termTax = $data['term-taxonomy'];
+        $termTax = $data['termTaxonomy'];
 
         // If parent is not greater than 0 then don't allow it to get flushed in our `toArray` call
         if (isset($termTax['parent_id']) && !is_numeric($termTax['parent_id'])) {
@@ -214,18 +214,19 @@ class TermTaxonomyService extends AbstractCrudService {
      * @throws \Exception
      */
     public function update($id, $data) {
-        // Throw error if term or term-taxonomy not set
-        if (!isset($data['term']) || !isset($data['term-taxonomy'])) {
+        // Throw error if term or termTaxonomy not set
+        if (!isset($data['term']) || !isset($data['termTaxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
                 'parameter "$data" to contain a "term" and a ' .
-                '"term-taxonomy" key.');
+                '"termTaxonomy" key.');
         }
 
         // Clean data
         $dbDataHelper = $this->getDbDataHelper();
         $data = $dbDataHelper->escapeTuple($data);
-        $termTax = $data['term-taxonomy'];
+        $termTax = $data['termTaxonomy'];
         $term = $data['term'];
+
 
         // Set term's alias if it is not set
         // assumes termTax has term_alias field.
@@ -235,7 +236,7 @@ class TermTaxonomyService extends AbstractCrudService {
 
         // Normalize description
         $desc = $termTax['description'];
-        $termTax['description'] = $desc ? $desc : '';
+        $termTax['description'] = is_string($desc) ? $desc : '';
 
         // Normalize parent id
         $termTax['parent_id'] = !empty($termTax['parent_id']) ?
@@ -258,15 +259,13 @@ class TermTaxonomyService extends AbstractCrudService {
 
             // Process Term Taxonomy
             $this->getTermTaxonomyTable()
-                ->update(['term_taxonomy_id' => $id], $termTax);
-
-            $termTaxRslt = $conn->getLastGeneratedValue();
+                ->update($termTax, ['term_taxonomy_id' => $id]);
 
             // Commit changes
-            //$conn->commit();
+            $conn->commit();
 
             // Return success message
-            return $termTaxRslt;
+            return true;
        }
         catch (\Exception $e) {
             // Rollback changes
@@ -278,7 +277,7 @@ class TermTaxonomyService extends AbstractCrudService {
     }
 
     public function delete($id) {
-        // Throw error if term or term-taxonomy not set
+        // Throw error if term or termTaxonomy not set
         if (!is_numeric($id)) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' expects id to be numeric.');
         }

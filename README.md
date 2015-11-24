@@ -11,17 +11,19 @@ More documentation coming soon.
 
 #### 0.3.0 MVP
 - [ ] - Add tests:
-    - [ ] - Tests for `Edm\Db`:
-        - [X] - Tests for `Edm\Db\DatabaseDataHelper`.
-        - [ ] - Tests for `Edm\Db\TableGateway`:
-        - [ ] - Tests for `Edm\Db\ResultSet\Proto`.
-            - [X] - Test for `Edm\Db\ResultSet\Proto\TermProto`.
-            - [X] - Test for `Edm\Db\ResultSet\Proto\AbstractProto`.
-            - [X] - Test for `Edm\Db\ResultSet\Proto\TermTaxonomyProto`.
-    - [X] - Tests for `Edm\InputFilter\DefaultInputOptions`.
-    - [X] - Tests for `Edm\Filter`:
-        - [X] - Tests for `Edm\Filter\Alias`.
-        - [X] - Tests for `Edm\Filter\Slug`.
+    - [ ] - `Edm\Db`:
+        - [X] - `Edm\Db\DatabaseDataHelper`.
+        - [ ] - `Edm\Db\TableGateway`:
+        - [ ] - `Edm\Db\ResultSet\Proto`.
+            - [X] - `Edm\Db\ResultSet\Proto\AbstractProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\ProtoInterface`.
+            - [X] - `Edm\Db\ResultSet\Proto\TermProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProto`.
+    - [X] - `Edm\InputFilter\DefaultInputOptions`.
+    - [X] - `Edm\InputFilter\DefaultInputOptionsAware`.
+    - [X] - `Edm\Filter`:
+        - [X] - `Edm\Filter\Alias`.
+        - [X] - `Edm\Filter\Slug`.
 - [X] - Re-evaluate how 'aliases' are used in the EDM system.
     Resources:
         - valid url characters stackoverflow: (http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links)

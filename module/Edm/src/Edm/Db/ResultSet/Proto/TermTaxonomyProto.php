@@ -17,7 +17,7 @@ class TermTaxonomyProto extends AbstractProto  {
      * Allowed keys for setting properties on this array object
      * @var array
      */
-    protected $allowedKeysForProto = array(
+    protected $_allowedKeysForProto = array(
         'term_taxonomy_id',
         'term_alias',
         'taxonomy',
@@ -30,14 +30,14 @@ class TermTaxonomyProto extends AbstractProto  {
     /**
      * @var array
      */
-    protected $notAllowedKeysForInsert = [
+    protected $_notAllowedKeysForInsert = [
         'term_taxonomy_id'
     ];
 
     /**
      * @var array
      */
-    protected $notAllowedKeysForUpdate = [
+    protected $_notAllowedKeysForUpdate = [
         'term_taxonomy_id'
     ];
 
@@ -59,7 +59,7 @@ class TermTaxonomyProto extends AbstractProto  {
     /**
      * @var array
      */
-    protected $subProtoGetters = [
+    protected $_subProtoGetters = [
         'getTermProto',
         'getTermTaxonomyProxyProto',
     ];
@@ -69,11 +69,11 @@ class TermTaxonomyProto extends AbstractProto  {
      */
     public function getInputFilter() {
 
-        if ($this->inputFilter !== null) {
-            return $this->inputFilter;
+        if ($this->_inputFilter !== null) {
+            return $this->_inputFilter;
         }
 
-        $inputFilter = $this->inputFilter = new InputFilter();
+        $inputFilter = $this->_inputFilter = new InputFilter();
         $factory = new InputFactory();
 
         // Taxonomy

@@ -32,31 +32,31 @@ abstract class AbstractProto extends \ArrayObject
      * Valid keys allowed for proto.
      * @var array
      */
-    protected $allowedKeysForProto;
+    protected $_allowedKeysForProto;
     
     /**
      * Not allowed for RDBMS updates.
      * @var array
      */
-    protected $notAllowedKeysForUpdate;
+    protected $_notAllowedKeysForUpdate;
 
     /**
      * Keys that should be unset before exporting (toArray) array to db;
      * @var array
      */
-    protected $notAllowedKeysForInsert;
+    protected $_notAllowedKeysForInsert;
 
     /**
      * Proto names to use when calling to array to generate values.
      * @var array
      */
-    protected $subProtoGetters;
+    protected $_subProtoGetters;
 
     /**
      * Input Filter.
      * @var \Zend\InputFilter\InputFilterInterface
      */
-    protected $inputFilter = null;
+    protected $_inputFilter = null;
 
     /**
      * Key used when returning from `toArray` for form usage.
@@ -86,7 +86,7 @@ abstract class AbstractProto extends \ArrayObject
      * @return array
      */
     public function getAllowedKeysForProto () {
-        return $this->allowedKeysForProto;
+        return $this->_allowedKeysForProto;
     }
 
     /**
@@ -94,7 +94,7 @@ abstract class AbstractProto extends \ArrayObject
      * @return array
      */
     public function getNotAllowedKeysForUpdate () {
-        return $this->notAllowedKeysForUpdate;
+        return $this->_notAllowedKeysForUpdate;
     }
 
     /**
@@ -102,14 +102,14 @@ abstract class AbstractProto extends \ArrayObject
      * @return array
      */
     public function getNotAllowedKeysForInsert () {
-        return $this->notAllowedKeysForUpdate;
+        return $this->_notAllowedKeysForInsert;
     }
 
     /**
      * @return array
      */
     public function getSubProtoGetters() {
-        return $this->subProtoGetters;
+        return $this->_subProtoGetters;
     }
 
     /**
@@ -122,7 +122,7 @@ abstract class AbstractProto extends \ArrayObject
      */
     public function toArray ($operation = null) {
         $outArray = [];
-        foreach ($this->allowedKeysForProto as $key) {
+        foreach ($this->_allowedKeysForProto as $key) {
             if (!$this->has($key)) {
                 continue;
             }
@@ -182,12 +182,19 @@ abstract class AbstractProto extends \ArrayObject
 //        }
 
         // Get array keys to filter against
-        $notAllowedForOp = $this->{'notAllowedKeysFor' . $operation};
+        $notAllowedForOp = $this->{'_notAllowedKeysFor' . $operation};
 
         // Return filtered array
-        return array_filter($array, function ($key) use ($notAllowedForOp) {
-            return !in_array($key, $notAllowedForOp);
-        }, ARRAY_FILTER_USE_KEY);
+        if (isset($notAllowedForOp)) {
+            $retVal = array_filter($array, function ($key) use ($notAllowedForOp) {
+                return !in_array($key, $notAllowedForOp);
+            }, ARRAY_FILTER_USE_KEY);
+        }
+        else {
+            $retVal = $array;
+        }
+
+        return $retVal;
     }
 
     /**
@@ -283,7 +290,7 @@ abstract class AbstractProto extends \ArrayObject
      * @return \Zend\InputFilter\InputFilterAwareInterface
      */
     public function setInputFilter(InputFilterInterface $inputFilter) {
-        $this->inputFilter = $inputFilter;
+        $this->_inputFilter = $inputFilter;
         return $this;
     }
 
@@ -291,7 +298,7 @@ abstract class AbstractProto extends \ArrayObject
      * @return \Zend\InputFilter\InputFilterInterface
      */
     public function getInputFilter () {
-        return $this->inputFilter;
+        return $this->_inputFilter;
     }
 
     /**
@@ -300,8 +307,8 @@ abstract class AbstractProto extends \ArrayObject
      */
     public function forEachInSubProtos (callable $callback) {
         $out = [];
-        if (isset($this->subProtoGetters) && is_array($this->subProtoGetters)) {
-            foreach ($this->subProtoGetters as $getter) {
+        if (isset($this->_subProtoGetters) && is_array($this->_subProtoGetters)) {
+            foreach ($this->_subProtoGetters as $getter) {
                 $subProto = $this->{$getter}();
                 call_user_func($callback, $subProto);
                 $out[] = $subProto;

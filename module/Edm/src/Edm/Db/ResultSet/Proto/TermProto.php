@@ -7,7 +7,7 @@ use Zend\InputFilter\Factory as InputFactory,
 
 class TermProto extends AbstractProto {
 
-    protected $allowedKeysForProto = array(
+    protected $_allowedKeysForProto = array(
         'term_group_alias',
         'alias',
         'name',
@@ -17,8 +17,8 @@ class TermProto extends AbstractProto {
 
     public function getInputFilter() {
         // If input filter is set return it
-        if ($this->inputFilter !== null) {
-            return $this->inputFilter;
+        if ($this->_inputFilter !== null) {
+            return $this->_inputFilter;
         }
 
         $retVal = new InputFilter();

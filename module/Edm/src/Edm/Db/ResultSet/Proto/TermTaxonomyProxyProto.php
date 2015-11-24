@@ -14,7 +14,7 @@ class TermTaxonomyProxyProto extends AbstractProto {
      * Valid Keys for Model
      * @var array
      */
-    protected $allowedKeysForProto = array(
+    protected $_allowedKeysForProto = array(
         'term_taxonomy_id',
         'assocItemCount',
         'childCount'
