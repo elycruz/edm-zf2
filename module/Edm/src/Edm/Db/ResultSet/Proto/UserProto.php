@@ -5,7 +5,7 @@ namespace Edm\Db\ResultSet\Proto;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter;
 
-class User extends AbstractProto {
+class UserProto extends AbstractProto {
 
     /**
      * User role.
@@ -55,6 +55,14 @@ class User extends AbstractProto {
      * @var string
      */
     protected $_formKey = 'user';
+
+    /**
+     * @var array
+     */
+    protected $_subProtoGetters = [
+        'getDateInfoProto',
+        'getContactProto'
+    ];
 
     /**
      * Contact Proto Object
