@@ -11,27 +11,62 @@ namespace Edm\Db\ResultSet\Proto;
 use Zend\InputFilter\Factory as InputFactory,
     Zend\InputFilter\InputFilter;
 
-class TermTaxonomy extends AbstractProto  {
+class TermTaxonomyProto extends AbstractProto  {
 
-    protected $validKeys = array(
+    /**
+     * Allowed keys for setting properties on this array object
+     * @var array
+     */
+    protected $allowedKeysForProto = array(
         'term_taxonomy_id',
         'term_alias',
         'taxonomy',
         'description',
-        'childCount',
-        'assocItemCount',
+        'accessGroup',
         'listOrder',
-        'parent_id',
-        // Joined keys
-        'term_name',
-        'term_group_alias',
-        'taxonomy_name',
-        'parent_name',
-        'parent_alias',
-        // Custom keys
-        'children'
+        'parent_id'
     );
 
+    /**
+     * @var array
+     */
+    protected $notAllowedKeysForInsert = [
+        'term_taxonomy_id'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $notAllowedKeysForUpdate = [
+        'term_taxonomy_id'
+    ];
+
+    /**
+     * @var TermProto
+     */
+    protected $termProto;
+
+    /**
+     * @var TermTaxonomyProxyProto
+     */
+    protected $termTaxonomyProxyProto;
+
+    /**
+     * @var string
+     */
+    protected $_formKey = 'termTaxonomy';
+
+    /**
+     * @var array
+     */
+    protected $subProtoGetters = [
+        'getTermProto',
+        'getTermTaxonomyProxyProto',
+    ];
+
+    /**
+     * @return InputFilter|\Zend\InputFilter\InputFilterInterface
+     */
     public function getInputFilter() {
 
         if ($this->inputFilter !== null) {
@@ -89,13 +124,35 @@ class TermTaxonomy extends AbstractProto  {
                 )
             )));
 
-        return $this->inputFilter;
+        return $inputFilter;
     }
 
-    public function exchangeArray ($inputData) {
-
+    /**
+     * @param TermProto $termProto
+     * @return TermProto
+     */
+    public function getTermProto ($termProto = null) {
+        if (isset($termProto)) {
+            $this->termProto = $termProto;
+        }
+        else if (!isset($this->termProto)) {
+            $this->termProto = new TermProto();
+        }
+        return $this->termProto;
     }
 
-
+    /**
+     * @param TermTaxonomyProxyProto $termTaxonomyProxyProto
+     * @return TermTaxonomyProxyProto
+     */
+    public function getTermTaxonomyProxyProto ($termTaxonomyProxyProto = null) {
+        if (isset($termTaxonomyProxyProto)) {
+            $this->termTaxonomyProxyProto = $termTaxonomyProxyProto;
+        }
+        else if (!isset($this->termTaxonomyProxyProto)) {
+            $this->termTaxonomyProxyProto = new TermTaxonomyProxyProto();
+        }
+        return $this->termTaxonomyProxyProto;
+    }
 
 }

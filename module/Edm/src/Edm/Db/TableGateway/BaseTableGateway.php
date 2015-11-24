@@ -6,14 +6,9 @@ use Zend\Db\TableGateway\Feature\FeatureSet,
     Zend\Db\TableGateway\Feature\GlobalAdapterFeature,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\TableGateway,
-    Zend\ServiceManager\ServiceLocatorAwareTrait,
-    Zend\ServiceManager\ServiceLocatorAwareInterface;
+    Zend\Db\TableGateway\Exception\InvalidArgumentException;
 
-class BaseTableGateway extends TableGateway implements
-    BaseTableGatewayInterface,
-    ServiceLocatorAwareInterface {
-
-    use ServiceLocatorAwareTrait;
+class BaseTableGateway extends TableGateway {
 
     /**
      * Table Alias 
@@ -22,7 +17,7 @@ class BaseTableGateway extends TableGateway implements
      * alias should be "user" this allows services to get tables and models by alias and
      * allows sql to have an oop nature by having columns that point to these
      * tables/models by aliases as well.  This also allows us to have more succinct sql
-     * when refering to multiple tables in query;  E.g., instead of: SELECT term_alias.term_taxonomies, ...
+     * when referring to multiple tables in query;  E.g., instead of: SELECT term_alias.term_taxonomies, ...
      * we can write: 'SELECT term_alias.termTaxonomy' (makes our life a little easier)
      * also now when fetching our Model (if needed) we can now do
      *  `$model = new (ucase($table->alias))(); `  and walla we have our model without explicitly knowing
@@ -39,27 +34,10 @@ class BaseTableGateway extends TableGateway implements
     protected $modelClass;
 
     /**
-     * Table prefix if any (appended to default table name
-     * if this class is extended or if you pass in a `$tableName`).
-     * @var \string
+     * BaseTableGateway constructor for simplifying creation of tables created in for .
+     * Assumes `table`, `alias` and `modelClass` to be non-null or already set (in definition).
      */
-    protected $tablePrefix;
-
-    public function __construct($tableNamePrefix = null, $tableName = null, $tableAlias = null) {
-
-        if ($tableName) {
-            $this->table = $tableName;
-        }
-
-        if ($tableAlias) {
-            $this->alias = $tableAlias;
-        }
-
-        if ($tableNamePrefix) {
-            $this->tablePrefix = $tableNamePrefix;
-            $this->table = $tableNamePrefix . $this->table;
-        }
-
+    public function __construct () {
         $this->featureSet = new FeatureSet();
         $this->featureSet->addFeature(new GlobalAdapterFeature());
         $resultSetProto = new ResultSet();
@@ -68,17 +46,40 @@ class BaseTableGateway extends TableGateway implements
         $this->initialize();
     }
 
-    public function getFirstBy(array $by) {
-        return $this->select($by)->current();
+    /**
+     * Simple `get one where` method.  Only accepts `where` options.
+     * @param array $where
+     * @return array|\ArrayObject|null
+     */
+    public function getOneWhere(array $where) {
+        return $this->select($where)->current();
     }
 
-    public function getAlias() {
-        return $this->alias;
-    }
-
-    public function setAlias(\string $alias) {
-        $this->alias = $alias;
-        return $this;
+    /**
+     * __get - Overridden @see parent class.
+     *
+     * @param  string $property
+     * @throws \Zend\Db\TableGateway\Exception\InvalidArgumentException
+     * @return mixed
+     */
+    public function __get($property)
+    {
+        switch (strtolower($property)) {
+            case 'lastinsertvalue':
+                return $this->lastInsertValue;
+            case 'adapter':
+                return $this->adapter;
+            case 'table':
+                return $this->table;
+            case 'alias':
+                return $this->alias;
+            case 'modelClass':
+                return $this->modelClass;
+        }
+        if ($this->featureSet->canCallMagicGet($property)) {
+            return $this->featureSet->callMagicGet($property);
+        }
+        throw new InvalidArgumentException('Invalid magic property access in ' . __CLASS__ . '::__get()');
     }
 
 }

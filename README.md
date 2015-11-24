@@ -12,10 +12,12 @@ More documentation coming soon.
 #### 0.3.0 MVP
 - [ ] - Add tests:
     - [ ] - Tests for `Edm\Db`:
-        - [ ] - Tests for `Edm\Db\DatabaseDataHelper`.
+        - [X] - Tests for `Edm\Db\DatabaseDataHelper`.
         - [ ] - Tests for `Edm\Db\TableGateway`:
         - [ ] - Tests for `Edm\Db\ResultSet\Proto`.
-            - [ ] - Test for `Edm\Db\ResultSet\Proto\TermProto`.
+            - [X] - Test for `Edm\Db\ResultSet\Proto\TermProto`.
+            - [X] - Test for `Edm\Db\ResultSet\Proto\AbstractProto`.
+            - [X] - Test for `Edm\Db\ResultSet\Proto\TermTaxonomyProto`.
     - [X] - Tests for `Edm\InputFilter\DefaultInputOptions`.
     - [X] - Tests for `Edm\Filter`:
         - [X] - Tests for `Edm\Filter\Alias`.

@@ -25,7 +25,7 @@ defined('EDM_TOKEN_SEED') ||
 
 // Edm Alias Pattern
 defined('EDM_ALIAS_PATTERN') ||
-    define('EDM_ALIAS_PATTERN', '/^[a-z\_]+[a-z\d\-\_]*/i');
+    define('EDM_ALIAS_PATTERN', '/^[a-z\d\-\_]*/i');
 
 // Module Configuration
 return array(
@@ -33,31 +33,33 @@ return array(
         'invokables' => array(
             
             // Service invokables
-            'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
-            'Edm\Service\UserService'           => 'Edm\Service\UserService',
-            'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
-            'Edm\Service\PostService'           => 'Edm\Service\PostService',
-            'Edm\Service\PageService'           => 'Edm\Service\PageService',
+            'Edm\\Service\\TermTaxonomyService'   => 'Edm\\Service\\TermTaxonomyService',
+            'Edm\\Service\\UserService'           => 'Edm\\Service\\UserService',
+            'Edm\\Service\\ViewModuleService'     => 'Edm\\Service\\ViewModuleService',
+            'Edm\\Service\\PostService'           => 'Edm\\Service\\PostService',
+            'Edm\\Service\\PageService'           => 'Edm\\Service\\PageService',
 
             // Db invokables
-            'Edm\Db\DatabaseDataHelper'             => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Db\TableGateway\TermTable'         => 'Edm\Db\TableGateway\TermTable',
-            'Edm\Db\TableGateway\TermTaxonomyTable' => 'Edm\Db\TableGateway\TermTaxonomyTable',
-            'Edm\Db\TableGateway\UserTable'         => 'Edm\Db\TableGateway\UserTable',
-            'Edm\Db\TableGateway\PostTable'         => 'Edm\Db\TableGateway\PostTable',
-            'Edm\Db\TableGateway\ContactTable'      => 'Edm\Db\TableGateway\ContactTable',
+            'Edm\\Db\\DatabaseDataHelper'              => 'Edm\\Db\\DatabaseDataHelper',
+            'Edm\\Db\\TableGateway\\TermTable'         => 'Edm\\Db\\TableGateway\\TermTable',
+            'Edm\\Db\\TableGateway\\TermTaxonomyTable' => 'Edm\\Db\\TableGateway\\TermTaxonomyTable',
+            'Edm\\Db\\TableGateway\\TermTaxonomyProxyTable' => 'Edm\\Db\\TableGateway\\TermTaxonomyProxyTable',
+            'Edm\\Db\\TableGateway\\UserTable'         => 'Edm\\Db\\TableGateway\\UserTable',
+            'Edm\\Db\\TableGateway\\PostTable'         => 'Edm\\Db\\TableGateway\\PostTable',
+            'Edm\\Db\\TableGateway\\ContactTable'      => 'Edm\\Db\\TableGateway\\ContactTable',
             
             // Form invokables
-            'Edm\Form\TermTaxonomyForm' => 'Edm\Form\TermTaxonomyForm',
-            
+            'Edm\\Form\\TermForm'           => 'Edm\\Form\\TermForm',
+            'Edm\\Form\\TermTaxonomyForm'   => 'Edm\\Form\\TermTaxonomyForm',
+
             // Config invokables
             // --------------------------------------------------------------
             // Shared global input filter options (mostly validators and filters)
-            'Edm\InputFilter\DefaultInputOptions' 
-                => 'Edm\InputFilter\DefaultInputOptions',
+            'Edm\\InputFilter\\DefaultInputOptions' 
+                => 'Edm\\InputFilter\\DefaultInputOptions',
             
-            'Zend\Authentication\AuthService' => 
-                'Zend\Authentication\AuthenticationService'
+            'Zend\\Authentication\\AuthService' => 
+                'Zend\\Authentication\\AuthenticationService'
         )
     ),
     'controllers' => array(

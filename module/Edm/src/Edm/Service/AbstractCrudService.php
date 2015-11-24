@@ -14,21 +14,15 @@ use Edm\Db\DbAware,
     Edm\ServiceManager\ServiceLocatorAwareTrait,
     Edm\Db\DbDataHelperAwareTrait,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
-    Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     \stdClass;
 
-abstract class AbstractService implements
+abstract class AbstractCrudService implements
     ServiceLocatorAwareInterface, DbDataHelperAware, DbAware {
 
     use ServiceLocatorAwareTrait,
         DbDataHelperAwareTrait,
         DbAwareTrait;
-
-    const FETCH_FIRST_AS_ARRAY_OBJ = 1;
-    const FETCH_FIRST_AS_ARRAY = 2;
-    const FETCH_RESULT_SET = 3;
-    const FETCH_RESULT_SET_TO_ARRAY = 4;
 
     /**
      * @var \Zend\Db\ResultSet\ResultSet
@@ -36,22 +30,17 @@ abstract class AbstractService implements
     protected $resultSet;
 
     /**
-     * Services Sql Object
-     * @var \Zend\Db\Sql\Sql
-     */
-    protected $sql;
-
-    /**
      * Return Options as stdClass
-     * @param mixed $options
+     * @param stdClass|ArrayObject|array $options
      * @return \stdClass
      */
     public function normalizeMethodOptions($options = null) {
-        // Expect Array Object as options else convert
+        // Expect stdObject|Object as options else converts them
         if (is_array($options)) {
             $options = (object) $options;
         }
-        else {
+        else if (!is_object($options) || !(is_a($options, 'ArrayObject')
+            || is_a($options, 'stdClass'))) {
             $options = new stdClass();
         }
         return $options;
@@ -65,7 +54,7 @@ abstract class AbstractService implements
      */
     public function seedOptionsForSelect(stdClass $options) {
         // Sql
-        $sql = !empty($options->sql) ? $options->sql : $this->getSql();
+        $sql = isset($options->sql) ? $options->sql : $this->getSql();
 
         // Select
         if (isset($options->select)) {
@@ -84,10 +73,6 @@ abstract class AbstractService implements
             $select->order($options->order);
         }
 
-        // Fetch mode
-        $options->fetchMode = isset($options->fetchMode) ?
-            $options->fetchMode : self::FETCH_FIRST_AS_ARRAY;
-
         // Send some prelims to user
         $options->select = $select;
         $options->sql = $sql;
@@ -98,7 +83,7 @@ abstract class AbstractService implements
     /**
      * Read from db using "get select" and "get sql"
      * @param mixed $options
-     * @return mixed array result | array
+     * @return \Zend\Db\ResultSet\ResultSet
      */
     public function read($options = null) {
         // Normalize/get options object and seed it with default select params
@@ -106,11 +91,9 @@ abstract class AbstractService implements
             $this->normalizeMethodOptions($options));
 
         // Get results
-        $rslt = $this->resultSet->initialize(
+        return $this->resultSet->initialize(
             $options->sql->prepareStatementForSqlObject(
                 $options->select)->execute());
-
-        return $this->fetchFromResult($rslt, $options->fetchMode);
     }
 
     /**
@@ -123,54 +106,9 @@ abstract class AbstractService implements
     }
 
     /**
+     * @param Sql $sql
      * @return \Zend\Db\Sql\Select
      */
-    abstract public function getSelect();
-
-    /**
-     * Fetch items/item from result set object
-     * @param \Zend\Db\ResultSet\ResultSet $rslt
-     * @param type $fetchMode
-     * @return mixed array result | array
-     */
-    public function fetchFromResult (ResultSet $rslt, $fetchMode = self::FETCH_RESULT_SET_TO_ARRAY) {
-        $dbDataHelper = $this->getDbDataHelper();
-        $retVal = null;
-
-        // Is current index in result set valid
-        $validRslt = $rslt->valid();
-        if (!$validRslt) {
-            return null;
-        }
-        $current = $rslt->current();
-        if (empty($current)) {
-            return null;
-        }
-
-        // Get data
-        $data = $current->toArray();
-
-        // Resolve fetchmode
-        switch ($fetchMode) {
-            case self::FETCH_FIRST_AS_ARRAY:
-                $current->exchangeArray($dbDataHelper->reverseEscapeTuple($data));
-                $retVal = $current->toArray();
-                break;
-            case self::FETCH_FIRST_AS_ARRAY_OBJ:
-                // Clean current
-                $current->exchangeArray($dbDataHelper->reverseEscapeTuple($data));
-                $retVal = $current;
-                break;
-            case self::FETCH_RESULT_SET:
-                $retVal = (new ResultSet())->initialize($rslt);
-                break;
-            case self::FETCH_RESULT_SET_TO_ARRAY:
-            default:
-                $retVal = $this->cleanResultSetToArray($rslt);
-                break;
-        }
-
-        return $retVal;
-    }
+    abstract public function getSelect($sql = null);
 
 }

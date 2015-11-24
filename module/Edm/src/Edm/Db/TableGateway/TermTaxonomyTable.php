@@ -4,8 +4,8 @@ namespace Edm\Db\TableGateway;
 
 class TermTaxonomyTable extends BaseTableGateway {
 
-    protected $table = 'termTaxonomy';
-    protected $alias = 'term_taxonomies';
-    protected $modelClass = \Edm\Model\TermTaxonomy;
+    protected $table = 'term_taxonomies';
+    protected $alias = 'termTaxonomy';
+    protected $modelClass = '\\Edm\\Db\\ResultSet\\Proto\\TermTaxonomyProto';
 
 }

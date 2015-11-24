@@ -56,7 +56,6 @@ class TermTableTest extends \PHPUnit_Framework_TestCase  {
     public static function setUpBeforeClass () {
         $locator = Bootstrap::getServiceManager();
         self::$termTable = $locator->get('Edm\Db\TableGateway\TermTable');
-        self::$termTable->setServiceLocator($locator);
     }
 
     public function setUp () {

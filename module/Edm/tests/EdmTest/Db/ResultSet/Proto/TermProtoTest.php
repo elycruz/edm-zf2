@@ -10,9 +10,9 @@ namespace EdmTest\Db\ResultSet\Proto;
 
 use Edm\Db\ResultSet\Proto\TermProto;
 
-class TermProtoTest extends \PHPUnit_Framework_TestCase  {
-
-    public $validKeys = [
+class TermProtoTest extends \PHPUnit_Framework_TestCase
+{
+    public $allowedKeysForProto = [
         'name', 'alias', 'term_group_alias'
     ];
 
@@ -20,7 +20,8 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
         'hello', 'world', 'all', 'your', 'base', 'are', 'belong', 'to', 'us'
     ];
 
-    public function forTruthyTestsProvider () {
+    public function forTruthyTestsProvider()
+    {
         $numItems = 3;
         $out = [];
         for ($i = 0; $i < $numItems; $i += 1) {
@@ -33,7 +34,8 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
         return $out;
     }
 
-    public function forFalsyTestsProvider () {
+    public function forFalsyTestsProvider()
+    {
         // Num items to generate
         $numItems = 3;
 
@@ -68,55 +70,84 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase  {
 
     /**
      * @dataProvider forTruthyTestsProvider
+     * @param TermProto $item
      */
-    public function testWithTruthyValues ($item) {
-        // For `toArray` tests
-        $rslt = $item->toArray();
-
-        // Test for valid keys
-        foreach ($this->validKeys as $key) {
-            // Test `has` method
-            $this->assertEquals(true, $item->has($key),
-                'Term proto should have a set "' . $key . '" key.');
-
-            // Test `toArray` method
-            $this->assertEquals(true, array_key_exists($key, $rslt),
-                'Term proto\'s `toArray` method for this case should\'nt ' .
-                'return an array with valid term proto keys.');
-        }
-
-        // Test for invalid keys
-        foreach ($this->invalidKeys as $key) {
-            // Test `has` method
-            $this->assertEquals(false, $item->has($key),
-                'Term proto should not have a set "' . $key . '" key.');
-
-            // Test `toArray` method
-            $this->assertEquals(false, array_key_exists($key, $rslt),
-                'Term proto\'s `toArray` method for this case should\'nt ' .
-                'return an array with valid term proto keys.');
-        }
-    }
-
-    public function testGetValidKeys () {
-        $termProto = new TermProto();
-        $protoValidKeys = $termProto->getValidKeys();
-        foreach ($this->validKeys as $key) {
-            $this->assertEquals(true, in_array($key, $protoValidKeys),
-                'A term proto should contain key "' . $key . '".');
+    public function testHasMethod ($item) {
+        $allowedKeys = $this->allowedKeysForProto;
+        foreach ($allowedKeys as $key) {
+            $this->assertEquals(true, $item->has($key));
         }
     }
 
     /**
      * @dataProvider forFalsyTestsProvider
+     * @param TermProto $item
      */
-    public function testWithEmptyValues ($item) {
-        foreach ($this->validKeys as $key) {
-            $this->assertEquals(false, $item->has($key),
-                'Term proto should not have a set "' . $key . '" key.');
+    public function testHasMethodFails ($item) {
+        $allowedKeys = $this->allowedKeysForProto;
+        foreach ($allowedKeys as $key) {
+            $this->assertEquals(false, $item->has($key));
         }
     }
 
-    public static function tearDownAfterClass() {
+    /**
+     * @dataProvider forTruthyTestsProvider
+     * @param TermProto $item
+     */
+    public function testToArrayForTruthyValues($item)
+    {
+        // For `toArray` tests
+        $rslt = $item->toArray();
+
+        // Test for valid keys
+        foreach ($this->allowedKeysForProto as $key) {
+            $this->assertEquals(true, array_key_exists($key, $rslt),
+                'Term proto\'s `toArray` method for this case should\'nt ' .
+                'return an array with valid term proto keys.');
+        }
     }
+
+    /**
+     * @dataProvider forFalsyTestsProvider
+     * @param TermProto $item
+     */
+    public function testToArrayWithFalsyValues($item)
+    {
+        // Test empty `toArray` result
+        $this->assertCount(0, $item->toArray());
+    }
+
+    /**
+     * @dataProvider forTruthyTestsProvider
+     * @param $item
+     */
+    public function testGetFormKey($item)
+    {
+        $this->assertEquals($item->getFormKey(), 'term');
+    }
+
+    public function testGetAllowedKeysForProto()
+    {
+        $termProto = new TermProto();
+        $protoValidKeys = $termProto->getAllowedKeysForProto();
+        foreach ($this->allowedKeysForProto as $key) {
+            $this->assertEquals(true, in_array($key, $protoValidKeys),
+                'A term proto should contain key "' . $key . '".');
+        }
+    }
+
+    public function testToArray()
+    {
+        $termProto = new TermProto();
+        $protoValidKeys = $termProto->getAllowedKeysForProto();
+        foreach ($this->allowedKeysForProto as $key) {
+            $this->assertEquals(true, in_array($key, $protoValidKeys),
+                'A term proto should contain key "' . $key . '".');
+        }
+    }
+
+    public static function tearDownAfterClass()
+    {
+    }
+
 }

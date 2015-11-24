@@ -1,184 +1,185 @@
 <?php
 
 /**
- * Common input filter definitions used in our forms
- * @var array
+ * Common input filter configs/definitions used for our forms.
+ * @var array <string => array <validators[[]], filters[[]]> >
  */
-return array(
-    
+return [
+
     /**
-     * Id
-     * @var bigint(20)
+     * Id - bigint(20)
+     * @var array <validators<[]>>
      */
-    'id' => array(
-        'validators' => array(
-            array('name' => 'Digits'),
-            array('name' => 'StringLength',
-                'options' => array(
+    'id' => [
+        'validators' => [
+            ['name' => 'Digits'],
+            ['name' => 'StringLength',
+                'options' => [
                     'min' => 0,
                     'max' => 20
-                )
-            )
-        )
-    ),
+                ]
+            ]
+        ]
+    ],
 
-    'int' => array(
-        'validators' => array(
-            array('name' => 'Digits')
-        )
-    ),
-    
+    'int' => [
+        'validators' => [
+            ['name' => 'Digits']
+        ]
+    ],
+
     /**
-     * Alias
-     * @var varchar(200)
+     * Alias - varchar(200)
+     * @var array
      */
-    'alias' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
-                    'pattern' => EDM_ALIAS_PATTERN
-                )
-            )
-        ),
-        'filters' => array(
-            array('name' => 'StringToLower'),
-        )
-    ),
-    
+    'alias' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
+                    'pattern' => '/^[\w\-]{2,200}$/i'
+                ]
+            ]
+        ],
+        'filters' => [
+            ['name' => 'StringToLower'],
+        ]
+    ],
+
     /**
-     * Short Alias (same as EDM_ALIAS_PATTERN except limited to 55 characters)
-     * @var varchar(55)
+     * Short Alias - varchar(55)
+     * @var array
      */
-    'short-alias' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
-                    'pattern' => '/^[a-z_]*[a-z\d\-_]{2,55}$/i'
-                )
-            )
-        ),
-        'filters' => array(
-            array('name' => 'StringToLower'),
-        )
-    ),
-    
+    'short-alias' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
+                    'pattern' => '/^[\w\-]{2,55}$/i'
+                ]
+            ]
+        ],
+        'filters' => [
+            ['name' => 'StringToLower'],
+        ]
+    ],
+
     /**
-     *  Name
-     * @var varchar(55)
+     *  Name - varchar(55)
+     * @var array
      */
-    'name' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
-                    'pattern' => '/^[a-z\w\s\d]{2,255}$/i'
-                )
-            )
-        ),
-        'filters' => array(
-            array('name' => 'StripTags'),
-            array('name' => 'StringTrim')
-        )
-    ),
-    
+    'name' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
+                    'pattern' => '/^[\w\W\s\d\`]{2,255}$/i'
+                ]
+            ]
+        ],
+        'filters' => [
+            ['name' => 'StripTags'],
+            ['name' => 'StringTrim']
+        ]
+    ],
+
     /**
-     * Short Name
-     * @var varchar(55)
+     * Short Name - varchar(55)
+     * @var array
      */
-    'short-name' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
-                    'pattern' => '/^[a-z\w\s\d]{2,55}$/i'
-                )
-            )
-        ),
-        'filters' => array(
-            array('name' => 'StripTags'),
-            array('name' => 'StringTrim')
-        )
-    ),
-    
+    'short-name' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
+                    'pattern' => '/^[a-z\w\s\d\`]{2,55}$/i'
+                ]
+            ]
+        ],
+        'filters' => [
+            ['name' => 'StripTags'],
+            ['name' => 'StringTrim']
+        ]
+    ],
+
     /**
      * Boolean
-     * @var 
+     * @var array
      */
-    'boolean' => array(
-        'filters' => array(
-            array('name' => 'Boolean',
-                'options' => array(
+    'boolean' => [
+        'filters' => [
+            ['name' => 'Boolean',
+                'options' => [
                     'type' => 'all'
-                )
-            )
-        )
-    ),
-    
+                ]
+            ]
+        ]
+    ],
+
     /**
-     * Email
-     * @var varchar(255)
+     * Email - varchar(255)
+     * @var array
      */
-    'email' => array(
-        'validators' => array(
-            array('name' => 'EmailAddress')
-        ),
-        'filters' => array(
-            array('name' => 'StringToLower')
-        )
-    ),
-    
+    'email' => [
+        'validators' => [
+            ['name' => 'EmailAddress']
+        ],
+        'filters' => [
+            ['name' => 'StringToLower']
+        ]
+    ],
+
     /**
-     * Password @todo create friendlier password mismatch message
-     * @var varchar(64)
+     * Password - varchar(64)
+     * @todo create friendlier password mismatch message
+     * @var array
      */
-    'password' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
+    'password' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
                     'pattern' => '/^[a-z\d\-_]{6,32}$/',
                     'message' => 'Password doesn\'t match password pattern.'
-                ))
-        )
-    ),
-    
+                ]]
+        ]
+    ],
+
     /**
-     * Html Id
-     * @var varchar(200) 
+     * Html Id - varchar(200)
+     * @var array
      */
-    'html_id' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
+    'html_id' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
                     'pattern' => '/[a-z\d\-\_\.\:]{2,200}/i'
-                )
-            )
-        )
-    ),
-    
+                ]
+            ]
+        ]
+    ],
+
     /**
-     * Html Class
-     * @var varchar(200) 
+     * Html Class - varchar(200)
+     * @var array
      */
-    'html_class' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
+    'html_class' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
                     'pattern' => '/[a-z\d\s\t\n\r\-\_\.\:]{2,200}/i'
-                )
-            )
-        ),
-        'filters' => array(
-            array('name' => 'StringTrim')
-        )
-    ),
-    
+                ]
+            ]
+        ],
+        'filters' => [
+            ['name' => 'StringTrim']
+        ]
+    ],
+
     /**
-     * Description
-     * @var longtext
+     * Description - longtext
+     * @var array
      */
-    'description' => array(
-        'filters' => array(
-            array('name' => 'StripTags',
-                'options' => array(
-                    'allowTags' => array(
+    'description' => [
+        'filters' => [
+            ['name' => 'StripTags',
+                'options' => [
+                    'allowTags' => [
                         'div', 'span', 'object', 'h1', 'h2', 'h3', 'h4',
                         'h5', 'h6', 'hr', 'p', 'blockquote', 'pre', 'a', 'abbr', 'acronym',
                         'address', 'big', 'cite', 'code', 'del', 'dfn', 'em',
@@ -186,37 +187,37 @@ return array(
                         'sup', 'tt', 'var', 'b', 'i', 'dl', 'dt', 'dd', 'ol', 'ul', 'li',
                         'fieldset', 'label', 'legend', 'table', 'caption', 'tbody',
                         'tfoot', 'thead', 'tr', 'th', 'td'
-                    ),
-                )
-            ),
-            array('name' => 'StringTrim')
-        )
-    ),
-    
+                    ],
+                ]
+            ],
+            ['name' => 'StringTrim']
+        ]
+    ],
+
     /**
-     * Screen Name
-     * @var alnum [a-z\d]{6,32}
+     * Screen Name - varchar(32) - [a-z\d]{6,32}
+     * @var array
      */
-    'screen-name' => array(
-        'validators' => array(
-            array('name' => 'Alnum'),
-            array('name' => 'StringLength',
-                'options' => array(
-                    'min' => 6, 'max' => 32))
-        )),
-    
+    'screen-name' => [
+        'validators' => [
+            ['name' => 'Alnum'],
+            ['name' => 'StringLength',
+                'options' => [
+                    'min' => 6, 'max' => 32]]
+        ]],
+
     /**
-     * Activation Key
-     * @var alnum [a-z\d]{32}
+     * Activation Key - varchar(32) - [a-z\d]{32}
+     * @var array
      */
-    'activation-key' => array(
-        'validators' => array(
-            array('name' => 'Regex',
-                'options' => array(
+    'activation-key' => [
+        'validators' => [
+            ['name' => 'Regex',
+                'options' => [
                     'pattern' => '/^[a-z\d]{32}$/i',
                     'message' => 'Activation key is invalid.'
-                ))
-        )
-    )
-    
-);
+                ]]
+        ]
+    ]
+
+];
