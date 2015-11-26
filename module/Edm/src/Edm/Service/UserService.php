@@ -8,12 +8,20 @@
 
 namespace Edm\Service;
 
+use Zend\Db\ResultSet\ResultSet,
+    Zend\Db\Sql\Sql,
+    Edm\Db\ResultSet\Proto\UserProto;
 
 class UserService
 {
     protected $userTable;
     protected $contactTable;
     protected $userContactRelTable;
+
+    public function __construct () {
+        $this->resultSet = new ResultSet();
+        $this->resultSet->setArrayObjectPrototype(new UserProto());
+    }
 
     /**
      * Returns our pre-prepared select statement
@@ -24,34 +32,49 @@ class UserService
      *      taxonomy_name
      * @return Zend\Db\Sql\Select
      */
-    public function getSelect($sql = null) {
+    public function getSelect($sql = null, $includeSensitiveUserColumns = false) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
+
+        // Get required tables for result set
+        $userTable = $this->getUserTable();
+        $contactUserRelTable = $this->getContactUserRelTable();
+        $contactTable = $this->getContactTable();
+        $dateInfoTable = $this->getDateInfoTable();
+
+        // User table columns
+        $userTableColumns = [
+            'user_id', 'role', 'accessGroup', 'status', 'lastLogin', 'date_info_id'
+        ];
+
+        // Conditionally include sensitive `user` table columns
+        if ($includeSensitiveUserColumns) {
+            $userTableColumns[] = 'password';
+            $userTableColumns[] = 'activationKey';
+        }
+
         // @todo implement return values only for current role level
         // @todo make password and activationkey optional via flag
         return $select
             // User Contact Rel Table
-            ->from(array('userContactRel' => $this->getContactUserRelTable()->table))
+            ->from(array($contactUserRelTable->alias => $contactUserRelTable->table))
 
             // User Table
-            ->join(array('user' => $this->getUserTable()->table),
-                'user.screenName=userContactRel.screenName',
-                array(
-                    'user_id', 'password', 'role',
-                    'accessGroup', 'status', 'lastLogin',
-                    'activationKey', 'date_info_id'))
+            ->join(array($userTable->alias => $userTable->table),
+                $userTable->alias . '.screenName=' . $contactUserRelTable->alias . '.screenName',
+                $userTableColumns)
 
             // Contact Table
-            ->join(array('contact' => $this->getContactTable()->table),
-                'contact.email=userContactRel.email',
+            ->join(array($contactTable->alias => $contactTable->table),
+                $contactTable->alias '.email=' . $contactUserRelTable->alias . '.email',
                 array(
                     'contact_id', 'altEmail', 'name',
                     'type', 'firstName', 'middleName', 'lastName',
                     'userParams'))
 
             // Date Info Table
-            ->join(array('dateInfo' => $this->getDateInfoTable()->table),
-                'user.date_info_id=dateInfo.date_info_id', array(
+            ->join(array($dateInfoTable->alias => $dateInfoTable->table),
+                $userTable->alias . '.date_info_id=' . $dateInfoTable->alias . '.date_info_id', array(
                     'createdDate', 'createdById', 'lastUpdated', 'lastUpdatedById'));
     }
 

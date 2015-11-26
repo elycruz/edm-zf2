@@ -134,6 +134,8 @@ class TermTableTest extends \PHPUnit_Framework_TestCase  {
         // Assert the appropriate type is being returned for fetched, created item:
         $this->assertInstanceOf('Edm\\Db\\ResultSet\\Proto\\TermProto', $resultSet->current(),
             'Should return an object of type "Edm\\Db\\ResultSet\\Proto\\TermProto');
+    
+        $this->assertEquals($resultSet->current()->getFormKey(), $termTable->alias);
     }
 
     public function testResultSetProtoInputFilters () {

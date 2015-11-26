@@ -2,7 +2,8 @@
 
 namespace EdmTest\Db\TableGateway;
 
-use Edm\Db\TableGateway\TermTaxonomyProxyTable;
+use Edm\Db\TableGateway\TermTaxonomyProxyTable,
+    Edm\Db\ResultSet\Proto\TermTaxonomyProxyProto;
 
 class TermTaxonomyProxyTableTest extends \PHPUnit_Framework_TestCase {
     public static $termTaxonomyProxyTable;
@@ -19,6 +20,11 @@ class TermTaxonomyProxyTableTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('term_taxonomies_proxy', $this->termTaxonomyProxyTable()->table);
     }
 
+    public function testAliasAndProtoFormKey () {
+        $proto = new TermTaxonomyProxyProto();
+        $this->assertEquals($proto->getFormKey(), $this->termTaxonomyProxyTable()->alias);
+    }
+    
     public function testModelClass () {
         $this->assertEquals('Edm\Db\ResultSet\Proto\TermTaxonomyProxyProto',
             $this->termTaxonomyProxyTable()->modelClass);

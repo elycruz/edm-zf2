@@ -2,7 +2,8 @@
 
 namespace EdmTest\Db\TableGateway;
 
-use Edm\Db\TableGateway\TermTaxonomyTable;
+use Edm\Db\TableGateway\TermTaxonomyTable,
+    Edm\Db\ResultSet\Proto\TermTaxonomyProto;
 
 class TermTaxonomyTableTest extends \PHPUnit_Framework_TestCase {
     public static $termTaxonomyTable;
@@ -13,6 +14,11 @@ class TermTaxonomyTableTest extends \PHPUnit_Framework_TestCase {
 
     public function testAlias () {
        $this->assertEquals('termTaxonomy', $this->termTaxonomyTable()->alias);
+    }
+
+    public function testAliasAndProtoFormKey () {
+        $proto = new TermTaxonomyProto();
+        $this->assertEquals($proto->getFormKey(), $this->termTaxonomyTable()->alias);
     }
 
     public function testTableName () {
