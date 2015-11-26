@@ -370,6 +370,18 @@ class TermTaxonomyService extends AbstractCrudService {
     }
 
     /**
+     * Term Table
+     * @return \Edm\Db\TableGateway\TermTable
+     */
+    public function getTermTable() {
+        if (empty($this->termTable)) {
+            $this->termTable = $this->getServiceLocator()
+                ->get('Edm\Db\TableGateway\TermTable');
+        }
+        return $this->termTable;
+    }
+
+    /**
      * Term Taxonomy Table
      * @return \Edm\Db\TableGateway\TermTaxonomyTable
      */
@@ -391,26 +403,6 @@ class TermTaxonomyService extends AbstractCrudService {
                 ->get('Edm\Db\TableGateway\TermTaxonomyProxyTable');
         }
         return $this->termTaxProxyTable;
-    }
-
-    /**
-     * Term Table
-     * @return \Edm\Db\TableGateway\TermTable
-     */
-    public function getTermTable() {
-        if (empty($this->termTable)) {
-            $this->termTable = $this->getServiceLocator()
-                ->get('Edm\Db\TableGateway\TermTable');
-        }
-        return $this->termTable;
-    }
-
-    /**
-     * Term Taxonomy Proto.
-     * @return \Edm\Db\ResultSet\Proto\TermTaxonomyProto
-     */
-    public function getTermTaxonomyProto () {
-        return $this->termTaxonomyProto;
     }
 
 }

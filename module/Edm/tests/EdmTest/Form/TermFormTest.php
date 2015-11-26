@@ -79,6 +79,13 @@ class TermFormTest extends \PHPUnit_Framework_TestCase
                     'alias' => 'missing-name-field',
                     'term_group_alias' => 'missing-field'
                 ]
+            ]],
+            [
+                new TermForm(), [
+                'term' => [
+                    'name' => '',
+                    'alias' => 'invalid-name-property'
+                ]
             ]]
         ];
     }

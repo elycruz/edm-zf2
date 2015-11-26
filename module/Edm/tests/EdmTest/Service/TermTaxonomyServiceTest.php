@@ -16,8 +16,6 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
 
     public static $termTaxService;
 
-    public static $idsToCleanup = [];
-
     public $requiredTermTaxProtoKeys = [
         'term_taxonomy_id',
         'term_alias',
@@ -258,7 +256,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     }
 
     protected function assertCorrectProtoClass ($proto) {
-        $this->assertInstanceOf('\\Edm\Db\ResultSet\\Proto\\TermTaxonomyProto', $proto);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\TermTaxonomyProto', $proto);
     }
 
     protected function assertCorrectResultSetClass ($rsltSet) {
@@ -266,9 +264,6 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     }
 
     public static function tearDownAfterClass () {
-        foreach (self::$idsToCleanup as $id) { 
-            self::$termTaxService->delete($id);
-        }
     }
 
 }
