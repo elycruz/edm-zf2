@@ -10,6 +10,7 @@
 namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
+    Zend\Db\Sql\Sql,
     Edm\Db\ResultSet\Proto\TermTaxonomyProto;
 
 class TermTaxonomyService extends AbstractCrudService {
@@ -103,10 +104,11 @@ class TermTaxonomyService extends AbstractCrudService {
      * Returns our pre-prepared select statement
      * for our term taxonomy model
      * @todo select should include: (parent_name, parent_alias, taxonomy_name)
-     * @param \Zend\Db\Sql\Sql $sql
+     * @param Sql $sql
+     * @param array $options - Default null.
      * @return \Zend\Db\Sql\Select
      */
-    public function getSelect($sql = null) {
+    public function getSelect(Sql $sql = null, array $options = null) {
         $sql = isset($sql) ? $sql : $this->getSql();
         $select = $sql->select();
         $termTaxTable = $this->getTermTaxonomyTable();

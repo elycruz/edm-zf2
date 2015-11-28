@@ -10,10 +10,14 @@ namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
-    Edm\Db\ResultSet\Proto\UserProto;
+    Edm\Db\ResultSet\Proto\UserProto,
+    Edm\Db\TableGateway\DateInfoTableAware,
+    Edm\Db\TableGateway\DateInfoTableAwareTrait;
 
-class UserService
-{
+class UserService extends AbstractCrudService implements DateInfoTableAware {
+
+    use DateInfoTableAwareTrait;
+
     protected $userTable;
     protected $contactTable;
     protected $userContactRelTable;
@@ -24,17 +28,50 @@ class UserService
     }
 
     /**
+     * Gets a user by id
+     * @param integer $id
+     * @return mixed array | boolean
+     */
+    public function getById($id) {
+        return $this->read([
+            'where' => ['user.user_id' => $id]
+        ])->current();
+    }
+
+    /**
+     * Fetches a user by screen name
+     * @param string $screenName
+     * @return mixed array | boolean
+     */
+    public function getByScreenName($screenName) {
+        return $this->read(array(
+            'where' => array('user.screenName' => $screenName)))->current();
+    }
+
+    /**
+     * Gets a user by email
+     * @param string $email
+     * @return mixed array | boolean
+     */
+    public function getByEmail($email) {
+        return $this->read(array(
+            'where' => array('contact.email' => $email)))->current();
+    }
+
+    /**
      * Returns our pre-prepared select statement
      * for our term taxonomy model
-     * @todo select should include:
-     *      parent_name
-     *      parent_alias
-     *      taxonomy_name
-     * @return Zend\Db\Sql\Select
+     * @param Sql $sql
+     * @param array $options
+     * @todo select should include: [parent_name, parent_alias, taxonomy_name]
+     * @return \Zend\Db\Sql\Select
      */
-    public function getSelect($sql = null, $includeSensitiveUserColumns = false) {
+    public function getSelect(Sql $sql = null, array $options = null) {
         $sql = $sql !== null ? $sql : $this->getSql();
         $select = $sql->select();
+        $hasOptions = isset($options);
+        $includeSensitiveUserColumns = $hasOptions && isset($options['includeSensitiveUserColumns']) ?
+            $options['includeSensitiveUserColumns'] : false;
 
         // Get required tables for result set
         $userTable = $this->getUserTable();
@@ -54,7 +91,6 @@ class UserService
         }
 
         // @todo implement return values only for current role level
-        // @todo make password and activationkey optional via flag
         return $select
             // User Contact Rel Table
             ->from(array($contactUserRelTable->alias => $contactUserRelTable->table))
@@ -66,7 +102,7 @@ class UserService
 
             // Contact Table
             ->join(array($contactTable->alias => $contactTable->table),
-                $contactTable->alias '.email=' . $contactUserRelTable->alias . '.email',
+                $contactTable->alias . '.email=' . $contactUserRelTable->alias . '.email',
                 array(
                     'contact_id', 'altEmail', 'name',
                     'type', 'firstName', 'middleName', 'lastName',
