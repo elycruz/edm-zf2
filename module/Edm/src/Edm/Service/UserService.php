@@ -10,13 +10,19 @@ namespace Edm\Service;
 
 use Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
+    Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter,
     Edm\Db\ResultSet\Proto\UserProto,
     Edm\Db\TableGateway\DateInfoTableAware,
-    Edm\Db\TableGateway\DateInfoTableAwareTrait;
+    Edm\Db\TableGateway\DateInfoTableAwareTrait,
+    Edm\Hasher\Pbkdf2Hasher,
+    Edm\UserAware,
+    Edm\UserAwareTrait;
 
-class UserService extends AbstractCrudService implements DateInfoTableAware {
+class UserService extends AbstractCrudService
+    implements DateInfoTableAware, UserAware {
 
-    use DateInfoTableAwareTrait;
+    use DateInfoTableAwareTrait,
+        UserAwareTrait;
 
     protected $userTable;
     protected $contactTable;
@@ -224,12 +230,82 @@ class UserService extends AbstractCrudService implements DateInfoTableAware {
     }
 
     /**
+     * @param int $userId
+     * @return UserService
+     */
+    public function updateLastLoginById ($userId) {
+        $today = new \DateTime();
+        $this->updateItem($userId, array('lastLogin' => $today->getTimestamp()));
+        return $this;
+    }
+
+    /**
+     * Log a user in and validate them by identity column and credential column.
+     * @param User $user
+     * @param string $identityColumn - Default 'screenName'.
+     * @param string $credentialColumn default 'password'
+     * @return boolean
+     */
+    public function loginUser(User $user,
+                              $identityColumn = 'screenName',
+                              $credentialColumn = 'password')
+    {
+        // Get auth adapter
+        $authService = $this->getAuthService();
+
+        // Set auth type
+        $authAdapter = new CallbackCheckAdapter(
+            $this->getDb(),
+            $this->getUserTable()->table,
+            $identityColumn,
+            $credentialColumn,
+            function ($a, $b) {
+                $hasher = new Pbkdf2Hasher();
+                return $hasher->validate_against_hash($b, $a);
+            });
+
+        // Set preliminaries before check
+        $authAdapter->setIdentity($user->screenName);
+        $authAdapter->setCredential($user->password);
+        $authAdapter->getDbSelect()->where(array('status' => 'activated'));
+        $rslt = $authService->authenticate($authAdapter);
+
+        // Check if credentials are valid
+        if ($rslt->isValid()) {
+            // store the username, first and last names of the user
+            $storage = $authService->getStorage();
+            $storage->write($authAdapter->getResultRowObject(array(
+                'user_id', $identityColumn, 'lastLogin',
+                'role')));
+
+            // Update user lastLogin
+            $this->updateLastLoginForId($authService->getIdentity()->user_id);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Clears the user token
+     */
+    public function logoutUser() {
+        $auth = $this->getAuthService();
+        if ($auth->hasIdentity()) {
+            $auth->clearIdentity();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns an encoded password
-     * @param String $password
-     * @return alnum md5 hash
+     * @param string $password
+     * @return strign - Pbkdf2 hashed password
      */
     public function encodePassword($password) {
-        return $this->getHasher()->create_hash($password); //EDM_SALT . $password . EDM_PEPPER);
+        return $this->getHasher()->create_hash($password);
     }
 
     /**
@@ -249,7 +325,6 @@ class UserService extends AbstractCrudService implements DateInfoTableAware {
      * @return string
      */
     public function generateUniqueScreenName($screenNameLength = 8) {
-        $screenName = '';
         do {
             $screenName = $this->generateUUID($screenNameLength);
         } while ($this->checkScreenNameExistsInDb($screenName));
@@ -296,7 +371,7 @@ class UserService extends AbstractCrudService implements DateInfoTableAware {
     }
 
     /**
-     * Our password and activation key hasher.
+     * Returns our password hasher (pbkdf2 hasher).
      * @return Pbkdf2Hasher
      */
     public function getHasher() {
