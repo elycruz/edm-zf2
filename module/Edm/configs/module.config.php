@@ -1,65 +1,40 @@
 <?php
 
-// @todo update forms to use the init function for initializing 
-// so that we can have access to the service manager
-
-//-----------------------------------------------------------------------------
-// Defines
-//-----------------------------------------------------------------------------
-
-// Application path
-defined('APP_PATH') ||
-        define('APP_PATH', realpath(__DIR__ . '/../../../'));
-
-// Edm salt seed
-defined('EDM_SALT') ||
-    define('EDM_SALT', 'youruniquesalttextgoeshere');
-
-// Edm pepper seed
-defined('EDM_PEPPER') ||
-    define('EDM_PEPPER', 'youruniquepeppertextgoeshere');
-
-// Edm token seed
-defined('EDM_TOKEN_SEED') ||
-    define('EDM_TOKEN_SEED', 'tokenseedtextgoeshere');
-
-// Edm Alias Pattern
-defined('EDM_ALIAS_PATTERN') ||
-    define('EDM_ALIAS_PATTERN', '/^[a-z\d\-\_]*/i');
-
 // Module Configuration
 return array(
+
     'service_manager' => array(
         'invokables' => array(
             
             // Service invokables
-            'Edm\\Service\\TermTaxonomyService'   => 'Edm\\Service\\TermTaxonomyService',
-            'Edm\\Service\\UserService'           => 'Edm\\Service\\UserService',
-            'Edm\\Service\\ViewModuleService'     => 'Edm\\Service\\ViewModuleService',
-            'Edm\\Service\\PostService'           => 'Edm\\Service\\PostService',
-            'Edm\\Service\\PageService'           => 'Edm\\Service\\PageService',
+            'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
+            'Edm\Service\UserService'           => 'Edm\Service\UserService',
+            'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
+            'Edm\Service\PostService'           => 'Edm\Service\PostService',
+            'Edm\Service\PageService'           => 'Edm\Service\PageService',
 
             // Db invokables
-            'Edm\\Db\\DatabaseDataHelper'              => 'Edm\\Db\\DatabaseDataHelper',
-            'Edm\\Db\\TableGateway\\TermTable'         => 'Edm\\Db\\TableGateway\\TermTable',
-            'Edm\\Db\\TableGateway\\TermTaxonomyTable' => 'Edm\\Db\\TableGateway\\TermTaxonomyTable',
-            'Edm\\Db\\TableGateway\\TermTaxonomyProxyTable' => 'Edm\\Db\\TableGateway\\TermTaxonomyProxyTable',
-            'Edm\\Db\\TableGateway\\UserTable'         => 'Edm\\Db\\TableGateway\\UserTable',
-            'Edm\\Db\\TableGateway\\PostTable'         => 'Edm\\Db\\TableGateway\\PostTable',
-            'Edm\\Db\\TableGateway\\ContactTable'      => 'Edm\\Db\\TableGateway\\ContactTable',
-            
+            'Edm\Db\DatabaseDataHelper'                  => 'Edm\Db\DatabaseDataHelper',
+            'Edm\Db\TableGateway\TermTable'              => 'Edm\Db\TableGateway\TermTable',
+            'Edm\Db\TableGateway\TermTaxonomyTable'      => 'Edm\Db\TableGateway\TermTaxonomyTable',
+            'Edm\Db\TableGateway\TermTaxonomyProxyTable' => 'Edm\Db\TableGateway\TermTaxonomyProxyTable',
+            'Edm\Db\TableGateway\UserTable'              => 'Edm\Db\TableGateway\UserTable',
+            'Edm\Db\TableGateway\PostTable'              => 'Edm\Db\TableGateway\PostTable',
+            'Edm\Db\TableGateway\ContactUserRelTable'    => 'Edm\Db\TableGateway\ContactUserRelTable',
+            'Edm\Db\TableGateway\ContactTable'           => 'Edm\Db\TableGateway\ContactTable',
+
             // Form invokables
-            'Edm\\Form\\TermForm'           => 'Edm\\Form\\TermForm',
-            'Edm\\Form\\TermTaxonomyForm'   => 'Edm\\Form\\TermTaxonomyForm',
+            'Edm\Form\TermForm'           => 'Edm\Form\TermForm',
+            'Edm\Form\TermTaxonomyForm'   => 'Edm\Form\TermTaxonomyForm',
 
             // Config invokables
             // --------------------------------------------------------------
             // Shared global input filter options (mostly validators and filters)
-            'Edm\\InputFilter\\DefaultInputOptions' 
-                => 'Edm\\InputFilter\\DefaultInputOptions',
+            'Edm\InputFilter\DefaultInputOptions' 
+                => 'Edm\InputFilter\DefaultInputOptions',
             
-            'Zend\\Authentication\\AuthService' => 
-                'Zend\\Authentication\\AuthenticationService'
+            'Zend\Authentication\AuthService' => 
+                'Zend\Authentication\AuthenticationService'
         )
     ),
     'controllers' => array(
