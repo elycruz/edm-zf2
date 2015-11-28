@@ -19,6 +19,8 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
             ->get('Edm\Service\UserService');
     }
 
+    public function testGetSelect () {}
+
     public function userService () {
         return self::$userService;
     }
