@@ -19,7 +19,90 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
             ->get('Edm\Service\UserService');
     }
 
-    public function testGetSelect () {}
+    public function truthyCreationProvider () {
+        return [
+            [[
+                // Only include required columns (others are defaulted in db)
+                'user' => [
+                    'screenName' => 'SomeScreenName',
+                    'password' => 'helloworld',
+                    'lastLogin' => '0101010101',
+                    'activationKey' => 'helloworld'
+                ],
+                'contact' => [
+                    'email' => 'some@email.com',
+                    'alt-email' => 'some-alt@email.com',
+                    'name' => 'Some name',
+                    'firstName' => 'First Name',
+                    'lastName' => 'Last Name',
+                    'middleName' => 'Middle Name',
+                    'userParams' => ''
+                ]
+            ]]
+        ];
+    }
+
+    /**
+     * @dataProvider truthyCreationProvider
+     */
+    public function testCreate ($userData) {
+
+        // Get service
+        $service = $this->userService();
+
+        // Create user
+        $id = $service->create($userData);
+
+        // Assert id returned
+        //$this->assertInternalType ('string', $id);
+
+        // Remove inserted row
+        //$id = $service->delete($id);
+    }
+
+    public function testClass () {
+        $service = $this->userService();
+        $this->assertInstanceOf('Edm\Service\UserService', $service);
+        $this->assertInstanceOf('Edm\Service\AbstractCrudService', $service);
+    }
+
+    public function testGetSelect () {
+        $this->assertInstanceOf('Zend\Db\Sql\Select', $this->userService()->getSelect());
+    }
+
+    public function testGetById () {
+        $id = 1;
+        $service = $this->userService();
+        $proto = $service->getById($id);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
+    }
+
+    public function testGetByScreenName () {
+
+    }
+
+    public function testRead () {
+        // Set id to search for
+        $id = 1;
+
+        // Get service
+        $service = $this->userService();
+
+        // Get read result
+        $rslt = $service->read(['where' => ['user_id' => $id]]);
+
+        // Get row
+        $proto = $rslt->current();
+
+        // Assert correct result set type
+        $this->assertInstanceOf('Zend\Db\ResultSet\ResultSet', $rslt);
+
+        // Assert only one item with current id
+        $this->assertEquals(1, $rslt->count());
+
+        // Assert correct proto class was returned by `read`
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
+    }
 
     public function userService () {
         return self::$userService;

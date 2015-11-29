@@ -1,5 +1,8 @@
 <?php
 
+defined ('APP_PATH') ||
+    define ('APP_PATH', __DIR__ . '/../../');
+
 /**
  * Global Configuration Override
  *

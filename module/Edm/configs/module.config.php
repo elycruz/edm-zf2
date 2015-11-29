@@ -22,6 +22,7 @@ return array(
             'Edm\Db\TableGateway\PostTable'              => 'Edm\Db\TableGateway\PostTable',
             'Edm\Db\TableGateway\ContactUserRelTable'    => 'Edm\Db\TableGateway\ContactUserRelTable',
             'Edm\Db\TableGateway\ContactTable'           => 'Edm\Db\TableGateway\ContactTable',
+            'Edm\Db\TableGateway\DateInfoTable'          => 'Edm\Db\TableGateway\DateInfoTable',
 
             // Form invokables
             'Edm\Form\TermForm'           => 'Edm\Form\TermForm',

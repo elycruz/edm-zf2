@@ -39,7 +39,7 @@ class UserService extends AbstractCrudService
      * @return \Exception|int
      * @throws \Exception
      */
-    public function createUser(array $data) {
+    public function create(array $data) {
         if (!isset($data['user']) || !isset($data['contact'])) {
             throw new \Exception (__CLASS__ . '->' . __FUNCTION__ . ' expects $data
             to include both a "user" and a "contact" key.  Keys found: '. implode(array_keys($data), ', '));
@@ -73,11 +73,14 @@ class UserService extends AbstractCrudService
                 $contact['firstName'], $contact['lastName'], $contact['email']);
         }
 
+        // Get db data helper
+        $dbDataHelper = $this->getDbDataHelper();
+
         // Escape user data
-        $user = $this->escapeTuple($user);
+        $user = $dbDataHelper->escapeTuple($user);
 
         // Escape contact data
-        $contact = $this->escapeTuple($contact);
+        $contact = $dbDataHelper->escapeTuple($contact);
 
         // User contact rel
         $userContactRel = array(
@@ -115,6 +118,24 @@ class UserService extends AbstractCrudService
             $conn->rollback();
             $retVal = $e;
         }
+        return $retVal;
+    }
+
+
+    public function delete ($id) {
+        $conn = $this->getDb()->getDriver()->getConnection();        
+        $conn->beginTransaction();
+
+        try {
+            
+            $conn->commit();
+            $retVal = true;
+        }
+        catch ($e) {
+            $conn->rollback();
+            $retVal = $e; //false;
+        }
+
         return $retVal;
     }
 
@@ -314,9 +335,9 @@ class UserService extends AbstractCrudService
      * @param array $user
      * @return boolean
      */
-    public function isActivationKeyValid($key, $user) {
+    public function isActivationKeyValid($key, $contact) {
         return $key === $this->generateActivationKey(
-            $user->firstName, $user->lastName, $user->email);
+            $contact['firstName'], $contact['lastName'], $contact['email']);
     }
 
     /**
@@ -409,7 +430,7 @@ class UserService extends AbstractCrudService
     public function getContactUserRelTable() {
         if (empty($this->userContactRelTable)) {
             $this->userContactRelTable = $this->getServiceLocator()
-                ->get('Edm\Db\TableGateway\UserContactRel');
+                ->get('Edm\Db\TableGateway\ContactUserRelTable');
         }
         return $this->userContactRelTable;
     }
