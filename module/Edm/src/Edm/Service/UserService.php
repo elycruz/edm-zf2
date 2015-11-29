@@ -131,7 +131,7 @@ class UserService extends AbstractCrudService
             $conn->commit();
             $retVal = true;
         }
-        catch ($e) {
+        catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e; //false;
         }

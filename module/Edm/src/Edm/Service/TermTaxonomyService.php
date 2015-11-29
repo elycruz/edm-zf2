@@ -134,7 +134,6 @@ class TermTaxonomyService extends AbstractCrudService {
     /**
      * @param array $data
      * @return \Exception|int
-     * @throws \Edm\Db\Exception
      * @throws \Exception
      */
     public function create($data) {
@@ -352,7 +351,7 @@ class TermTaxonomyService extends AbstractCrudService {
         // Get term table
         $termTable = $this->getTermTable();
 
-           // Check if term already exists
+        // Check if term already exists
         $term = $termTable->select(['alias' => $termData['alias']])->current();
 
         // Create term if empty
