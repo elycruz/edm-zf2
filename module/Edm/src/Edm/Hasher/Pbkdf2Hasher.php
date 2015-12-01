@@ -37,24 +37,24 @@ namespace Edm\Hasher;
  * instead of /home/user/site/our_website/some_dir/pbkdf2_hasher_constants.php,
  * maybe use something like /home/protected_user/hasher_constants/our_website-hasher_constants.php).
  */
-defined ("PBKDF2_HASH_ALGORITHIM") ||
-    define("PBKDF2_HASH_ALGORITHM", "sha256");
-defined ("PBKDF2_ITERATIONS") ||
-    define("PBKDF2_ITERATIONS", 1000);
-defined ("PBKDF2_SALT_BYTE_SIZE") ||
-    define("PBKDF2_SALT_BYTE_SIZE", 24);
-defined ("PBKDF2_HASH_BYTE_SIZE") ||
-    define("PBKDF2_HASH_BYTE_SIZE", 24);
-defined ("HASH_SECTION") ||
-    define("HASH_SECTIONS", 4);
-defined("HASH_ALGORITHIM_INDEX") ||
-    define("HASH_ALGORITHM_INDEX", 0);
-defined ("HASH_ITERATION_INDEX") ||
-    define("HASH_ITERATION_INDEX", 1);
-defined ("HASH_SALT_INDEX") ||
-    define("HASH_SALT_INDEX", 2);
-defined ("HASH_PBKDF2_INDEX") ||
-    define("HASH_PBKDF2_INDEX", 3);
+//defined ("PBKDF2_HASH_ALGORITHIM") ||
+//    define("PBKDF2_HASH_ALGORITHM", "sha256");
+//defined ("PBKDF2_ITERATIONS") ||
+//    define("PBKDF2_ITERATIONS", 1000);
+//defined ("PBKDF2_SALT_BYTE_SIZE") ||
+//    define("PBKDF2_SALT_BYTE_SIZE", 24);
+//defined ("PBKDF2_HASH_BYTE_SIZE") ||
+//    define("PBKDF2_HASH_BYTE_SIZE", 24);
+//defined ("HASH_SECTION") ||
+//    define("HASH_SECTIONS", 4);
+//defined("HASH_ALGORITHIM_INDEX") ||
+//    define("HASH_ALGORITHM_INDEX", 0);
+//defined ("HASH_ITERATION_INDEX") ||
+//    define("HASH_ITERATION_INDEX", 1);
+//defined ("HASH_SALT_INDEX") ||
+//    define("HASH_SALT_INDEX", 2);
+//defined ("HASH_PBKDF2_INDEX") ||
+//    define("HASH_PBKDF2_INDEX", 3);
 
 class Pbkdf2Hasher {
    

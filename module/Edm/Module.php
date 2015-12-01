@@ -83,15 +83,15 @@ class Module implements
         $moduleRouteListener->attach($eventManager);
     }
 
-    public function initDefines ($e) {
-        $app = $e->getTarget();
-        $locator = $app->getServiceManager();
-        $defines = $locator->getMergedConfig();
-        foreach ($defines as $define => $value) {
-            defined($define) ||
-                define($define, $value);
-        }
-    }
+//    public function initDefines ($e) {
+//        $app = $e->getTarget();
+//        $locator = $app->getServiceManager();
+//        $defines = $locator->getMergedConfig();
+//        foreach ($defines as $define => $value) {
+//            defined($define) ||
+//                define($define, $value);
+//        }
+//    }
     
     public function setTemplate ($e) {
         $matches    = $e->getRouteMatch();

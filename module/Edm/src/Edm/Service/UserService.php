@@ -73,6 +73,10 @@ class UserService extends AbstractCrudService
                 $contact['firstName'], $contact['lastName'], $contact['email']);
         }
 
+        if (empty($contact['userParams'])) {
+            $contact['userParams'] = '';
+        }
+
         // Get db data helper
         $dbDataHelper = $this->getDbDataHelper();
 
@@ -93,39 +97,44 @@ class UserService extends AbstractCrudService
 
         // Begin transaction
         $conn->beginTransaction();
+
+        // Try to insert user data
         try {
             // Create contact
             $this->getContactTable()->insert($contact);
 
             // Insert date info
             $today = new \DateTime();
-            $this->getDateInfoTable()->insert(
-                array('createdDate' => $today->getTimestamp(),
-                    'createdById' => '0'));
+            $this->getDateInfoTable()->insert(['createdDate' => $today->getTimestamp()]);
 
             // Get date_info_id for post
-            $cleanUser['date_info_id'] = $driver->getLastGeneratedValue();
+            $user['date_info_id'] = $driver->getLastGeneratedValue();
 
             // Create user
-            $retVal = $this->getUserTable()->insert($user);
+            $this->getUserTable()->insert($user);
+
+            // Get last generated id
+            $retVal = (int) $driver->getLastGeneratedValue();
 
             // Create user contact rel
-            $this->getUserContactRelTable()->insert($userContactRel);
+            $this->getContactUserRelTable()->insert($userContactRel);
 
             // Commit and return true
             $conn->commit();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e;
         }
         return $retVal;
     }
 
+    public function update ($id, $data) {}
 
     /**
-     * @param ing $id
+     * @param int $id
      * @return bool|\Exception
-     * @throws Exception
+     * @throws \Exception
      */
     public function delete ($id) {
         // Get db connection
@@ -141,7 +150,7 @@ class UserService extends AbstractCrudService
 
             // Throw an error if user doesn't exist
             if (empty($existingUserRow)) {
-                throw new Exception ('Failed to delete user with id "' . $id . '".  User doesn\'t exist in database.');
+                throw new \Exception ('Failed to delete user with id "' . $id . '".  User doesn\'t exist in database.');
             }
 
             // Delete entries for user id $id
@@ -174,7 +183,7 @@ class UserService extends AbstractCrudService
      * @return boolean
      */
     public function checkEmailExistsInDb($email) {
-        $rslt = $this->getUserContactRelTable()->select(
+        $rslt = $this->getContactUserRelTable()->select(
             array('email' => $email))->current();
         return !empty($rslt);
     }
@@ -185,7 +194,7 @@ class UserService extends AbstractCrudService
      * @return boolean
      */
     public function checkScreenNameExistsInDb($screenName) {
-        $rslt = $this->getUserContactRelTable()
+        $rslt = $this->getContactUserRelTable()
             ->select(array('screenName' => $screenName))->current();
         return !empty($rslt);
     }
@@ -285,18 +294,18 @@ class UserService extends AbstractCrudService
      */
     public function updateLastLoginById ($userId) {
         $today = new \DateTime();
-        $this->updateItem($userId, array('lastLogin' => $today->getTimestamp()));
+        $this->update($userId, array('lastLogin' => $today->getTimestamp()));
         return $this;
     }
 
     /**
      * Log a user in and validate them by identity column and credential column.
-     * @param User $user
+     * @param UserProto $user
      * @param string $identityColumn - Default 'screenName'.
      * @param string $credentialColumn default 'password'
      * @return boolean
      */
-    public function loginUser(User $user,
+    public function loginUser(UserProto $user,
                               $identityColumn = 'screenName',
                               $credentialColumn = 'password')
     {
@@ -352,7 +361,7 @@ class UserService extends AbstractCrudService
     /**
      * Returns an encoded password
      * @param string $password
-     * @return strign - Pbkdf2 hashed password
+     * @return string - Pbkdf2 hashed password
      */
     public function encodePassword($password) {
         return $this->getHasher()->create_hash($password);
@@ -361,7 +370,7 @@ class UserService extends AbstractCrudService
     /**
      * Compares activation key to generated one.
      * @param string $key
-     * @param array $user
+     * @param array $contact
      * @return boolean
      */
     public function isActivationKeyValid($key, $contact) {

@@ -26,12 +26,11 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
                 'user' => [
                     'screenName' => 'SomeScreenName',
                     'password' => 'helloworld',
-                    'lastLogin' => '0101010101',
                     'activationKey' => 'helloworld'
                 ],
                 'contact' => [
                     'email' => 'some@email.com',
-                    'alt-email' => 'some-alt@email.com',
+                    'altEmail' => 'some-alt@email.com',
                     'name' => 'Some name',
                     'firstName' => 'First Name',
                     'lastName' => 'Last Name',
@@ -44,9 +43,9 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider truthyCreationProvider
+     * @param array $userData
      */
     public function testCreate ($userData) {
-
         // Get service
         $service = $this->userService();
 
@@ -54,12 +53,13 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $id = $service->create($userData);
 
         // Assert id returned
-        $this->assertInternalType ('int', $id);
+        $this->assertInternalType('int', $id);
 
+        // Get inserted row
         $insertedRow = $service->getById($id);
 
         // Assert inserted user row was inserted correctly
-        $this->assertNotEmpty($insertedRow);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $insertedRow);
 
         // Remove inserted row
         $service->delete($id);
