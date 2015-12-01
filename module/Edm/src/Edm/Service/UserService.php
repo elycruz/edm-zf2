@@ -37,11 +37,11 @@ class UserService extends AbstractCrudService
     /**
      * @param array $data
      * @return \Exception|int
-     * @throws \Exception
+     * @throws UnqualifiedDataException
      */
     public function create(array $data) {
         if (!isset($data['user']) || !isset($data['contact'])) {
-            throw new \Exception (__CLASS__ . '->' . __FUNCTION__ . ' expects $data
+            throw new UnqualifiedDataException(__CLASS__ . '->' . __FUNCTION__ . ' expects $data
             to include both a "user" and a "contact" key.  Keys found: '. implode(array_keys($data), ', '));
         }
 
@@ -134,7 +134,7 @@ class UserService extends AbstractCrudService
     /**
      * @param int $id
      * @return bool|\Exception
-     * @throws \Exception
+     * @throws UnqualifiedDataException
      */
     public function delete ($id) {
         // Get db connection
@@ -150,7 +150,7 @@ class UserService extends AbstractCrudService
 
             // Throw an error if user doesn't exist
             if (empty($existingUserRow)) {
-                throw new \Exception ('Failed to delete user with id "' . $id . '".  User doesn\'t exist in database.');
+                throw new UnqualifiedDataException ('Failed to delete user with id "' . $id . '".  User doesn\'t exist in database.');
             }
 
             // Delete entries for user id $id

@@ -65,6 +65,22 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $service->delete($id);
     }
 
+    /**
+     * @param $userData
+     * @dataProvider truthyCreationProvider
+     */
+    public function testUpdate ($userData) {
+
+    }
+
+    /**
+     * @param $userData
+     * @dataProvider truthyCreationProvider
+     */
+    public function testDelete ($userData) {
+
+    }
+
     public function testClass () {
         $service = $this->userService();
         $this->assertInstanceOf('Edm\Service\UserService', $service);
