@@ -54,10 +54,15 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $id = $service->create($userData);
 
         // Assert id returned
-        //$this->assertInternalType ('string', $id);
+        $this->assertInternalType ('int', $id);
+
+        $insertedRow = $service->getById($id);
+
+        // Assert inserted user row was inserted correctly
+        $this->assertNotEmpty($insertedRow);
 
         // Remove inserted row
-        //$id = $service->delete($id);
+        $service->delete($id);
     }
 
     public function testClass () {

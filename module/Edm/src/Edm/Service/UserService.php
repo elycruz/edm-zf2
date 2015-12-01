@@ -122,20 +122,49 @@ class UserService extends AbstractCrudService
     }
 
 
+    /**
+     * @param ing $id
+     * @return bool|\Exception
+     * @throws Exception
+     */
     public function delete ($id) {
-        $conn = $this->getDb()->getDriver()->getConnection();        
+        // Get db connection
+        $conn = $this->getDb()->getDriver()->getConnection();
+
+        // Begin db transaction
         $conn->beginTransaction();
 
+        // Try to delete user
         try {
-            
+            // Fetch existing user
+            $existingUserRow = $this->getById($id);
+
+            // Throw an error if user doesn't exist
+            if (empty($existingUserRow)) {
+                throw new Exception ('Failed to delete user with id "' . $id . '".  User doesn\'t exist in database.');
+            }
+
+            // Delete entries for user id $id
+            $this->getUserTable()->delete(['user_id' => $id]);
+            $this->getContactUserRelTable()->delete(['screenName' => $existingUserRow->screenName]);
+            $this->getContactTable()->delete(['email' => $existingUserRow->getContactProto()->email]);
+
+            // Commit changes
             $conn->commit();
+
+            // Return success
             $retVal = true;
         }
+        // Catch and return any exceptions
         catch (\Exception $e) {
+            // Roll back changes
             $conn->rollback();
+
+            // Capture and return error
             $retVal = $e; //false;
         }
 
+        // Return return value
         return $retVal;
     }
 
