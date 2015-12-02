@@ -39,7 +39,7 @@ class UserService extends AbstractCrudService
      * @return \Exception|int
      * @throws UnqualifiedDataException
      */
-    public function create(array $data) {
+    public function create($data) {
         if (!isset($data['user']) || !isset($data['contact'])) {
             throw new UnqualifiedDataException(__CLASS__ . '->' . __FUNCTION__ . ' expects $data
             to include both a "user" and a "contact" key.  Keys found: '. implode(array_keys($data), ', '));
@@ -48,6 +48,12 @@ class UserService extends AbstractCrudService
         // Get data
         $contact = $data['contact'];
         $user = $data['user'];
+
+        // Get today's date
+        $today = new \DateTime();
+
+        // Creation timestamp
+        $timestamp = $today->getTimestamp();
 
         // If no screen name generate one
         if (empty($user['screenName'])) {
@@ -64,16 +70,12 @@ class UserService extends AbstractCrudService
             unset($contact['parent_id']);
         }
 
-        $key = isset($user['activationKey']) ? $user['activationKey'] : '';
-        $userKeyValid = $this->isActivationKeyValid($key, $contact);
+        // Generate activation key
+        $user['activationKey'] =
+            $this->generateActivationKey($user['screenName'], $contact['email'], $timestamp);
 
-        // If no api key and activation key is required generate
-        if (!$userKeyValid) {
-            $user['activationKey'] = $this->generateActivationKey(
-                $contact['firstName'], $contact['lastName'], $contact['email']);
-        }
-
-        if (empty($contact['userParams'])) {
+        // Set user params for contact if they are empty
+        if (!isset($contact['userParams']) || !is_string($contact['userParams'])) {
             $contact['userParams'] = '';
         }
 
@@ -104,8 +106,7 @@ class UserService extends AbstractCrudService
             $this->getContactTable()->insert($contact);
 
             // Insert date info
-            $today = new \DateTime();
-            $this->getDateInfoTable()->insert(['createdDate' => $today->getTimestamp()]);
+            $this->getDateInfoTable()->insert(['createdDate' => $timestamp]);
 
             // Get date_info_id for post
             $user['date_info_id'] = $driver->getLastGeneratedValue();
@@ -247,7 +248,7 @@ class UserService extends AbstractCrudService
      * @param string $email
      * @return boolean
      */
-    public function checkEmailExistsInDb($email) {
+    public function checkIfEmailExistsInDb($email) {
         $rslt = $this->getContactUserRelTable()->select(
             array('email' => $email))->current();
         return !empty($rslt);
@@ -258,7 +259,7 @@ class UserService extends AbstractCrudService
      * @param string $screenName
      * @return boolean
      */
-    public function checkScreenNameExistsInDb($screenName) {
+    public function checkIfScreenNameExistsInDb($screenName) {
         $rslt = $this->getContactUserRelTable()
             ->select(array('screenName' => $screenName))->current();
         return !empty($rslt);
@@ -435,12 +436,13 @@ class UserService extends AbstractCrudService
     /**
      * Compares activation key to generated one.
      * @param string $key
-     * @param array $contact
+     * @param string $screenName
+     * @param string $email
+     * @param int $timestamp
      * @return boolean
      */
-    public function isActivationKeyValid($key, $contact) {
-        return $key === $this->generateActivationKey(
-            $contact['firstName'], $contact['lastName'], $contact['email']);
+    public function isActivationKeyValid($key, $screenName, $email, $timestamp = null) {
+        return $key === $this->generateActivationKey($screenName, $email, $timestamp);
     }
 
     /**
@@ -451,19 +453,22 @@ class UserService extends AbstractCrudService
     public function generateUniqueScreenName($screenNameLength = 8) {
         do {
             $screenName = $this->generateUUID($screenNameLength);
-        } while ($this->checkScreenNameExistsInDb($screenName));
+        } while ($this->checkIfScreenNameExistsInDb($screenName));
         return $screenName;
     }
 
     /**
      * Returns 32 character length activation key for user activation
      * @param string $screenName
+     * @param string $email
+     * @param string $timestamp
      * @param string $salt - Default `EDM_SALT`
      * @param string $pepper - Default `EDM_PEPPER`
      * @return string
      */
-    public function generateActivationKey($screenName, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
-        return hash('md5', $salt . time() . uniqid($screenName) . $pepper);
+    public function generateActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
+        $timestamp = !isset($timestamp) ? time() : $timestamp;
+        return hash('md5', $salt . $timestamp . $screenName . $email . $pepper);
     }
 
     /**

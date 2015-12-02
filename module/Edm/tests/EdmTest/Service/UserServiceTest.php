@@ -188,6 +188,27 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
     }
 
+    /**
+     * Requires fully qualified 'contact' portion of user data.
+     * @see Edm\Db\ResultSet\Proto\ContactProto
+     * @dataProvider truthyCreationProvider
+     * @param $userData
+     */
+    public function testGenerateActivationKey ($userData) {
+        // Get user service
+        $userService = $this->userService();
+
+        // Get contact information
+        $contact = $userData['contact'];
+        $user = $userData['user'];
+
+        // Generate an activation key
+        $key = $userService->generateActivationKey($user['screenName'], $contact['email']);
+
+        // Assert expected result
+        $this->assertEquals(true, strlen($key) === 32);
+    }
+
     public function userService () {
         return self::$userService;
     }
