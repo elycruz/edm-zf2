@@ -28,7 +28,7 @@ class ContactProtoTest extends \PHPUnit_Framework_TestCase {
 
     public function testNotAllowedKeysForUpdate () {
         $proto = new ContactProto();
-        $this->assertArraySubset(['contact_id'], $proto->getNotAllowedKeysForUpdate());
+        $this->assertArraySubset(['contact_id', 'email'], $proto->getNotAllowedKeysForUpdate());
     }
 
     public function testGetInputFilter () {

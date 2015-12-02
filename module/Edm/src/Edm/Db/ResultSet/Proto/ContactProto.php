@@ -39,7 +39,8 @@ class ContactProto extends AbstractProto {
      * @var array
      */
     protected $_notAllowedKeysForUpdate = array(
-        'contact_id'
+        'contact_id',
+        'email'
     );
 
     /**

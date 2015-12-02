@@ -15,6 +15,12 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 {
     public static $userService;
 
+    /**
+     * Ids that are created throughout tests that should not be left in database.
+     * @var array
+     */
+    public static $userIdsToDelete = [];
+
     public static function setUpBeforeClass () {
         self::$userService = Bootstrap::getServiceManager()
             ->get('Edm\Service\UserService');
@@ -52,6 +58,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
         // Create user
         $id = $service->create($userData);
+        self::$userIdsToDelete[] = $id;
 
         // Assert id returned
         $this->assertInternalType('int', $id);
@@ -73,44 +80,47 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
      * @dataProvider truthyCreationProvider
      * @param array $userData
      */
-//    public function testUpdate ($userData) {
-//        // Get service
-//        $service = $this->userService();
-//
-//        // Create user
-//        $id = $service->create($userData);
-//
-//        // Get created user
-//        $userProto = $service->getUserById($id);
-//
-//        // Get contact
-//        $contact = $userProto->getContactProto();
-//
-//        // Update row
-//        $contact->firstName = 'Rice';
-//        $contact->lastName = 'Krispies';
-//        $contact->middleName = 'Bob';
-//        $userProto->role = 'cms-super-admin';
-//
-//        // Update row
-//        $service->update($userProto->user_id, $userProto->toArrayNested(UserProto::FOR_OPERATION_DB_UPDATE));
-//
-//        // Get updated row
-//        $updatedUserProto = $service->getUserById($userProto->user_id);
-//        $contact = $updatedUserProto->getContactProto();
-//
-//        // Assert updates were made successfully
-//        $this->assertEquals('Rice', $contact->firstName);
-//        $this->assertEquals('Krispies', $contact->lastName);
-//        $this->assertEquals('Bob', $contact->middleName);
-//        $this->assertEquals('guest', $updatedUserProto->role);
-//
-//        // Delete created user
-//        $service->delete($userProto->user_id);
-//
-//        // Return updated row for deletion
-//        return $updatedUserProto;
-//    }
+    public function testUpdate ($userData) {
+        // Get service
+        $service = $this->userService();
+
+        // Create user
+        $id = $service->create($userData);
+        self::$userIdsToDelete[] = $id;
+
+        // Get created user
+        $userProto = $service->getUserById($id);
+
+        // Get contact
+        $contact = $userProto->getContactProto();
+
+        // Update row
+        $contact->firstName = 'Rice';
+        $contact->lastName = 'Krispies';
+        $contact->middleName = 'Bob';
+        $userProto->role = 'guest';
+
+        // Update row
+        $service->update($userProto->user_id,
+            $contact->email,
+            $userProto->toArrayNested(UserProto::FOR_OPERATION_DB_UPDATE));
+
+        // Get updated row
+        $updatedUserProto = $service->getUserById($userProto->user_id);
+        $contact = $updatedUserProto->getContactProto();
+
+        // Assert updates were made successfully
+        $this->assertEquals('Rice', $contact->firstName);
+        $this->assertEquals('Krispies', $contact->lastName);
+        $this->assertEquals('Bob', $contact->middleName);
+        $this->assertEquals('guest', $updatedUserProto->role);
+
+        // Delete created user
+        $service->delete($userProto->user_id);
+
+        // Return updated row for deletion
+        return $updatedUserProto;
+    }
 
     /**
      * @dataProvider truthyCreationProvider
@@ -122,6 +132,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
         // Create user
         $id = $userService->create($userData);
+        self::$userIdsToDelete[] = $id;
 
         // Get user
         $userProto = $userService->getUserById($id);
@@ -179,6 +190,13 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
     public function userService () {
         return self::$userService;
+    }
+
+    public static function tearDownAfterClass () {
+        $userService = self::$userService;
+        foreach(self::$userIdsToDelete as $user_id) {
+            $userService->delete($user_id);
+        }
     }
 
 }

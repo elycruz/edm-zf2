@@ -148,21 +148,9 @@ class UserService extends AbstractCrudService
         $data = $dbDataHelper->escapeTuple($data);
         $user = $data['user'];
 
-        // If contact key exists
-        if (array_key_exists('contact', $data)) {
-
-            // Get contact data
+        // Get contact data if necessary
+        if (isset($data['contact'])) {
             $contact = $data['contact'];
-
-            // Get original contact data for comparison
-            $originalData = array_key_exists('originalContact', $data)
-                ? $data['originalContact'] : [];
-
-            // Difference in data
-            $diff = array_diff_assoc($contact, $originalData);
-
-            // Check whether we need to update contact data or not
-            $updateContactData = count($diff) > 0;
         }
 
         // If password encode it
@@ -176,10 +164,11 @@ class UserService extends AbstractCrudService
         // Begin transaction
         $conn->beginTransaction();
 
+        // Try to update user
         try {
 
             // Update contact if necessary
-            if (isset($contact) && $updateContactData) {
+            if (isset($contact)) {
                 if (preg_match('/^\d+$/', $originalContactEmailOrId) == 1) {
                     $contactUpdateOptions = ['contact_id' => $originalContactEmailOrId];
                 }
@@ -194,11 +183,16 @@ class UserService extends AbstractCrudService
 
             // Commit and return true
             $conn->commit();
+
+            // Set return value
             $retVal = true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e;
         }
+
+        // Return value
         return $retVal;
     }
 
