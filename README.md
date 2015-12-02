@@ -16,8 +16,9 @@ The following defines have to be defined in one of your autoload files
 <?php
 
 // Application path
-defined('APP_PATH') ||
-define('APP_PATH', realpath(__DIR__ . '/../../'));
+// 'APP_PATH' is already defined in global.php
+// defined('APP_PATH') ||
+// define('APP_PATH', realpath(__DIR__ . '/../../'));
 
 // Edm salt seed
 defined('EDM_SALT') ||
@@ -58,18 +59,38 @@ define("HASH_PBKDF2_INDEX", 3);
 #### 0.3.0 MVP
 - [ ] - Add tests:
     - [ ] - `Edm\Db`:
-        - [X] - `Edm\Db\DatabaseDataHelper`.
-        - [ ] - `Edm\Db\TableGateway`:
-        - [ ] - `Edm\Db\ResultSet\Proto`.
+        - [X] - ~~`Edm\Db\DatabaseDataHelper`~~ `Edm\Db\DbDataHelper`.
+        - [ ] - `Edm\Db\ResultSet\Proto`:
             - [X] - `Edm\Db\ResultSet\Proto\AbstractProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\ContactProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\ContactUserRelProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\DateInfoProto`.
             - [X] - `Edm\Db\ResultSet\Proto\ProtoInterface`.
             - [X] - `Edm\Db\ResultSet\Proto\TermProto`.
             - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProto`.
-    - [X] - `Edm\InputFilter\DefaultInputOptions`.
-    - [X] - `Edm\InputFilter\DefaultInputOptionsAware`.
+            - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProxyProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\UserProto`.
+        - [ ] - `Edm\Db\TableGateway`:
+            - [X] - `Edm\Db\TableGateway\ContactTable`.
+            - [X] - `Edm\Db\TableGateway\ContactUserRelTable`.
+            - [X] - `Edm\Db\TableGateway\DateInfoTable`.
+            - [X] - `Edm\Db\TableGateway\TermTable`.
+            - [X] - `Edm\Db\TableGateway\TermTaxonomyTable`.
+            - [X] - `Edm\Db\TableGateway\TermTaxonomyProxyTable`.
+            - [X] - `Edm\Db\TableGateway\UserTable`.
     - [X] - `Edm\Filter`:
         - [X] - `Edm\Filter\Alias`.
         - [X] - `Edm\Filter\Slug`.
+    - [ ] - `Edm\Form`:
+        - [ ] - `Edm\Form\Fieldset`:
+            - [ ] - `Edm\Form\Fieldset\SubmitAndResetFieldset`.
+            - [ ] - `Edm\Form\Fieldset\TermFieldset`.
+        - [ ] - `Edm\Form\TermForm`.
+    - [X] - `Edm\InputFilter\DefaultInputOptions`.
+    - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.
+    - [ ] - `Edm\Service`:
+        - [X] - Preliminary `Edm\Service\TermTaxonomyService` tests.
+        - [ ] - `Edm\Service\UserService`
 - [X] - Re-evaluate how 'aliases' are used in the EDM system.
     Resources:
         - valid url characters stackoverflow: (http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links)
