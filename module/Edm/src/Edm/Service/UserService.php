@@ -129,7 +129,78 @@ class UserService extends AbstractCrudService
         return $retVal;
     }
 
-    public function update ($id, $data) {}
+    /**
+     * @param int|string $id
+     * @param string|int $originalContactEmailOrId
+     * @param array $data
+     * @return bool|\Exception
+     * @throws \Exception
+     */
+    public function update ($id, $originalContactEmailOrId, $data) {
+        // If no user key
+        if (!array_key_exists('user', $data)) {
+            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ .
+                ' requires the data param to contain a user key.');
+        }
+
+        // Escape tuples
+        $dbDataHelper = $this->getDbDataHelper();
+        $data = $dbDataHelper->escapeTuple($data);
+        $user = $data['user'];
+
+        // If contact key exists
+        if (array_key_exists('contact', $data)) {
+
+            // Get contact data
+            $contact = $data['contact'];
+
+            // Get original contact data for comparison
+            $originalData = array_key_exists('originalContact', $data)
+                ? $data['originalContact'] : [];
+
+            // Difference in data
+            $diff = array_diff_assoc($contact, $originalData);
+
+            // Check whether we need to update contact data or not
+            $updateContactData = count($diff) > 0;
+        }
+
+        // If password encode it
+        if (!empty($user['password'])) {
+            $user['password'] = $this->encodePassword($user['password']);
+        }
+
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+
+        // Begin transaction
+        $conn->beginTransaction();
+
+        try {
+
+            // Update contact if necessary
+            if (isset($contact) && $updateContactData) {
+                if (preg_match('/^\d+$/', $originalContactEmailOrId) == 1) {
+                    $contactUpdateOptions = ['contact_id' => $originalContactEmailOrId];
+                }
+                else {
+                    $contactUpdateOptions = ['email' => $originalContactEmailOrId];
+                }
+                $this->getContactTable()->update($contact, $contactUpdateOptions);
+            }
+
+            // Update user
+            $this->getUserTable()->update($user, array('user_id' => $id), $user);
+
+            // Commit and return true
+            $conn->commit();
+            $retVal = true;
+        } catch (\Exception $e) {
+            $conn->rollback();
+            $retVal = $e;
+        }
+        return $retVal;
+    }
 
     /**
      * @param int $id
@@ -146,7 +217,7 @@ class UserService extends AbstractCrudService
         // Try to delete user
         try {
             // Fetch existing user
-            $existingUserRow = $this->getById($id);
+            $existingUserRow = $this->getUserById($id);
 
             // Throw an error if user doesn't exist
             if (empty($existingUserRow)) {
@@ -204,7 +275,7 @@ class UserService extends AbstractCrudService
      * @param integer $id
      * @return mixed array | boolean
      */
-    public function getById($id) {
+    public function getUserById($id) {
         return $this->read([
             'where' => [$this->getUserTable()->alias .  '.user_id' => $id]
         ])->current();
@@ -215,7 +286,7 @@ class UserService extends AbstractCrudService
      * @param string $screenName
      * @return mixed array | boolean
      */
-    public function getByScreenName($screenName) {
+    public function getUserByScreenName($screenName) {
         return $this->read([
             'where' => [$this->getUserTable()->alias .  '.screenName' => $screenName]
         ])->current();
@@ -226,7 +297,7 @@ class UserService extends AbstractCrudService
      * @param string $email
      * @return mixed array | boolean
      */
-    public function getByEmail($email) {
+    public function getUserByEmail($email) {
         return $this->read([
             'where' => [$this->getContactTable()->alias . '.email' => $email]
         ])->current();
@@ -292,7 +363,7 @@ class UserService extends AbstractCrudService
      * @param int $userId
      * @return UserService
      */
-    public function updateLastLoginById ($userId) {
+    public function updateLastLoginForUserById ($userId) {
         $today = new \DateTime();
         $this->update($userId, array('lastLogin' => $today->getTimestamp()));
         return $this;
@@ -305,7 +376,7 @@ class UserService extends AbstractCrudService
      * @param string $credentialColumn default 'password'
      * @return boolean
      */
-    public function loginUser(UserProto $user,
+    public function logUserIn(UserProto $user,
                               $identityColumn = 'screenName',
                               $credentialColumn = 'password')
     {
@@ -349,7 +420,7 @@ class UserService extends AbstractCrudService
     /**
      * Clears the user token
      */
-    public function logoutUser() {
+    public function logUserOut() {
         $auth = $this->getAuthService();
         if ($auth->hasIdentity()) {
             $auth->clearIdentity();
@@ -472,5 +543,5 @@ class UserService extends AbstractCrudService
         }
         return $this->userContactRelTable;
     }
-    
+
 }

@@ -8,7 +8,8 @@
 
 namespace EdmTest\Service;
 
-use EdmTest\Bootstrap;
+use EdmTest\Bootstrap,
+    Edm\Db\ResultSet\Proto\UserProto;
 
 class UserServiceTest extends \PHPUnit_Framework_TestCase
 {
@@ -56,29 +57,80 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('int', $id);
 
         // Get inserted row
-        $insertedRow = $service->getById($id);
+        $insertedRow = $service->getUserById($id);
 
         // Assert inserted user row was inserted correctly
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $insertedRow);
 
-        // Remove inserted row
+        // Remove created row
         $service->delete($id);
+
+        // Return row for next test
+        return $insertedRow;
     }
 
     /**
-     * @param $userData
      * @dataProvider truthyCreationProvider
+     * @param array $userData
      */
-    public function testUpdate ($userData) {
-
-    }
+//    public function testUpdate ($userData) {
+//        // Get service
+//        $service = $this->userService();
+//
+//        // Create user
+//        $id = $service->create($userData);
+//
+//        // Get created user
+//        $userProto = $service->getUserById($id);
+//
+//        // Get contact
+//        $contact = $userProto->getContactProto();
+//
+//        // Update row
+//        $contact->firstName = 'Rice';
+//        $contact->lastName = 'Krispies';
+//        $contact->middleName = 'Bob';
+//        $userProto->role = 'cms-super-admin';
+//
+//        // Update row
+//        $service->update($userProto->user_id, $userProto->toArrayNested(UserProto::FOR_OPERATION_DB_UPDATE));
+//
+//        // Get updated row
+//        $updatedUserProto = $service->getUserById($userProto->user_id);
+//        $contact = $updatedUserProto->getContactProto();
+//
+//        // Assert updates were made successfully
+//        $this->assertEquals('Rice', $contact->firstName);
+//        $this->assertEquals('Krispies', $contact->lastName);
+//        $this->assertEquals('Bob', $contact->middleName);
+//        $this->assertEquals('guest', $updatedUserProto->role);
+//
+//        // Delete created user
+//        $service->delete($userProto->user_id);
+//
+//        // Return updated row for deletion
+//        return $updatedUserProto;
+//    }
 
     /**
-     * @param $userData
      * @dataProvider truthyCreationProvider
+     * @param array $userData
      */
     public function testDelete ($userData) {
+        // Get service
+        $userService = $this->userService();
 
+        // Create user
+        $id = $userService->create($userData);
+
+        // Get user
+        $userProto = $userService->getUserById($id);
+
+        // Delete user
+        $rslt = $userService->delete($userProto->user_id);
+
+        // Test return value
+        $this->assertEquals(true, $rslt);
     }
 
     public function testClass () {
@@ -94,7 +146,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetById () {
         $id = 1;
         $service = $this->userService();
-        $proto = $service->getById($id);
+        $proto = $service->getUserById($id);
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
     }
 
