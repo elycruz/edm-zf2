@@ -91,6 +91,9 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         // Get created user
         $userProto = $service->getUserById($id);
 
+        //
+        $unchangedData = $userProto->toNestedArray();
+
         // Get contact
         $contact = $userProto->getContactProto();
 
@@ -102,8 +105,8 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
         // Update row
         $service->update($userProto->user_id,
-            $contact->email,
-            $userProto->toArrayNested(UserProto::FOR_OPERATION_DB_UPDATE));
+            $unchangedData,
+            $userProto->toNestedArray(UserProto::FOR_OPERATION_DB_UPDATE));
 
         // Get updated row
         $updatedUserProto = $service->getUserById($userProto->user_id);

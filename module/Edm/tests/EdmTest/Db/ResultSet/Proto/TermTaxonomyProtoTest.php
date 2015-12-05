@@ -315,7 +315,7 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
      * @dataProvider fullyQualifiedTermTaxonomyProvider
      * @param TermTaxonomyProto $termTaxonomy
      */
-    public function testToArrayNested (TermTaxonomyProto $termTaxonomy) {
+    public function testtoNestedArray (TermTaxonomyProto $termTaxonomy) {
         // Protos to get valid keys from
         $resultSetProtos = [];
 
@@ -329,7 +329,7 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
         $resultSetProtos['termTaxonomyProxy'] = $termTaxonomy->getTermTaxonomyProxyProto();
 
         // Dump nested array
-        $result = $termTaxonomy->toArrayNested();
+        $result = $termTaxonomy->toNestedArray();
 
         // Assert the top level expected keys are set
         $this->assertArrayHasKey('term', $result);

@@ -137,7 +137,7 @@ abstract class AbstractProto extends \ArrayObject
      * @param string $operation
      * @return array
      */
-    public function toArrayNested ($operation = null) {
+    public function toNestedArray ($operation = null) {
         // Declare out array
         $outArray = [];
 

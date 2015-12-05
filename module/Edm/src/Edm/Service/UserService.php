@@ -45,15 +45,15 @@ class UserService extends AbstractCrudService
             to include both a "user" and a "contact" key.  Keys found: '. implode(array_keys($data), ', '));
         }
 
-        // Get data
-        $contact = $data['contact'];
-        $user = $data['user'];
-
         // Get today's date
         $today = new \DateTime();
 
         // Creation timestamp
         $timestamp = $today->getTimestamp();
+
+        // Get data
+        $contact = $data['contact'];
+        $user = $data['user'];
 
         // If no screen name generate one
         if (empty($user['screenName'])) {
@@ -65,14 +65,21 @@ class UserService extends AbstractCrudService
             $user['password'] = $this->encodePassword($user['password']);
         }
 
+        // Set user activation key
+        $user['activationKey'] =
+            $this->generateActivationKey(
+                $user['screenName'],
+                $contact['email'],
+                $timestamp
+            );
+
+        // Set user activation key created date
+        $user['activationKeyCreatedDate'] = $timestamp;
+
         // Remove parent id if not valid
         if (isset($contact['parent_id']) && !is_numeric($contact['parent_id'])) {
             unset($contact['parent_id']);
         }
-
-        // Generate activation key
-        $user['activationKey'] =
-            $this->generateActivationKey($user['screenName'], $contact['email'], $timestamp);
 
         // Set user params for contact if they are empty
         if (!isset($contact['userParams']) || !is_string($contact['userParams'])) {
@@ -132,26 +139,73 @@ class UserService extends AbstractCrudService
 
     /**
      * @param int|string $id
-     * @param string|int $originalContactEmailOrId
      * @param array $data
+     * @param array $originalData - Optional.  Default `null`.
+     * @param bool $escapeOriginalData - Optional.  Default `false`.
      * @return bool|\Exception
      * @throws \Exception
      */
-    public function update ($id, $originalContactEmailOrId, $data) {
+    public function update ($id, $data, $originalData = null, $escapeOriginalData = false) {
         // If no user key
-        if (!array_key_exists('user', $data)) {
+        if (!array_key_exists('user', $data) || !array_key_exists('user', $originalData)) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ .
-                ' requires the data param to contain a user key.');
+                ' requires the data and original data params to contain a user key.');
         }
+
+        // Get today's date
+        $today = new \DateTime();
+
+        // Creation timestamp
+        $timestamp = $today->getTimestamp();
 
         // Escape tuples
         $dbDataHelper = $this->getDbDataHelper();
         $data = $dbDataHelper->escapeTuple($data);
         $user = $data['user'];
 
+        // Get original data
+        $originalData = !isset($originalData) ?
+            $dbDataHelper->escapeTuple($this->getUserById($id)->toNestedArray()) : $originalData;
+
+        // Check whether to escape original data or not
+        if ($escapeOriginalData) {
+            $originalData = $dbDataHelper->escapeTuple($originalData);
+        }
+
+        // Get original user data
+        $originalUser = $originalData['user'];
+        $originalContact = $originalData['contact'];
+
+        // Set flags for whether to update contact table
+        $updateContactTable = false;
+
+        // Track whether email changed
+        $emailChanged = false;
+
+        // Track whether screen name changed
+        $screenNameChanged = isset($user['screenName']) &&
+            $originalUser['screenName'] !== $user['screenName'];
+
         // Get contact data if necessary
-        if (isset($data['contact'])) {
+        if (isset($data['contact']) && isset($originalData['contact'])) {
             $contact = $data['contact'];
+            $originalContact = $originalData['contact'];
+            $emailChanged = isset($contact['email']) && $contact['email'] !== $originalContact['email'];
+            $updateContactTable = true;
+        }
+
+        // If email changed require user to activate it via an email by issuing new activation key
+        if ($emailChanged) {
+            // Set user activation key
+            $user['activationKey'] =
+                $this->generateActivationKey(
+                    $user['screenName'],
+                    $contact['email'],
+                    $timestamp
+                );
+
+            // Set user activation key created date
+            $user['activationKeyCreatedDate'] = $timestamp;
         }
 
         // If password encode it
@@ -169,18 +223,36 @@ class UserService extends AbstractCrudService
         try {
 
             // Update contact if necessary
-            if (isset($contact)) {
-                if (preg_match('/^\d+$/', $originalContactEmailOrId) == 1) {
-                    $contactUpdateOptions = ['contact_id' => $originalContactEmailOrId];
-                }
-                else {
-                    $contactUpdateOptions = ['email' => $originalContactEmailOrId];
-                }
+            if ($updateContactTable) {
+                $contactUpdateOptions = ['contact_id' => $originalContact['contact_id']];
                 $this->getContactTable()->update($contact, $contactUpdateOptions);
             }
 
             // Update user
             $this->getUserTable()->update($user, array('user_id' => $id), $user);
+
+            // Resolve data for contact user rel table if necessary
+            if ($screenNameChanged || $emailChanged) {
+                $contactUserRelData = [];
+                if ($screenNameChanged) {
+                    $contactUserRelData['screenName'] = $user['screenName'];
+                }
+                if ($emailChanged) {
+                    $contactUserRelData['email'] = $contact['email'];
+                }
+                $this->getContactUserRelTable()->update($contactUserRelData, [
+                    'screenName' => $originalUser['screenName'],
+                    'email' => $originalContact['email']
+                ]);
+            }
+
+            // Update date info table
+            $this->getDateInfoTable()->update([
+                    'lastUpdated' => $timestamp,
+                    'lastUpdatedBy' => 0
+                ], [
+                    'date_info_id' => $originalUser['date_info_id']
+                ]);
 
             // Commit and return true
             $conn->commit();
@@ -446,18 +518,6 @@ class UserService extends AbstractCrudService
     }
 
     /**
-     * Returns a unique screen name with length of "screen name length"
-     * @param int $screenNameLength
-     * @return string
-     */
-    public function generateUniqueScreenName($screenNameLength = 8) {
-        do {
-            $screenName = $this->generateUUID($screenNameLength);
-        } while ($this->checkIfScreenNameExistsInDb($screenName));
-        return $screenName;
-    }
-
-    /**
      * Returns 32 character length activation key for user activation
      * @param string $screenName
      * @param string $email
@@ -469,6 +529,18 @@ class UserService extends AbstractCrudService
     public function generateActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
         $timestamp = !isset($timestamp) ? time() : $timestamp;
         return hash('md5', $salt . $timestamp . $screenName . $email . $pepper);
+    }
+
+    /**
+     * Returns a unique screen name with length of "screen name length"
+     * @param int $screenNameLength
+     * @return string
+     */
+    public function generateUniqueScreenName($screenNameLength = 8) {
+        do {
+            $screenName = $this->generateUUID($screenNameLength);
+        } while ($this->checkIfScreenNameExistsInDb($screenName));
+        return $screenName;
     }
 
     /**
@@ -541,6 +613,11 @@ class UserService extends AbstractCrudService
                 ->get('Edm\Db\TableGateway\ContactUserRelTable');
         }
         return $this->userContactRelTable;
+    }
+
+
+    public function normalizeCrudData ($nestedDataArray) {
+
     }
 
 }
