@@ -47,7 +47,6 @@ class UserProto extends AbstractProto {
      * @var array
      */
     protected $_notAllowedKeysForUpdate = array(
-        'screenName',
         'date_info_id',
         'user_id'
     );

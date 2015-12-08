@@ -35,55 +35,49 @@ class UserService extends AbstractCrudService
     }
 
     /**
-     * @param array $data
+     * @param UserProto $user
      * @return \Exception|int
      * @throws UnqualifiedDataException
      */
-    public function create($data) {
-        if (!isset($data['user']) || !isset($data['contact'])) {
-            throw new UnqualifiedDataException(__CLASS__ . '->' . __FUNCTION__ . ' expects $data
-            to include both a "user" and a "contact" key.  Keys found: '. implode(array_keys($data), ', '));
-        }
-
+    public function create(UserProto $user) {
         // Get today's date
         $today = new \DateTime();
 
         // Creation timestamp
         $timestamp = $today->getTimestamp();
 
-        // Get data
-        $contact = $data['contact'];
-        $user = $data['user'];
+        // Get contact data
+        $contact = $user->getContactProto();
 
         // If no screen name generate one
-        if (empty($user['screenName'])) {
-            $user['screenName'] = $this->generateUniqueScreenName();
+        if (!$user->has('screenName')) {
+            $user->screenName = $this->generateUniqueScreenName();
         }
 
         // If user has a password
-        if (!empty($user['password'])) {
-            $user['password'] = $this->encodePassword($user['password']);
+        if (!empty($user->password)) {
+            $user->password = $this->encodePassword($user->password);
         }
 
         // Set user activation key
-        $user['activationKey'] =
+        $user->activationKey =
             $this->generateActivationKey(
-                $user['screenName'],
-                $contact['email'],
+                $user->screenName,
+                $contact->email,
                 $timestamp
             );
 
         // Set user activation key created date
-        $user['activationKeyCreatedDate'] = $timestamp;
+        $user->activationKeyCreatedDate = $timestamp;
 
         // Remove parent id if not valid
-        if (isset($contact['parent_id']) && !is_numeric($contact['parent_id'])) {
-            unset($contact['parent_id']);
+        if (isset($contact->parent_id) && !is_numeric($contact->parent_id)) {
+            unset($contact->parent_id);
         }
 
         // Set user params for contact if they are empty
-        if (!isset($contact['userParams']) || !is_string($contact['userParams'])) {
-            $contact['userParams'] = '';
+        if (!isset($contact->userParams) || !is_string($contact->userParams)) {
+            $contact->userParams = '';
         }
 
         // Get db data helper
@@ -97,8 +91,8 @@ class UserService extends AbstractCrudService
 
         // User contact rel
         $userContactRel = array(
-            'email' => $contact['email'],
-            'screenName' => $user['screenName']);
+            'email' => $contact->email,
+            'screenName' => $user->screenName);
 
         // Get database platform object
         $driver = $this->getDb()->getDriver();
@@ -110,7 +104,7 @@ class UserService extends AbstractCrudService
         // Try to insert user data
         try {
             // Create contact
-            $this->getContactTable()->insert($contact);
+            $this->getContactTable()->insert($contact->toArray());
 
             // Insert date info
             $this->getDateInfoTable()->insert(['createdDate' => $timestamp]);
@@ -119,7 +113,7 @@ class UserService extends AbstractCrudService
             $user['date_info_id'] = $driver->getLastGeneratedValue();
 
             // Create user
-            $this->getUserTable()->insert($user);
+            $this->getUserTable()->insert($user->toArray());
 
             // Get last generated id
             $retVal = (int) $driver->getLastGeneratedValue();
@@ -140,12 +134,13 @@ class UserService extends AbstractCrudService
     /**
      * @param int|string $id
      * @param array $data
-     * @param array $originalData - Optional.  Default `null`.
+     * @param array $originalData
      * @param bool $escapeOriginalData - Optional.  Default `false`.
      * @return bool|\Exception
      * @throws \Exception
      */
-    public function update ($id, $data, $originalData = null, $escapeOriginalData = false) {
+    public function update ($id, $data, $originalData, $escapeOriginalData = false) {
+//        var_dump(func_get_args());
         // If no user key
         if (!array_key_exists('user', $data) || !array_key_exists('user', $originalData)) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ .
@@ -162,10 +157,6 @@ class UserService extends AbstractCrudService
         $dbDataHelper = $this->getDbDataHelper();
         $data = $dbDataHelper->escapeTuple($data);
         $user = $data['user'];
-
-        // Get original data
-        $originalData = !isset($originalData) ?
-            $dbDataHelper->escapeTuple($this->getUserById($id)->toNestedArray()) : $originalData;
 
         // Check whether to escape original data or not
         if ($escapeOriginalData) {
@@ -224,7 +215,7 @@ class UserService extends AbstractCrudService
 
             // Update contact if necessary
             if ($updateContactTable) {
-                $contactUpdateOptions = ['contact_id' => $originalContact['contact_id']];
+                $contactUpdateOptions = ['email' => $originalContact['email']];
                 $this->getContactTable()->update($contact, $contactUpdateOptions);
             }
 
@@ -249,7 +240,7 @@ class UserService extends AbstractCrudService
             // Update date info table
             $this->getDateInfoTable()->update([
                     'lastUpdated' => $timestamp,
-                    'lastUpdatedBy' => 0
+                    'lastUpdatedById' => 0
                 ], [
                     'date_info_id' => $originalUser['date_info_id']
                 ]);
@@ -270,11 +261,11 @@ class UserService extends AbstractCrudService
     }
 
     /**
-     * @param int $id
+     * @param UserProto $userProto
      * @return bool|\Exception
      * @throws UnqualifiedDataException
      */
-    public function delete ($id) {
+    public function delete (UserProto $userProto) {
         // Get db connection
         $conn = $this->getDb()->getDriver()->getConnection();
 
@@ -283,18 +274,10 @@ class UserService extends AbstractCrudService
 
         // Try to delete user
         try {
-            // Fetch existing user
-            $existingUserRow = $this->getUserById($id);
-
-            // Throw an error if user doesn't exist
-            if (empty($existingUserRow)) {
-                throw new UnqualifiedDataException ('Failed to delete user with id "' . $id . '".  User doesn\'t exist in database.');
-            }
-
             // Delete entries for user id $id
-            $this->getUserTable()->delete(['user_id' => $id]);
-            $this->getContactUserRelTable()->delete(['screenName' => $existingUserRow->screenName]);
-            $this->getContactTable()->delete(['email' => $existingUserRow->getContactProto()->email]);
+            $this->getUserTable()->delete(['user_id' => $userProto->user_id]);
+            $this->getContactUserRelTable()->delete(['screenName' => $userProto->screenName]);
+            $this->getContactTable()->delete(['email' => $userProto->getContactProto()->email]);
 
             // Commit changes
             $conn->commit();
