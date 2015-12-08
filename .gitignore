@@ -3,4 +3,5 @@
 vendor
 logs
 _recycler
+auth.json
 Thumbs.db
