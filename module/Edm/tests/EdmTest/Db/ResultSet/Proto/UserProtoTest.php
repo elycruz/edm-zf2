@@ -28,6 +28,7 @@ class UserProtoTest extends \PHPUnit_Framework_TestCase
         'status',
         'lastLogin',
         'activationKey',
+        'activationKeyCreatedDate',
         'date_info_id'
     ];
 

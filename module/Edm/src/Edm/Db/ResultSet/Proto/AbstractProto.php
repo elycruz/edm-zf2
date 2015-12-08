@@ -137,7 +137,7 @@ abstract class AbstractProto extends \ArrayObject
      * @param string $operation
      * @return array
      */
-    public function toArrayNested ($operation = null) {
+    public function toNestedArray ($operation = null) {
         // Declare out array
         $outArray = [];
 
@@ -145,7 +145,7 @@ abstract class AbstractProto extends \ArrayObject
         $selfOut = $this->toArray($operation);
 
         // For each in sub protos nest their arrays
-        $this->forEachInSubProtos(function ($subProto) use (&$outArray, $operation) {
+        $this->forEachInSubProtos(function (AbstractProto $subProto) use (&$outArray, $operation) {
             $outArray[$subProto->getFormKey()] = $subProto->toArray($operation);
         });
 
@@ -216,6 +216,26 @@ abstract class AbstractProto extends \ArrayObject
             $this->setAllowedKeysOnProto($input, $subProto);
         });
         $this->setAllowedKeysOnProto($input);
+        return $oldArray;
+    }
+
+    /**
+     * @param array $input
+     * @return array
+     */
+    public function exchangeNestedArray ($input) {
+        $oldArray = $this->toNestedArray();
+        $this->forEachInSubProtos(
+            /**
+             * @param AbstractProto $subProto
+             */
+            function (AbstractProto $subProto) use ($input) {
+                $formKey = $subProto->getFormKey();
+                if (isset($input[$formKey])) {
+                    $this->setAllowedKeysOnProto($input[$formKey], $subProto);
+                }
+            });
+        $this->setAllowedKeysOnProto($input[$this->getFormKey()]);
         return $oldArray;
     }
 

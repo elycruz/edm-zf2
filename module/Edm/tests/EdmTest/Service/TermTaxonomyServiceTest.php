@@ -183,7 +183,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $originalRslt->description = 'Some description here.';
         $originalRslt->accessGroup = 'user';
         $originalRslt->getTermProto()->name = 'Some Term Taxonomy Hereio Bob';
-        $data = $originalRslt->toArrayNested(TermTaxonomyProto::FOR_OPERATION_DB_UPDATE);
+        $data = $originalRslt->toNestedArray(TermTaxonomyProto::FOR_OPERATION_DB_UPDATE);
 
         // Create test term taxonomy
         $retVal = $termTaxService->update($id, $data);

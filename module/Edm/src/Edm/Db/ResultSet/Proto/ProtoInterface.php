@@ -19,7 +19,7 @@ interface ProtoInterface {
 
     public function has($key);
     public function toArray($operation = null);
-    public function toArrayNested($operation = null);
+    public function toNestedArray($operation = null);
     public function getAllowedKeysForProto();
     public function getNotAllowedKeysForInsert();
     public function getNotAllowedKeysForUpdate();

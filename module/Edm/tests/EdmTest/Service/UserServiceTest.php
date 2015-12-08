@@ -57,8 +57,11 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $service = $this->userService();
 
         // Create user
-        $id = $service->create($userData);
-        self::$userIdsToDelete[] = $id;
+        $id = $service->create(
+            $this->userProtoFromNestedArray($userData));
+
+        $userProto = $service->getUserById($id);
+        self::$userIdsToDelete[] = $userProto;
 
         // Assert id returned
         $this->assertInternalType('int', $id);
@@ -70,7 +73,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $insertedRow);
 
         // Remove created row
-        $service->delete($id);
+        $service->delete($userProto);
 
         // Return row for next test
         return $insertedRow;
@@ -85,11 +88,15 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $service = $this->userService();
 
         // Create user
-        $id = $service->create($userData);
-        self::$userIdsToDelete[] = $id;
+        $id = $service->create(
+            $this->userProtoFromNestedArray($userData)
+        );
 
         // Get created user
         $userProto = $service->getUserById($id);
+        self::$userIdsToDelete[] = $userProto;
+
+        $unchangedData = clone $userProto;
 
         // Get contact
         $contact = $userProto->getContactProto();
@@ -101,9 +108,9 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $userProto->role = 'guest';
 
         // Update row
-        $service->update($userProto->user_id,
-            $contact->email,
-            $userProto->toArrayNested(UserProto::FOR_OPERATION_DB_UPDATE));
+        $rslt = $service->update($userProto->user_id,
+            $userProto->toNestedArray(UserProto::FOR_OPERATION_DB_UPDATE),
+            $unchangedData->toNestedArray());
 
         // Get updated row
         $updatedUserProto = $service->getUserById($userProto->user_id);
@@ -116,7 +123,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('guest', $updatedUserProto->role);
 
         // Delete created user
-        $service->delete($userProto->user_id);
+        $service->delete($userProto);
 
         // Return updated row for deletion
         return $updatedUserProto;
@@ -131,14 +138,15 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $userService = $this->userService();
 
         // Create user
-        $id = $userService->create($userData);
-        self::$userIdsToDelete[] = $id;
+        $id = $userService->create(
+            $this->userProtoFromNestedArray($userData));
 
         // Get user
         $userProto = $userService->getUserById($id);
+        self::$userIdsToDelete[] = $userProto;
 
         // Delete user
-        $rslt = $userService->delete($userProto->user_id);
+        $rslt = $userService->delete($userProto);
 
         // Test return value
         $this->assertEquals(true, $rslt);
@@ -211,6 +219,12 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
     public function userService () {
         return self::$userService;
+    }
+
+    public function userProtoFromNestedArray ($nestedArray) {
+        $proto = new UserProto();
+        $proto->exchangeNestedArray($nestedArray);
+        return $proto;
     }
 
     public static function tearDownAfterClass () {
