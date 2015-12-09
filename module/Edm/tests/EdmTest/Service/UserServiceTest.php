@@ -15,11 +15,29 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 {
     public static $userService;
 
+    public static $qualifyingUserData = [
+        // Only include required columns (others are defaulted in db)
+        'user' => [
+            'screenName' => 'SomeScreenName',
+            'password' => 'helloworld',
+            'activationKey' => 'helloworld'
+        ],
+        'contact' => [
+            'email' => 'some@email.com',
+            'altEmail' => 'some-alt@email.com',
+            'name' => 'Some name',
+            'firstName' => 'First Name',
+            'lastName' => 'Last Name',
+            'middleName' => 'Middle Name',
+            'userParams' => ''
+        ]
+    ];
+
     /**
      * Ids that are created throughout tests that should not be left in database.
      * @var array
      */
-    public static $userIdsToDelete = [];
+    public static $userProtosToDelete = [];
 
     public static function setUpBeforeClass () {
         self::$userService = Bootstrap::getServiceManager()
@@ -51,52 +69,38 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider truthyCreationProvider
      * @param array $userData
+     * @return UserProto
      */
     public function testCreate ($userData) {
-        // Get service
-        $service = $this->userService();
 
-        // Create user
-        $id = $service->create(
+        // Get user service
+        $userService = $this->userService();
+
+        // Get user id
+        $id = $userService->create(
             $this->userProtoFromNestedArray($userData));
-
-        $userProto = $service->getUserById($id);
-        self::$userIdsToDelete[] = $userProto;
 
         // Assert id returned
         $this->assertInternalType('int', $id);
 
-        // Get inserted row
-        $insertedRow = $service->getUserById($id);
-
-        // Assert inserted user row was inserted correctly
-        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $insertedRow);
-
-        // Remove created row
-        $service->delete($userProto);
-
-        // Return row for next test
-        return $insertedRow;
+        return $id;
     }
 
     /**
-     * @dataProvider truthyCreationProvider
-     * @param array $userData
+     * @depends testCreate
+     * @param int $id
+     * @return UserProto
      */
-    public function testUpdate ($userData) {
+    public function testUpdate ($id) {
+        var_dump($id);
         // Get service
         $service = $this->userService();
 
-        // Create user
-        $id = $service->create(
-            $this->userProtoFromNestedArray($userData)
-        );
-
-        // Get created user
+        // Get user
         $userProto = $service->getUserById($id);
-        self::$userIdsToDelete[] = $userProto;
 
-        $unchangedData = clone $userProto;
+        // Clone user proto
+        $unchangedData = $this->userProtoFromNestedArray($userProto->toNestedArray());
 
         // Get contact
         $contact = $userProto->getContactProto();
@@ -108,9 +112,10 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $userProto->role = 'guest';
 
         // Update row
-        $rslt = $service->update($userProto->user_id,
-            $userProto->toNestedArray(UserProto::FOR_OPERATION_DB_UPDATE),
-            $unchangedData->toNestedArray());
+        $rslt = $service->update($userProto->user_id, $userProto, $unchangedData);
+
+        // Assert user was updated successfully
+        $this->assertEquals(true, $rslt);
 
         // Get updated row
         $updatedUserProto = $service->getUserById($userProto->user_id);
@@ -122,28 +127,17 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Bob', $contact->middleName);
         $this->assertEquals('guest', $updatedUserProto->role);
 
-        // Delete created user
-        $service->delete($userProto);
-
-        // Return updated row for deletion
+        // Return the updated user
         return $updatedUserProto;
     }
 
     /**
-     * @dataProvider truthyCreationProvider
-     * @param array $userData
+     * @depends testUpdate
+     * @param UserProto $userProto
      */
-    public function testDelete ($userData) {
+    public function testDelete (UserProto $userProto) {
         // Get service
         $userService = $this->userService();
-
-        // Create user
-        $id = $userService->create(
-            $this->userProtoFromNestedArray($userData));
-
-        // Get user
-        $userProto = $userService->getUserById($id);
-        self::$userIdsToDelete[] = $userProto;
 
         // Delete user
         $rslt = $userService->delete($userProto);
@@ -228,10 +222,6 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     public static function tearDownAfterClass () {
-        $userService = self::$userService;
-        foreach(self::$userIdsToDelete as $user_id) {
-            $userService->delete($user_id);
-        }
     }
 
 }

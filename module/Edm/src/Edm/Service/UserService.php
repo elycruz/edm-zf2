@@ -8,6 +8,7 @@
 
 namespace Edm\Service;
 
+use Edm\Db\ResultSet\Proto\ContactProto;
 use Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter,
@@ -133,20 +134,15 @@ class UserService extends AbstractCrudService
 
     /**
      * @param int|string $id
-     * @param array $data
-     * @param array $originalData
+     * @param UserProto $userProto
+     * @param UserProto $originalProto
      * @param bool $escapeOriginalData - Optional.  Default `false`.
      * @return bool|\Exception
      * @throws \Exception
      */
-    public function update ($id, $data, $originalData, $escapeOriginalData = false) {
-//        var_dump(func_get_args());
-        // If no user key
-        if (!array_key_exists('user', $data) || !array_key_exists('user', $originalData)) {
-            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ .
-                ' requires the data and original data params to contain a user key.');
-        }
-
+    public function update (
+        $id, UserProto $userProto, UserProto $originalProto, $escapeOriginalData = false)
+    {
         // Get today's date
         $today = new \DateTime();
 
@@ -155,17 +151,14 @@ class UserService extends AbstractCrudService
 
         // Escape tuples
         $dbDataHelper = $this->getDbDataHelper();
-        $data = $dbDataHelper->escapeTuple($data);
-        $user = $data['user'];
+        $userProto = $dbDataHelper->escapeTuple($userProto);
+        $contact = $userProto->getContactProto();
+        $originalContact = $originalProto->getContactProto();
 
         // Check whether to escape original data or not
         if ($escapeOriginalData) {
-            $originalData = $dbDataHelper->escapeTuple($originalData);
+            $originalProto = $dbDataHelper->escapeTuple($originalProto);
         }
-
-        // Get original user data
-        $originalUser = $originalData['user'];
-        $originalContact = $originalData['contact'];
 
         // Set flags for whether to update contact table
         $updateContactTable = false;
@@ -174,34 +167,36 @@ class UserService extends AbstractCrudService
         $emailChanged = false;
 
         // Track whether screen name changed
-        $screenNameChanged = isset($user['screenName']) &&
-            $originalUser['screenName'] !== $user['screenName'];
+        $screenNameChanged = false;
 
-        // Get contact data if necessary
-        if (isset($data['contact']) && isset($originalData['contact'])) {
-            $contact = $data['contact'];
-            $originalContact = $originalData['contact'];
-            $emailChanged = isset($contact['email']) && $contact['email'] !== $originalContact['email'];
+        // Check whether screen name changed
+        if ($userProto->has('screenName') && $originalProto->has('screenName')) {
+            $screenNameChanged = $originalProto->screenName !== $userProto->screenName;
+        }
+
+        // Check whether email changed
+        if ($contact->has('email') && $originalContact->has('email')) {
+            $emailChanged = $contact->email !== $originalContact->email;
             $updateContactTable = true;
         }
 
         // If email changed require user to activate it via an email by issuing new activation key
         if ($emailChanged) {
             // Set user activation key
-            $user['activationKey'] =
+            $userProto->activationKey =
                 $this->generateActivationKey(
-                    $user['screenName'],
-                    $contact['email'],
+                    $userProto->screenName,
+                    $contact->email,
                     $timestamp
                 );
 
             // Set user activation key created date
-            $user['activationKeyCreatedDate'] = $timestamp;
+            $userProto->activationKeyCreatedDate = $timestamp;
         }
 
         // If password encode it
-        if (!empty($user['password'])) {
-            $user['password'] = $this->encodePassword($user['password']);
+        if (!empty($userProto->password)) {
+            $userProto->password = $this->encodePassword($userProto->password);
         }
 
         // Get database platform object
@@ -215,25 +210,28 @@ class UserService extends AbstractCrudService
 
             // Update contact if necessary
             if ($updateContactTable) {
-                $contactUpdateOptions = ['email' => $originalContact['email']];
-                $this->getContactTable()->update($contact, $contactUpdateOptions);
+                $contactUpdateOptions = ['email' => $originalContact->email];
+                $this->getContactTable()->update(
+                    $contact->toArray(ContactProto::FOR_OPERATION_DB_UPDATE),
+                    $contactUpdateOptions);
             }
 
             // Update user
-            $this->getUserTable()->update($user, array('user_id' => $id), $user);
+            $this->getUserTable()->update(
+                $userProto->toArray(UserProto::FOR_OPERATION_DB_UPDATE), ['user_id' => $id]);
 
             // Resolve data for contact user rel table if necessary
             if ($screenNameChanged || $emailChanged) {
                 $contactUserRelData = [];
                 if ($screenNameChanged) {
-                    $contactUserRelData['screenName'] = $user['screenName'];
+                    $contactUserRelData['screenName'] = $userProto->screenName;
                 }
                 if ($emailChanged) {
-                    $contactUserRelData['email'] = $contact['email'];
+                    $contactUserRelData['email'] = $contact->email;
                 }
                 $this->getContactUserRelTable()->update($contactUserRelData, [
-                    'screenName' => $originalUser['screenName'],
-                    'email' => $originalContact['email']
+                    'screenName' => $originalProto->screenName,
+                    'email' => $originalContact->email
                 ]);
             }
 
@@ -242,7 +240,7 @@ class UserService extends AbstractCrudService
                     'lastUpdated' => $timestamp,
                     'lastUpdatedById' => 0
                 ], [
-                    'date_info_id' => $originalUser['date_info_id']
+                    'date_info_id' => $originalProto->date_info_id
                 ]);
 
             // Commit and return true
@@ -264,6 +262,8 @@ class UserService extends AbstractCrudService
      * @param UserProto $userProto
      * @return bool|\Exception
      * @throws UnqualifiedDataException
+     * @todo Protect this method so that it actually only operates for `superadmins` and `cms-managers`.
+     * @todo Optionally, also, only mark user as `marked-for-deleted` instead of actually deleting user.
      */
     public function delete (UserProto $userProto) {
         // Get db connection
