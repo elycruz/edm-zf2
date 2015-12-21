@@ -1,5 +1,5 @@
 **/.idea
-**/nbproject
+nbproject/private
 vendor
 logs
 _recycler
