@@ -57,7 +57,55 @@ namespace Edm\Hasher;
 //    define("HASH_PBKDF2_INDEX", 3);
 
 class Pbkdf2Hasher {
-   
+    
+    /**
+     * Hash algorithm to use.
+     * @var String
+     */
+    protected $_hashAlgorithm = 'sha256';
+    
+    /**
+     * Salt byte size (should be the same as `$_hashByteSize` (best practice scenario (harder to crack algorithm)).
+     * @var String
+     */
+    protected $_saltByteSize = 34;
+    
+    /**
+     * Pbkdf2 hash byte size (should be the same as `$_saltByteSize` (best practice scenario "")).
+     * @var String
+     */
+    protected $_hashByteSize = 34;
+    
+    /**
+     * @var Integer
+     */
+    protected $_numIterations = 944;
+    
+    /**
+     * @var Integer
+     */
+    protected $_numSections = 4;
+    
+    /**
+     * @var Integer
+     */
+    protected $_algorithmIndex = 0;
+    
+    /**
+     * @var Integer
+     */
+    protected $_iterationIndex = 1;
+    
+    /**
+     * @var Integer
+     */
+    protected $_saltIndex = 2;
+    
+    /**
+     * @var Integer
+     */
+    protected $_hashIndex = 3;
+    
     public function __construct() {}
     
     /**
@@ -186,4 +234,5 @@ class Pbkdf2Hasher {
             return bin2hex(substr($output, 0, $key_length));
         }
     }
+    
 }
