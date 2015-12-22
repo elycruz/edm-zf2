@@ -160,8 +160,20 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
     }
 
-    public function testGetByScreenName () {
-
+    /**
+     * @dataProvider truthyCreationProvider
+     * @param array $userData
+     */
+    public function testGetByScreenName ($userData) {
+        $userService = $this->userService();
+        $originalUserProto = $this->userProtoFromNestedArray($userData);
+        $screenName = $originalUserProto->screenName;
+        $user_id = $userService->create($originalUserProto);
+        $proto = $userService->getUserByScreenName($screenName);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
+        $this->assertEquals($screenName, $proto->screenName);
+        $this->assertEquals($user_id, $proto->user_id);
+        $userService->delete($proto);
     }
 
     public function testRead () {
@@ -200,10 +212,10 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         // Get contact information
         $contact = $userData['contact'];
         $user = $userData['user'];
-
+        
         // Generate an activation key
         $key = $userService->generateActivationKey($user['screenName'], $contact['email']);
-
+        
         // Assert expected result
         $this->assertEquals(true, strlen($key) === 32);
     }
