@@ -85,15 +85,15 @@ class UserService extends AbstractCrudService
         $dbDataHelper = $this->getDbDataHelper();
 
         // Escape user data
-        $user = $dbDataHelper->escapeTuple($user);
+        $updatedUser = $dbDataHelper->escapeTuple($user);
 
         // Escape contact data
-        $contact = $dbDataHelper->escapeTuple($contact);
+        $updatedContact = $dbDataHelper->escapeTuple($contact);
 
         // User contact rel
         $userContactRel = array(
-            'email' => $contact->email,
-            'screenName' => $user->screenName);
+            'email' => $updatedContact->email,
+            'screenName' => $updatedUser->screenName);
 
         // Get database platform object
         $driver = $this->getDb()->getDriver();
@@ -105,16 +105,16 @@ class UserService extends AbstractCrudService
         // Try to insert user data
         try {
             // Create contact
-            $this->getContactTable()->insert($contact->toArray());
+            $this->getContactTable()->insert($updatedContact->toArray());
 
             // Insert date info
             $this->getDateInfoTable()->insert(['createdDate' => $timestamp]);
 
             // Get date_info_id for post
-            $user['date_info_id'] = $driver->getLastGeneratedValue();
+            $updatedUser['date_info_id'] = $driver->getLastGeneratedValue();
 
             // Create user
-            $this->getUserTable()->insert($user->toArray());
+            $this->getUserTable()->insert($updatedUser->toArray());
 
             // Get last generated id
             $retVal = (int) $driver->getLastGeneratedValue();
@@ -151,8 +151,8 @@ class UserService extends AbstractCrudService
 
         // Escape tuples
         $dbDataHelper = $this->getDbDataHelper();
-        $userProto = $dbDataHelper->escapeTuple($userProto);
-        $contact = $userProto->getContactProto();
+        $cleanedUserProto = $dbDataHelper->escapeTuple($userProto);
+        $contact = $cleanedUserProto->getContactProto();
         $originalContact = $originalProto->getContactProto();
 
         // Check whether to escape original data or not
@@ -169,34 +169,39 @@ class UserService extends AbstractCrudService
         // Track whether screen name changed
         $screenNameChanged = false;
 
+        // If user screen name or contact email changed
+        $contactUserRelData = [];
+
         // Check whether screen name changed
-        if ($userProto->has('screenName') && $originalProto->has('screenName')) {
-            $screenNameChanged = $originalProto->screenName !== $userProto->screenName;
+        if ($cleanedUserProto->has('screenName') && $originalProto->has('screenName')) {
+            $screenNameChanged = $originalProto->screenName !== $cleanedUserProto->screenName;
+            $contactUserRelData['screenName'] = $cleanedUserProto->screenName;
         }
 
         // Check whether email changed
         if ($contact->has('email') && $originalContact->has('email')) {
             $emailChanged = $contact->email !== $originalContact->email;
             $updateContactTable = true;
+            $contactUserRelData['email'] = $contact->email;
         }
 
         // If email changed require user to activate it via an email by issuing new activation key
         if ($emailChanged) {
             // Set user activation key
-            $userProto->activationKey =
+            $cleanedUserProto->activationKey =
                 $this->generateActivationKey(
-                    $userProto->screenName,
+                    $cleanedUserProto->screenName,
                     $contact->email,
                     $timestamp
                 );
 
             // Set user activation key created date
-            $userProto->activationKeyCreatedDate = $timestamp;
+            $cleanedUserProto->activationKeyCreatedDate = $timestamp;
         }
 
         // If password encode it
-        if (!empty($userProto->password)) {
-            $userProto->password = $this->encodePassword($userProto->password);
+        if (!empty($cleanedUserProto->password)) {
+            $cleanedUserProto->password = $this->encodePassword($cleanedUserProto->password);
         }
 
         // Get database platform object
@@ -218,18 +223,11 @@ class UserService extends AbstractCrudService
 
             // Update user
             $this->getUserTable()->update(
-                $userProto->toArray(UserProto::FOR_OPERATION_DB_UPDATE), ['user_id' => $id]);
+                $cleanedUserProto->toArray(UserProto::FOR_OPERATION_DB_UPDATE), ['user_id' => $id]);
 
             // Resolve data for contact user rel table if necessary
             if ($screenNameChanged || $emailChanged) {
-                $contactUserRelData = [];
-                if ($screenNameChanged) {
-                    $contactUserRelData['screenName'] = $userProto->screenName;
-                }
-                if ($emailChanged) {
-                    $contactUserRelData['email'] = $contact->email;
-                }
-                $this->getContactUserRelTable()->update($contactUserRelData, [
+                 $this->getContactUserRelTable()->update($contactUserRelData, [
                     'screenName' => $originalProto->screenName,
                     'email' => $originalContact->email
                 ]);
@@ -356,13 +354,13 @@ class UserService extends AbstractCrudService
     /**
      * Returns our pre-prepared select statement
      * for our term taxonomy model
-     * @param Sql $sql
+     * @param Sql $sqlObj
      * @param array $options
      * @todo select should include: [parent_name, parent_alias, taxonomy_name]
      * @return \Zend\Db\Sql\Select
      */
-    public function getSelect(Sql $sql = null, array $options = null) {
-        $sql = $sql !== null ? $sql : $this->getSql();
+    public function getSelect(Sql $sqlObj = null, array $options = null) {
+        $sql = $sqlObj !== null ? $sqlObj : $this->getSql();
         $select = $sql->select();
         $hasOptions = isset($options);
         $includeSensitiveUserColumns = $hasOptions && isset($options['includeSensitiveUserColumns']) ?
@@ -510,8 +508,8 @@ class UserService extends AbstractCrudService
      * @return string
      */
     public function generateActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
-        $timestamp = !isset($timestamp) ? time() : $timestamp;
-        return hash('md5', $salt . $timestamp . $screenName . $email . $pepper);
+        $timeStamp = !isset($timestamp) ? time() : $timestamp;
+        return hash('md5', $salt . $timeStamp . $screenName . $email . $pepper);
     }
 
     /**
@@ -536,20 +534,27 @@ class UserService extends AbstractCrudService
      */
     public function generateUUID($len = 8, $seed = EDM_TOKEN_SEED) {
         $hex = md5(EDM_SALT . $seed . EDM_PEPPER . uniqid("", true));
-
         $pack = pack('H*', $hex);
+        
+        // max 22 chars
+        $base64Encoded = base64_encode($pack);        
+        
+        // mixed case
+        $filteredUid = preg_replace("/[^A-Za-z0-9]/", "", $base64Encoded);    
 
-        $uid = base64_encode($pack);        // max 22 chars
+        if ($len < 5) {
+            $len = 5;
+        }
+        
+        // prevent silliness, can remove
+        if ($len > 144) {
+            $len = 144;                                 
+        }
 
-        $uid = preg_replace("/[^A-Za-z0-9]/", "", $uid);    // mixed case
-
-        if ($len < 4)
-            $len = 4;
-        if ($len > 128)
-            $len = 128;                       // prevent silliness, can remove
-
-        while (strlen($uid) < $len)
-            $uid = $uid . $this->generateUUID(22);     // append until length achieved
+        // append until length achieved
+        while (strlen($filteredUid) < $len) {
+            $uid = $filteredUid . $this->generateUUID(21);    
+        }
 
         return substr($uid, 0, $len);
     }
@@ -596,11 +601,6 @@ class UserService extends AbstractCrudService
                 ->get('Edm\Db\TableGateway\ContactUserRelTable');
         }
         return $this->userContactRelTable;
-    }
-
-
-    public function normalizeCrudData ($nestedDataArray) {
-
     }
 
 }
