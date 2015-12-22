@@ -43,6 +43,11 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         self::$userService = Bootstrap::getServiceManager()
             ->get('Edm\Service\UserService');
     }
+    
+    /**
+     * @var Int
+     */
+    public static $createdUserId = null;
 
     public function truthyCreationProvider () {
         return [
@@ -69,7 +74,6 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider truthyCreationProvider
      * @param array $userData
-     * @return UserProto
      */
     public function testCreate ($userData) {
 
@@ -82,16 +86,12 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
         // Assert id returned
         $this->assertInternalType('int', $id);
-        
-        return $id;
+
+        self::$createdUserId = $id;
     }
 
-    /**
-     * @depends testCreate
-     * @param int $id
-     * @return UserProto
-     */
-    public function testUpdate ($id) {
+    public function testUpdate () {
+        $id = self::$createdUserId;
         
         // Get service
         $service = $this->userService();
@@ -126,18 +126,15 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Krispies', $contact->lastName);
         $this->assertEquals('Bob', $contact->middleName);
         $this->assertEquals('guest', $updatedUserProto->role);
-
-        // Return the updated user
-        return $updatedUserProto;
+        
+        self::$createdUserId = $updatedUserProto->user_id;
     }
 
-    /**
-     * @depends testUpdate
-     * @param UserProto $userProto
-     */
-    public function testDelete (UserProto $userProto) {
+    public function testDelete () {
         // Get service
         $userService = $this->userService();
+        
+        $userProto = $userService->getUserById(self::$createdUserId);
 
         // Delete user
         $rslt = $userService->delete($userProto);
