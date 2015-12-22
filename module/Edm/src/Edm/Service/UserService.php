@@ -8,8 +8,8 @@
 
 namespace Edm\Service;
 
-use Edm\Db\ResultSet\Proto\ContactProto;
-use Zend\Db\ResultSet\ResultSet,
+use Edm\Db\ResultSet\Proto\ContactProto,
+    Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter,
     Edm\Db\ResultSet\Proto\UserProto,

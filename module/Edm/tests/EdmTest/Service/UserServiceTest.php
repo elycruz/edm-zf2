@@ -82,7 +82,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
 
         // Assert id returned
         $this->assertInternalType('int', $id);
-
+        
         return $id;
     }
 
@@ -92,10 +92,10 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
      * @return UserProto
      */
     public function testUpdate ($id) {
-        var_dump($id);
+        
         // Get service
         $service = $this->userService();
-
+        
         // Get user
         $userProto = $service->getUserById($id);
 
@@ -222,6 +222,12 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     public static function tearDownAfterClass () {
+        $userService = self::$userService;
+        $user = $userService->getUserByScreenName('SomeScreenName');
+        if ($user instanceof UserProto === false) {
+            return;
+        }
+        self::$userService->delete($user);
     }
 
 }
