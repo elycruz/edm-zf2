@@ -505,6 +505,7 @@ class UserService extends AbstractCrudService
      * @param string $timestamp
      * @param string $salt - Default `EDM_SALT`
      * @param string $pepper - Default `EDM_PEPPER`
+     * @todos consider using pbkdf2 hasher for this key.
      * @return string
      */
     public function generateUserActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {

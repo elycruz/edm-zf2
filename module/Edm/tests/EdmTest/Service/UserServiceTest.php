@@ -243,6 +243,17 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(true, $result);
         $userService->deleteUser($userProto);
     }
+    
+    /**
+     * @todo this test needs updating because Pbkdf2Hasher is going to become dynamic
+     */
+    public function testEncodeUserPassword () {
+        $userService = $this->userService();
+        $password = 'some-password-here';
+        $encodedPassword = $userService->encodeUserPassword($password);
+        $this->assertEquals(76, strlen($encodedPassword));
+        
+    }
 
     /**
      * Requires fully qualified 'contact' portion of user data.
@@ -327,6 +338,26 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $uuidMatchesRequiredPattern = preg_match('/^[a-z0-9A-Z]{' . $length . '}$/', $uuid);
         $this->assertEquals($length, strlen($uuid));
         $this->assertEquals(1, $uuidMatchesRequiredPattern);
+    }
+    
+    public function testGetHasher () {
+        $userService = $this->userService();
+        $this->assertInstanceOf('\Edm\Hasher\Pbkdf2Hasher', $userService->getHasher());
+    }
+    
+    public function testGetUserTable () {
+        $userService = $this->userService();
+        $this->assertInstanceOf('\Edm\Db\TableGateway\UserTable', $userService->getUserTable());
+    }
+    
+    public function testGetContactTable () {
+        $userService = $this->userService();
+        $this->assertInstanceOf('\Edm\Db\TableGateway\ContactTable', $userService->getContactTable());
+    }
+    
+    public function testGetUserContactRelTable () {
+        $userService = $this->userService();
+        $this->assertInstanceOf('\Edm\Db\TableGateway\ContactUserRelTable', $userService->getContactUserRelTable());
     }
 
     public function userService () {
