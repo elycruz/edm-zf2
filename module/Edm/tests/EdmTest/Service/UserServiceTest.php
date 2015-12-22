@@ -153,7 +153,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Zend\Db\Sql\Select', $this->userService()->getSelect());
     }
 
-    public function testGetById () {
+    public function testGetUserById () {
         $id = 1;
         $service = $this->userService();
         $proto = $service->getUserById($id);
@@ -164,7 +164,7 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
      * @dataProvider truthyCreationProvider
      * @param array $userData
      */
-    public function testGetByScreenName ($userData) {
+    public function testGetUserByScreenName ($userData) {
         $userService = $this->userService();
         $originalUserProto = $this->userProtoFromNestedArray($userData);
         $screenName = $originalUserProto->screenName;
@@ -173,6 +173,21 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
         $this->assertEquals($screenName, $proto->screenName);
         $this->assertEquals($user_id, $proto->user_id);
+        $userService->delete($proto);
+    }
+    
+    /**
+     * @dataProvider truthyCreationProvider
+     * @param array $userData
+     */
+    public function testGetUserByEmail ($userData) {
+        $userService = $this->userService();
+        $originalUserProto = $this->userProtoFromNestedArray($userData);
+        $email = $originalUserProto->getContactProto()->email;
+        $userService->create($originalUserProto);
+        $proto = $userService->getUserByEmail($email);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\UserProto', $proto);
+        $this->assertEquals($email, $proto->getContactProto()->email);
         $userService->delete($proto);
     }
 
