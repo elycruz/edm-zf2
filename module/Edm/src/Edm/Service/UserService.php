@@ -40,7 +40,7 @@ class UserService extends AbstractCrudService
      * @return \Exception|int
      * @throws UnqualifiedDataException
      */
-    public function create(UserProto $user) {
+    public function createUser (UserProto $user) {
         // Get today's date
         $today = new \DateTime();
 
@@ -52,17 +52,17 @@ class UserService extends AbstractCrudService
 
         // If no screen name generate one
         if (!$user->has('screenName')) {
-            $user->screenName = $this->generateUniqueScreenName();
+            $user->screenName = $this->generateUniqueUserScreenName();
         }
 
         // If user has a password
         if (!empty($user->password)) {
-            $user->password = $this->encodePassword($user->password);
+            $user->password = $this->encodeUserPassword($user->password);
         }
 
         // Set user activation key
         $user->activationKey =
-            $this->generateActivationKey(
+            $this->generateUserActivationKey(
                 $user->screenName,
                 $contact->email,
                 $timestamp
@@ -140,7 +140,7 @@ class UserService extends AbstractCrudService
      * @return bool|\Exception
      * @throws \Exception
      */
-    public function update (
+    public function updateUser (
         $id, UserProto $userProto, UserProto $originalProto, $escapeOriginalData = false)
     {
         // Get today's date
@@ -189,7 +189,7 @@ class UserService extends AbstractCrudService
         if ($emailChanged) {
             // Set user activation key
             $cleanedUserProto->activationKey =
-                $this->generateActivationKey(
+                $this->generateUserActivationKey(
                     $cleanedUserProto->screenName,
                     $contact->email,
                     $timestamp
@@ -201,7 +201,7 @@ class UserService extends AbstractCrudService
 
         // If password encode it
         if (!empty($cleanedUserProto->password)) {
-            $cleanedUserProto->password = $this->encodePassword($cleanedUserProto->password);
+            $cleanedUserProto->password = $this->encodeUserPassword($cleanedUserProto->password);
         }
 
         // Get database platform object
@@ -263,7 +263,7 @@ class UserService extends AbstractCrudService
      * @todo Protect this method so that it actually only operates for `superadmins` and `cms-managers`.
      * @todo Optionally, also, only mark user as `marked-for-deleted` instead of actually deleting user.
      */
-    public function delete (UserProto $userProto) {
+    public function deleteUser (UserProto $userProto) {
         // Get db connection
         $conn = $this->getDb()->getDriver()->getConnection();
 
@@ -301,7 +301,7 @@ class UserService extends AbstractCrudService
      * @param string $email
      * @return boolean
      */
-    public function checkIfEmailExistsInDb($email) {
+    public function isUserEmailInDb($email) {
         $rslt = $this->getContactUserRelTable()->select(
             array('email' => $email))->current();
         return !empty($rslt);
@@ -312,7 +312,7 @@ class UserService extends AbstractCrudService
      * @param string $screenName
      * @return boolean
      */
-    public function checkIfScreenNameExistsInDb($screenName) {
+    public function isUserScreenNameInDb($screenName) {
         $rslt = $this->getContactUserRelTable()
             ->select(array('screenName' => $screenName))->current();
         return !empty($rslt);
@@ -411,7 +411,7 @@ class UserService extends AbstractCrudService
      * @param int $userId
      * @return UserService
      */
-    public function updateLastLoginForUserById ($userId) {
+    public function updateUserLastLoginById ($userId) {
         $today = new \DateTime();
         $this->update($userId, array('lastLogin' => $today->getTimestamp()));
         return $this;
@@ -482,7 +482,7 @@ class UserService extends AbstractCrudService
      * @param string $password
      * @return string - Pbkdf2 hashed password
      */
-    public function encodePassword($password) {
+    public function encodeUserPassword($password) {
         return $this->getHasher()->create_hash($password);
     }
 
@@ -494,8 +494,8 @@ class UserService extends AbstractCrudService
      * @param int $timestamp
      * @return boolean
      */
-    public function isActivationKeyValid($key, $screenName, $email, $timestamp = null) {
-        return $key === $this->generateActivationKey($screenName, $email, $timestamp);
+    public function isValidUserActivationKey($key, $screenName, $email, $timestamp = null) {
+        return $key === $this->generateUserActivationKey($screenName, $email, $timestamp);
     }
 
     /**
@@ -507,7 +507,7 @@ class UserService extends AbstractCrudService
      * @param string $pepper - Default `EDM_PEPPER`
      * @return string
      */
-    public function generateActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
+    public function generateUserActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
         $timeStamp = !isset($timestamp) ? time() : $timestamp;
         return hash('md5', $salt . $timeStamp . $screenName . $email . $pepper);
     }
@@ -517,22 +517,24 @@ class UserService extends AbstractCrudService
      * @param int $screenNameLength
      * @return string
      */
-    public function generateUniqueScreenName($screenNameLength = 8) {
+    public function generateUniqueUserScreenName($screenNameLength = 8) {
         do {
-            $screenName = $this->generateUUID($screenNameLength);
-        } while ($this->checkIfScreenNameExistsInDb($screenName));
+            $screenName = $this->generateUuid($screenNameLength);
+        } while ($this->isUserScreenNameInDb($screenName));
         return $screenName;
     }
 
     /**
-     * Generates short unique ids
+     * Generates short unique ids (8 chars or greater).  `8` is the hardcoded
+     *  minimum here (ensures unique characters by default if data set length 
+     * is 36 to the power of 8 entries (2821109907456 entries) or less by default).
      * @see http://stackoverflow.com/questions/307486/short-unique-id-in-php
      *      answer 4
      * @param int $len default 8
      * @param string $seed
      * @return string
      */
-    public function generateUUID($len = 8, $seed = EDM_TOKEN_SEED) {
+    public function generateUuid($len = 8, $seed = EDM_TOKEN_SEED) {
         $hex = md5(EDM_SALT . $seed . EDM_PEPPER . uniqid("", true));
         $pack = pack('H*', $hex);
         
@@ -542,8 +544,8 @@ class UserService extends AbstractCrudService
         // mixed case
         $filteredUid = preg_replace("/[^A-Za-z0-9]/", "", $base64Encoded);    
 
-        if ($len < 5) {
-            $len = 5;
+        if ($len < 8) {
+            $len = 8;
         }
         
         // prevent silliness, can remove
@@ -553,9 +555,15 @@ class UserService extends AbstractCrudService
 
         // append until length achieved
         while (strlen($filteredUid) < $len) {
-            $uid = $filteredUid . $this->generateUUID(21);    
+            $uid = $filteredUid . $this->generateUuid(21);    
+        }
+        
+        // Ensure $uid is populated
+        if (empty($uid)) {
+            $uid = $filteredUid;
         }
 
+        // Return string of $len
         return substr($uid, 0, $len);
     }
 
