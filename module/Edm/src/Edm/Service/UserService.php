@@ -437,9 +437,8 @@ class UserService extends AbstractCrudService
             $this->getUserTable()->table,
             $identityColumn,
             $credentialColumn,
-            function ($a, $b) {
-                $hasher = new Pbkdf2Hasher();
-                return $hasher->validate_against_hash($b, $a);
+            function ($a, $b) use ($this) {
+                return $this->validateUserPassword($b, $a);
             });
 
         // Set preliminaries before check
@@ -484,6 +483,16 @@ class UserService extends AbstractCrudService
      */
     public function encodeUserPassword($password) {
         return $this->getHasher()->create_hash($password);
+    }
+    
+    /**
+     * Validates a users password against hashed version stored in database.
+     * @param string $unhashedPassword
+     * @param string $hashedPassword
+     * @return bool
+     */
+    public function validateUserPassword ($unhashedPassword, $hashedPassword) {
+        return $this->getHasher()->validate_against_hash($unhashedPassword, $hashedPassword);
     }
 
     /**

@@ -55,9 +55,9 @@ define("HASH_PBKDF2_INDEX", 3);
 
 ### Code rules:
 - No redeclaring of variables in same scope.
-- No methods or functions with more than 84 line length.
-- No classes with line length greater than 500.
-- Chars per line 80-144.
+- No methods or functions with more than 89 line length.
+- No classes with line length greater than 610.
+- Chars per line 89-144.
 
 ### Todos:
 

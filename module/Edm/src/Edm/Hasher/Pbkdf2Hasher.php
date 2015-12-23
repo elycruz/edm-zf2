@@ -37,72 +37,63 @@ namespace Edm\Hasher;
  * instead of /home/user/site/our_website/some_dir/pbkdf2_hasher_constants.php,
  * maybe use something like /home/protected_user/hasher_constants/our_website-hasher_constants.php).
  */
-//defined ("PBKDF2_HASH_ALGORITHIM") ||
-//    define("PBKDF2_HASH_ALGORITHM", "sha256");
-//defined ("PBKDF2_ITERATIONS") ||
-//    define("PBKDF2_ITERATIONS", 1000);
-//defined ("PBKDF2_SALT_BYTE_SIZE") ||
-//    define("PBKDF2_SALT_BYTE_SIZE", 24);
-//defined ("PBKDF2_HASH_BYTE_SIZE") ||
-//    define("PBKDF2_HASH_BYTE_SIZE", 24);
-//defined ("HASH_SECTION") ||
-//    define("HASH_SECTIONS", 4);
-//defined("HASH_ALGORITHIM_INDEX") ||
-//    define("HASH_ALGORITHM_INDEX", 0);
-//defined ("HASH_ITERATION_INDEX") ||
-//    define("HASH_ITERATION_INDEX", 1);
-//defined ("HASH_SALT_INDEX") ||
-//    define("HASH_SALT_INDEX", 2);
-//defined ("HASH_PBKDF2_INDEX") ||
-//    define("HASH_PBKDF2_INDEX", 3);
+//defined ("PBKDF2_HASH_ALGORITHIM") || define ("PBKDF2_HASH_ALGORITHM", "sha256");
+//defined ("PBKDF2_ITERATIONS")      || define ("PBKDF2_ITERATIONS",     1000);
+//defined ("PBKDF2_SALT_BYTE_SIZE")  || define ("PBKDF2_SALT_BYTE_SIZE", 24);
+//defined ("PBKDF2_HASH_BYTE_SIZE")  || define ("PBKDF2_HASH_BYTE_SIZE", 24);
+//defined ("HASH_SECTION")           || define ("HASH_SECTIONS",         4);
+//defined ("HASH_ALGORITHIM_INDEX")  || define ("HASH_ALGORITHM_INDEX",  0);
+//defined ("HASH_ITERATION_INDEX")   || define ("HASH_ITERATION_INDEX",  1);
+//defined ("HASH_SALT_INDEX")        || define ("HASH_SALT_INDEX",       2);
+//defined ("HASH_PBKDF2_INDEX")      || define ("HASH_PBKDF2_INDEX",     3);
 
 class Pbkdf2Hasher {
     
     /**
      * Hash algorithm to use.
-     * @var String
+     * @var string
      */
     protected $_hashAlgorithm = 'sha256';
     
     /**
      * Salt byte size (should be the same as `$_hashByteSize` (best practice scenario (harder to crack algorithm)).
-     * @var String
+     * @var string
      */
     protected $_saltByteSize = 34;
     
     /**
      * Pbkdf2 hash byte size (should be the same as `$_saltByteSize` (best practice scenario "")).
-     * @var String
+     * @var string
      */
     protected $_hashByteSize = 34;
     
     /**
-     * @var Integer
+     * @var int
      */
-    protected $_numIterations = 944;
+    protected $_numIterations = 1597;
     
     /**
-     * @var Integer
+     * @var int
      */
     protected $_numSections = 4;
     
     /**
-     * @var Integer
+     * @var int
      */
     protected $_algorithmIndex = 0;
     
     /**
-     * @var Integer
+     * @var int
      */
     protected $_iterationIndex = 1;
     
     /**
-     * @var Integer
+     * @var int
      */
     protected $_saltIndex = 2;
     
     /**
-     * @var Integer
+     * @var int
      */
     protected $_hashIndex = 3;
     
@@ -234,5 +225,88 @@ class Pbkdf2Hasher {
             return bin2hex(substr($output, 0, $key_length));
         }
     }
+    
+    public function getHashAlgorithm() {
+        return $this->_hashAlgorithm;
+    }
+
+    public function getSaltByteSize() {
+        return $this->_saltByteSize;
+    }
+
+    public function getHashByteSize() {
+        return $this->_hashByteSize;
+    }
+
+    public function getNumIterations() {
+        return $this->_numIterations;
+    }
+
+    public function getNumSections() {
+        return $this->_numSections;
+    }
+
+    public function getAlgorithmIndex() {
+        return $this->_algorithmIndex;
+    }
+
+    public function getIterationIndex() {
+        return $this->_iterationIndex;
+    }
+
+    public function getSaltIndex() {
+        return $this->_saltIndex;
+    }
+
+    public function getHashIndex() {
+        return $this->_hashIndex;
+    }
+
+    public function setHashAlgorithm($hashAlgorithm) {
+        $this->_hashAlgorithm = $hashAlgorithm;
+        return $this;
+    }
+
+    public function setSaltByteSize($saltByteSize) {
+        $this->_saltByteSize = $saltByteSize;
+        return $this;
+    }
+
+    public function setHashByteSize($hashByteSize) {
+        $this->_hashByteSize = $hashByteSize;
+        return $this;
+    }
+
+    public function setNumIterations($numIterations) {
+        $this->_numIterations = $numIterations;
+        return $this;
+    }
+
+    public function setNumSections($numSections) {
+        $this->_numSections = $numSections;
+        return $this;
+    }
+
+    public function setAlgorithmIndex($algorithmIndex) {
+        $this->_algorithmIndex = $algorithmIndex;
+        return $this;
+    }
+
+    public function setIterationIndex($iterationIndex) {
+        $this->_iterationIndex = $iterationIndex;
+        return $this;
+    }
+
+    public function setSaltIndex($saltIndex) {
+        $this->_saltIndex = $saltIndex;
+        return $this;
+    }
+
+    public function setHashIndex($hashIndex) {
+        $this->_hashIndex = $hashIndex;
+        return $this;
+    }
+
+
     
 }
