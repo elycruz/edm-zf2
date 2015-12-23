@@ -56,13 +56,17 @@ class Pbkdf2Hasher {
     protected $_hashAlgorithm = 'sha256';
     
     /**
-     * Salt byte size (should be the same as `$_hashByteSize` (best practice scenario (harder to crack algorithm)).
+     * Salt byte size.  
+     * @recommendation: make the value the same as `$_hashByteSize` 
+     *  (harder for attackers to differentiate between hash and salt values).
      * @var string
      */
     protected $_saltByteSize = 34;
     
     /**
-     * Pbkdf2 hash byte size (should be the same as `$_saltByteSize` (best practice scenario "")).
+     * Pbkdf2 hash byte size.
+     * @recommendation: make the value the same as `$_saltByteSize` 
+     *  (harder for attackers to differentiate between hash and salt values).
      * @var string
      */
     protected $_hashByteSize = 34;
@@ -85,7 +89,7 @@ class Pbkdf2Hasher {
     /**
      * @var int
      */
-    protected $_iterationIndex = 1;
+    protected $_iterationsIndex = 1;
     
     /**
      * @var int
@@ -97,7 +101,18 @@ class Pbkdf2Hasher {
      */
     protected $_hashIndex = 3;
     
-    public function __construct() {}
+    public function __construct(array $options = null) {
+        if (!isset($options)) {
+            return;
+        }
+        // Auto populate via setters
+        foreach ($options as $key => $value) {
+            $methodName = 'set' . ucfirst($key);
+            if (method_exists($this, $methodName)) {
+                $this->{$methodName}($value);
+            }
+        }
+    }
     
     /**
      * Creates a hash of string passed in the format: algorithm:iterations:salt:hash
@@ -106,17 +121,33 @@ class Pbkdf2Hasher {
      */
     public function create_hash($un_hashed_str)
     {
-        // format: algorithm:iterations:salt:hash
-        $salt = base64_encode(mcrypt_create_iv(PBKDF2_SALT_BYTE_SIZE, MCRYPT_DEV_URANDOM));
-        return PBKDF2_HASH_ALGORITHM . ":" . PBKDF2_ITERATIONS . ":" .  $salt . ":" .
-            base64_encode($this->pbkdf2(
-                PBKDF2_HASH_ALGORITHM,
+        $iterations = $this->_numIterations;
+        $hashAlgorithm = $this->_hashAlgorithm;
+        $saltByteSize = $this->_saltByteSize;
+        $hashByteSize = $this->_hashByteSize;
+        
+        $salt = base64_encode(mcrypt_create_iv($saltByteSize, MCRYPT_DEV_URANDOM));
+        $hash = base64_encode($this->pbkdf2(
+                $hashAlgorithm,
                 $un_hashed_str,
                 $salt,
-                PBKDF2_ITERATIONS,
-                PBKDF2_HASH_BYTE_SIZE,
+                $iterations,
+                $hashByteSize,
                 true
             ));
+        
+        // Prepare to order sections
+        $out = [];
+        $out[$this->_hashIndex] = $hash;
+        $out[$this->_saltIndex] = $salt;
+        $out[$this->_iterationsIndex] = $iterations;
+        $out[$this->_algorithmIndex] = $hashAlgorithm;
+        
+        // Sort indices
+        ksort($out);
+        
+        // format: algorithm:iterations:salt:hash
+        return implode( ':', $out);
     }
 
     /**
@@ -128,17 +159,17 @@ class Pbkdf2Hasher {
     public function validate_against_hash($un_hashed_str, $hashed_str)
     {
         $params = explode(":", $hashed_str);
-        if(count($params) < HASH_SECTIONS) {
+        if(count($params) < $this->_numSections) {
            return false;
         }
-        $pbkdf2 = base64_decode($params[HASH_PBKDF2_INDEX]);
+        $pbkdf2 = base64_decode($params[$this->_hashIndex]);
         return $this->slow_equals(
             $pbkdf2,
             $this->pbkdf2(
-                $params[HASH_ALGORITHM_INDEX],
+                $params[$this->_algorithmIndex],
                 $un_hashed_str,
-                $params[HASH_SALT_INDEX],
-                (int)$params[HASH_ITERATION_INDEX],
+                $params[$this->_saltIndex],
+                (int)$params[$this->_iterationsIndex],
                 strlen($pbkdf2),
                 true
             )
@@ -251,7 +282,7 @@ class Pbkdf2Hasher {
     }
 
     public function getIterationIndex() {
-        return $this->_iterationIndex;
+        return $this->_iterationsIndex;
     }
 
     public function getSaltIndex() {
@@ -262,49 +293,49 @@ class Pbkdf2Hasher {
         return $this->_hashIndex;
     }
 
-    public function setHashAlgorithm($hashAlgorithm) {
+    public function setHashAlgorithm(string $hashAlgorithm) {
         $this->_hashAlgorithm = $hashAlgorithm;
         return $this;
     }
 
-    public function setSaltByteSize($saltByteSize) {
+    public function setSaltByteSize(int $saltByteSize) {
         $this->_saltByteSize = $saltByteSize;
         return $this;
     }
 
-    public function setHashByteSize($hashByteSize) {
+    public function setHashByteSize(int $hashByteSize) {
         $this->_hashByteSize = $hashByteSize;
         return $this;
     }
 
-    public function setNumIterations($numIterations) {
+    public function setNumIterations(int $numIterations) {
         $this->_numIterations = $numIterations;
         return $this;
     }
 
-    public function setNumSections($numSections) {
+    public function setNumSections(int $numSections) {
         $this->_numSections = $numSections;
         return $this;
     }
 
-    public function setAlgorithmIndex($algorithmIndex) {
+    public function setAlgorithmIndex(int $algorithmIndex) {
         $this->_algorithmIndex = $algorithmIndex;
         return $this;
     }
 
-    public function setIterationIndex($iterationIndex) {
-        $this->_iterationIndex = $iterationIndex;
+    public function setIterationIndex(int $iterationsIndex) {
+        $this->_iterationsIndex = $iterationsIndex;
         return $this;
     }
 
-    public function setSaltIndex($saltIndex) {
+    public function setSaltIndex(int $saltIndex) {
         $this->_saltIndex = $saltIndex;
         return $this;
     }
 
-    public function setHashIndex($hashIndex) {
+    public function setHashIndex(int $hashIndex) {
         $this->_hashIndex = $hashIndex;
         return $this;
     }
-    
+
 }

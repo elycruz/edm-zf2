@@ -249,9 +249,17 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
      */
     public function testEncodeUserPassword () {
         $userService = $this->userService();
+        $hasher = $userService->getHasher();
+        $expectedStrLen = 
+                strlen($hasher->getHashAlgorithm()) +
+                $hasher->getHashByteSize() + 
+                $hasher->getSaltByteSize() + 
+                strlen($hasher->getNumIterations() + '') + 
+                ($hasher->getNumSections() - 1) + 8;
         $password = 'some-password-here';
         $encodedPassword = $userService->encodeUserPassword($password);
-        $this->assertEquals(76, strlen($encodedPassword));
+        var_dump($encodedPassword);
+        $this->assertEquals($expectedStrLen, strlen($encodedPassword));
     }
     
     public function testValidateUserPassword () {
@@ -366,6 +374,9 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Edm\Db\TableGateway\ContactUserRelTable', $userService->getContactUserRelTable());
     }
 
+    /**
+     * @return \Edm\Service\UserService
+     */
     public function userService () {
         return self::$userService;
     }
