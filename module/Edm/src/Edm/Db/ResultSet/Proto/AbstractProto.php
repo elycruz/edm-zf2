@@ -2,6 +2,9 @@
 
 /**
  * @note Proto's shouldn't be nested more than one level deep.
+ * @todo Consider adding primary key and foreign key fields to this proto 
+ * to help ease the definition/building of sql select statements and other CRUD
+ * operations in services.
  */
 
 namespace Edm\Db\ResultSet\Proto;
@@ -63,6 +66,20 @@ abstract class AbstractProto extends \ArrayObject
      * @var string
      */
     protected $_formKey;
+    
+    /**
+     * A place to store current values in proto for use in comparisons and other
+     * operations.  Allows user to call `storeSnapshot` to store it's current 
+     * `allowedKeysForProto` values inside an array.
+     * @var array
+     */
+    protected $_snapshotValues = [];
+    
+    /**
+     * Same as `$_snapshotValues` but for proto's own self and it's sub protos.
+     * @var array
+     */
+    protected $_nestedSnapshotValues = [];
 
     /**
      * Constructor
@@ -335,6 +352,37 @@ abstract class AbstractProto extends \ArrayObject
             }
         }
         return $out;
+    }
+    
+    /**
+     * Stores snapshot of own 'allowed' values.
+     * @param string $operation - ['Update', 'Insert']
+     * @see \Edm\Db\ResultSet\Proto\ProtoInterface constants
+     * @return \Edm\Db\ResultSet\Proto\AbstractProto
+     */
+    public function storeSnapshot ($operation = null) {
+        $this->_snapshotValues = $this->toArray($operation);
+        return $this;
+    }
+    
+    /**
+     * Stores snapshot of own 'allowed' key-value pairs and it's sub proto
+     * key-value pairs.
+     * @param string $operation - ['Update', 'Insert']
+     * @see \Edm\Db\ResultSet\Proto\ProtoInterface constants
+     * @return \Edm\Db\ResultSet\Proto\AbstractProto
+     */
+    public function storeNestedSnapshot ($operation = null) {
+        $this->_nestedSnapshotValues = $this->toNestedArray($operation);
+        return $this;
+    }
+    
+    public function getSnapshotValues() {
+        return $this->_snapshotValues;
+    }
+
+    public function getNestedSnapshotValues() {
+        return $this->_nestedSnapshotValues;
     }
 
 }
