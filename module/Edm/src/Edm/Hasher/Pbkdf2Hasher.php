@@ -61,7 +61,7 @@ class Pbkdf2Hasher {
      *  (harder for attackers to differentiate between hash and salt values).
      * @var string
      */
-    protected $_saltByteSize = 34;
+    protected $_saltByteSize = 21;
     
     /**
      * Pbkdf2 hash byte size.
@@ -69,7 +69,7 @@ class Pbkdf2Hasher {
      *  (harder for attackers to differentiate between hash and salt values).
      * @var string
      */
-    protected $_hashByteSize = 34;
+    protected $_hashByteSize = 21;
     
     /**
      * @var int
