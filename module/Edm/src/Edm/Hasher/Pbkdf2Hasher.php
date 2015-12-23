@@ -306,7 +306,5 @@ class Pbkdf2Hasher {
         $this->_hashIndex = $hashIndex;
         return $this;
     }
-
-
     
 }

@@ -252,7 +252,13 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         $password = 'some-password-here';
         $encodedPassword = $userService->encodeUserPassword($password);
         $this->assertEquals(76, strlen($encodedPassword));
-        
+    }
+    
+    public function testValidateUserPassword () {
+        $userService = $this->userService();
+        $password = 'some-password-here';
+        $encodedPassword = $userService->encodeUserPassword($password);
+        $this->assertEquals(true, $userService->validateUserPassword($password, $encodedPassword));
     }
 
     /**

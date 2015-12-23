@@ -437,7 +437,7 @@ class UserService extends AbstractCrudService
             $this->getUserTable()->table,
             $identityColumn,
             $credentialColumn,
-            function ($a, $b) use ($this) {
+            function ($a, $b) {
                 return $this->validateUserPassword($b, $a);
             });
 
