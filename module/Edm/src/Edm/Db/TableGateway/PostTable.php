@@ -4,8 +4,8 @@ namespace Edm\Db\TableGateway;
 
 class PostTable extends BaseTableGateway {
 
-    protected $table = 'post';
-    protected $alias = 'posts';
-    protected $modelClass = \Edm\Model\Post;
+    protected $table = 'posts';
+    protected $alias = 'post';
+    protected $modelClass = \Edm\Db\ResultSet\Proto\PostProto;
 
 }
