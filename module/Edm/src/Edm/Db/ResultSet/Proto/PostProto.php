@@ -49,8 +49,8 @@ class PostProto extends AbstractProto {
      * @var array
      */
     protected $_notAllowedKeysForUpdate = array(
-        'date_info_id',
-        'post_id'
+        'post_id',
+        'date_info_id'
     );
 
     /**
@@ -81,10 +81,10 @@ class PostProto extends AbstractProto {
         if ($this->inputFilter !== null) {
             return $this->inputFilter;
         }
+        
         // Return value (input filter)
-        $retVal =
-                $this->inputFilter =
-                new InputFilter();
+        $retVal = $this->inputFilter = new InputFilter();
+        
         // Input factory
         $factory = new InputFactory();
         // Post Id
@@ -172,7 +172,6 @@ class PostProto extends AbstractProto {
                 
         // User Params
         
-        $this->inputFilter = $retVal;
         return $retVal;
 
     }
