@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Created by IntelliJ IDEA.
  * User: Ely
@@ -12,8 +11,8 @@ class PasswordEncoder implements PasswordEncoderInterface
      * @param string $password
      * @return string - Encoded password.
      */
-    public function encodePassword ($password) {
-        return '';
+    public function encodeUserPassword ($password) {
+        return $this->getHasher()->create_hash($password);
     }
 
     /**

@@ -53,6 +53,11 @@ define("HASH_PBKDF2_INDEX", 3);
 
 ```
 
+### Code rules:
+- No redeclaring of variables in same scope.
+- No methods or functions with more than 89 line length.
+- No classes with line length greater than 610.
+- Chars per line 89-144.
 
 ### Todos:
 
@@ -83,14 +88,28 @@ define("HASH_PBKDF2_INDEX", 3);
         - [X] - `Edm\Filter\Slug`.
     - [ ] - `Edm\Form`:
         - [ ] - `Edm\Form\Fieldset`:
-            - [ ] - `Edm\Form\Fieldset\SubmitAndResetFieldset`.
-            - [ ] - `Edm\Form\Fieldset\TermFieldset`.
+            - [X] - `Edm\Form\Fieldset\SubmitAndResetFieldset`.
+            - [X] - `Edm\Form\Fieldset\TermFieldset`.
         - [ ] - `Edm\Form\TermForm`.
+    - [X] - `Edm\Hasher\Pbkdf2Hasher`.
     - [X] - `Edm\InputFilter\DefaultInputOptions`.
     - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.
     - [ ] - `Edm\Service`:
         - [X] - Preliminary `Edm\Service\TermTaxonomyService` tests.
-        - [ ] - `Edm\Service\UserService`
+        - [X] - `Edm\Service\UserService`
+            - [ ] - Solve the `Pbkdf2Hasher->create_hash` output length mystery 
+                (we need to know the strings exact length with and without
+                 padding even if it means abstracting away the last '=' or '=='
+                 that `base64_encode` adds depending on how much padding the last
+                character has).
+        - [ ] - `Edm\Service\PostService`.
+        - [ ] - `Edm\Service\PostCommentService`.
+        - [ ] - `Edm\Service\PostGalleryService`.
+        - [ ] - `Edm\Service\PostMediaService`.
+        - [ ] - `Edm\Service\PostFlaggingService`.
+        - [ ] - Upgrade all `*\Service\*` tests to use `Edm\Db\ResultSet\Proto\*` classes
+         as their data objects.
+        
 - [X] - Re-evaluate how 'aliases' are used in the EDM system.
     Resources:
         - valid url characters stackoverflow: (http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links)

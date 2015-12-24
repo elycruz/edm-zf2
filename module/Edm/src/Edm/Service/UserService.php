@@ -8,7 +8,8 @@
 
 namespace Edm\Service;
 
-use Zend\Db\ResultSet\ResultSet,
+use Edm\Db\ResultSet\Proto\ContactProto,
+    Zend\Db\ResultSet\ResultSet,
     Zend\Db\Sql\Sql,
     Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter,
     Edm\Db\ResultSet\Proto\UserProto,
@@ -39,7 +40,7 @@ class UserService extends AbstractCrudService
      * @return \Exception|int
      * @throws UnqualifiedDataException
      */
-    public function create(UserProto $user) {
+    public function createUser (UserProto $user) {
         // Get today's date
         $today = new \DateTime();
 
@@ -51,17 +52,17 @@ class UserService extends AbstractCrudService
 
         // If no screen name generate one
         if (!$user->has('screenName')) {
-            $user->screenName = $this->generateUniqueScreenName();
+            $user->screenName = $this->generateUniqueUserScreenName();
         }
 
         // If user has a password
         if (!empty($user->password)) {
-            $user->password = $this->encodePassword($user->password);
+            $user->password = $this->encodeUserPassword($user->password);
         }
 
         // Set user activation key
         $user->activationKey =
-            $this->generateActivationKey(
+            $this->generateUserActivationKey(
                 $user->screenName,
                 $contact->email,
                 $timestamp
@@ -84,15 +85,15 @@ class UserService extends AbstractCrudService
         $dbDataHelper = $this->getDbDataHelper();
 
         // Escape user data
-        $user = $dbDataHelper->escapeTuple($user);
+        $updatedUser = $dbDataHelper->escapeTuple($user);
 
         // Escape contact data
-        $contact = $dbDataHelper->escapeTuple($contact);
+        $updatedContact = $dbDataHelper->escapeTuple($contact);
 
         // User contact rel
         $userContactRel = array(
-            'email' => $contact->email,
-            'screenName' => $user->screenName);
+            'email' => $updatedContact->email,
+            'screenName' => $updatedUser->screenName);
 
         // Get database platform object
         $driver = $this->getDb()->getDriver();
@@ -104,16 +105,16 @@ class UserService extends AbstractCrudService
         // Try to insert user data
         try {
             // Create contact
-            $this->getContactTable()->insert($contact->toArray());
+            $this->getContactTable()->insert($updatedContact->toArray());
 
             // Insert date info
             $this->getDateInfoTable()->insert(['createdDate' => $timestamp]);
 
             // Get date_info_id for post
-            $user['date_info_id'] = $driver->getLastGeneratedValue();
+            $updatedUser['date_info_id'] = $driver->getLastGeneratedValue();
 
             // Create user
-            $this->getUserTable()->insert($user->toArray());
+            $this->getUserTable()->insert($updatedUser->toArray());
 
             // Get last generated id
             $retVal = (int) $driver->getLastGeneratedValue();
@@ -133,20 +134,15 @@ class UserService extends AbstractCrudService
 
     /**
      * @param int|string $id
-     * @param array $data
-     * @param array $originalData
+     * @param UserProto $userProto
+     * @param UserProto $originalProto
      * @param bool $escapeOriginalData - Optional.  Default `false`.
      * @return bool|\Exception
      * @throws \Exception
      */
-    public function update ($id, $data, $originalData, $escapeOriginalData = false) {
-//        var_dump(func_get_args());
-        // If no user key
-        if (!array_key_exists('user', $data) || !array_key_exists('user', $originalData)) {
-            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ .
-                ' requires the data and original data params to contain a user key.');
-        }
-
+    public function updateUser (
+        $id, UserProto $userProto, UserProto $originalProto, $escapeOriginalData = false)
+    {
         // Get today's date
         $today = new \DateTime();
 
@@ -155,17 +151,14 @@ class UserService extends AbstractCrudService
 
         // Escape tuples
         $dbDataHelper = $this->getDbDataHelper();
-        $data = $dbDataHelper->escapeTuple($data);
-        $user = $data['user'];
+        $cleanedUserProto = $dbDataHelper->escapeTuple($userProto);
+        $contact = $cleanedUserProto->getContactProto();
+        $originalContact = $originalProto->getContactProto();
 
         // Check whether to escape original data or not
         if ($escapeOriginalData) {
-            $originalData = $dbDataHelper->escapeTuple($originalData);
+            $originalProto = $dbDataHelper->escapeTuple($originalProto);
         }
-
-        // Get original user data
-        $originalUser = $originalData['user'];
-        $originalContact = $originalData['contact'];
 
         // Set flags for whether to update contact table
         $updateContactTable = false;
@@ -174,34 +167,41 @@ class UserService extends AbstractCrudService
         $emailChanged = false;
 
         // Track whether screen name changed
-        $screenNameChanged = isset($user['screenName']) &&
-            $originalUser['screenName'] !== $user['screenName'];
+        $screenNameChanged = false;
 
-        // Get contact data if necessary
-        if (isset($data['contact']) && isset($originalData['contact'])) {
-            $contact = $data['contact'];
-            $originalContact = $originalData['contact'];
-            $emailChanged = isset($contact['email']) && $contact['email'] !== $originalContact['email'];
+        // If user screen name or contact email changed
+        $contactUserRelData = [];
+
+        // Check whether screen name changed
+        if ($cleanedUserProto->has('screenName') && $originalProto->has('screenName')) {
+            $screenNameChanged = $originalProto->screenName !== $cleanedUserProto->screenName;
+            $contactUserRelData['screenName'] = $cleanedUserProto->screenName;
+        }
+
+        // Check whether email changed
+        if ($contact->has('email') && $originalContact->has('email')) {
+            $emailChanged = $contact->email !== $originalContact->email;
             $updateContactTable = true;
+            $contactUserRelData['email'] = $contact->email;
         }
 
         // If email changed require user to activate it via an email by issuing new activation key
         if ($emailChanged) {
             // Set user activation key
-            $user['activationKey'] =
-                $this->generateActivationKey(
-                    $user['screenName'],
-                    $contact['email'],
+            $cleanedUserProto->activationKey =
+                $this->generateUserActivationKey(
+                    $cleanedUserProto->screenName,
+                    $contact->email,
                     $timestamp
                 );
 
             // Set user activation key created date
-            $user['activationKeyCreatedDate'] = $timestamp;
+            $cleanedUserProto->activationKeyCreatedDate = $timestamp;
         }
 
         // If password encode it
-        if (!empty($user['password'])) {
-            $user['password'] = $this->encodePassword($user['password']);
+        if (!empty($cleanedUserProto->password)) {
+            $cleanedUserProto->password = $this->encodeUserPassword($cleanedUserProto->password);
         }
 
         // Get database platform object
@@ -215,25 +215,21 @@ class UserService extends AbstractCrudService
 
             // Update contact if necessary
             if ($updateContactTable) {
-                $contactUpdateOptions = ['email' => $originalContact['email']];
-                $this->getContactTable()->update($contact, $contactUpdateOptions);
+                $contactUpdateOptions = ['email' => $originalContact->email];
+                $this->getContactTable()->update(
+                    $contact->toArray(ContactProto::FOR_OPERATION_DB_UPDATE),
+                    $contactUpdateOptions);
             }
 
             // Update user
-            $this->getUserTable()->update($user, array('user_id' => $id), $user);
+            $this->getUserTable()->update(
+                $cleanedUserProto->toArray(UserProto::FOR_OPERATION_DB_UPDATE), ['user_id' => $id]);
 
             // Resolve data for contact user rel table if necessary
             if ($screenNameChanged || $emailChanged) {
-                $contactUserRelData = [];
-                if ($screenNameChanged) {
-                    $contactUserRelData['screenName'] = $user['screenName'];
-                }
-                if ($emailChanged) {
-                    $contactUserRelData['email'] = $contact['email'];
-                }
-                $this->getContactUserRelTable()->update($contactUserRelData, [
-                    'screenName' => $originalUser['screenName'],
-                    'email' => $originalContact['email']
+                 $this->getContactUserRelTable()->update($contactUserRelData, [
+                    'screenName' => $originalProto->screenName,
+                    'email' => $originalContact->email
                 ]);
             }
 
@@ -242,7 +238,7 @@ class UserService extends AbstractCrudService
                     'lastUpdated' => $timestamp,
                     'lastUpdatedById' => 0
                 ], [
-                    'date_info_id' => $originalUser['date_info_id']
+                    'date_info_id' => $originalProto->date_info_id
                 ]);
 
             // Commit and return true
@@ -264,8 +260,10 @@ class UserService extends AbstractCrudService
      * @param UserProto $userProto
      * @return bool|\Exception
      * @throws UnqualifiedDataException
+     * @todo Protect this method so that it actually only operates for `superadmins` and `cms-managers`.
+     * @todo Optionally, also, only mark user as `marked-for-deleted` instead of actually deleting user.
      */
-    public function delete (UserProto $userProto) {
+    public function deleteUser (UserProto $userProto) {
         // Get db connection
         $conn = $this->getDb()->getDriver()->getConnection();
 
@@ -303,7 +301,7 @@ class UserService extends AbstractCrudService
      * @param string $email
      * @return boolean
      */
-    public function checkIfEmailExistsInDb($email) {
+    public function isUserEmailInDb($email) {
         $rslt = $this->getContactUserRelTable()->select(
             array('email' => $email))->current();
         return !empty($rslt);
@@ -314,7 +312,7 @@ class UserService extends AbstractCrudService
      * @param string $screenName
      * @return boolean
      */
-    public function checkIfScreenNameExistsInDb($screenName) {
+    public function isUserScreenNameInDb($screenName) {
         $rslt = $this->getContactUserRelTable()
             ->select(array('screenName' => $screenName))->current();
         return !empty($rslt);
@@ -356,13 +354,13 @@ class UserService extends AbstractCrudService
     /**
      * Returns our pre-prepared select statement
      * for our term taxonomy model
-     * @param Sql $sql
+     * @param Sql $sqlObj
      * @param array $options
      * @todo select should include: [parent_name, parent_alias, taxonomy_name]
      * @return \Zend\Db\Sql\Select
      */
-    public function getSelect(Sql $sql = null, array $options = null) {
-        $sql = $sql !== null ? $sql : $this->getSql();
+    public function getSelect(Sql $sqlObj = null, array $options = null) {
+        $sql = $sqlObj !== null ? $sqlObj : $this->getSql();
         $select = $sql->select();
         $hasOptions = isset($options);
         $includeSensitiveUserColumns = $hasOptions && isset($options['includeSensitiveUserColumns']) ?
@@ -413,7 +411,7 @@ class UserService extends AbstractCrudService
      * @param int $userId
      * @return UserService
      */
-    public function updateLastLoginForUserById ($userId) {
+    public function updateUserLastLoginById ($userId) {
         $today = new \DateTime();
         $this->update($userId, array('lastLogin' => $today->getTimestamp()));
         return $this;
@@ -440,8 +438,7 @@ class UserService extends AbstractCrudService
             $identityColumn,
             $credentialColumn,
             function ($a, $b) {
-                $hasher = new Pbkdf2Hasher();
-                return $hasher->validate_against_hash($b, $a);
+                return $this->validateUserPassword($b, $a);
             });
 
         // Set preliminaries before check
@@ -484,8 +481,18 @@ class UserService extends AbstractCrudService
      * @param string $password
      * @return string - Pbkdf2 hashed password
      */
-    public function encodePassword($password) {
+    public function encodeUserPassword($password) {
         return $this->getHasher()->create_hash($password);
+    }
+    
+    /**
+     * Validates a users password against hashed version stored in database.
+     * @param string $unhashedPassword
+     * @param string $hashedPassword
+     * @return bool
+     */
+    public function validateUserPassword ($unhashedPassword, $hashedPassword) {
+        return $this->getHasher()->validate_against_hash($unhashedPassword, $hashedPassword);
     }
 
     /**
@@ -496,8 +503,8 @@ class UserService extends AbstractCrudService
      * @param int $timestamp
      * @return boolean
      */
-    public function isActivationKeyValid($key, $screenName, $email, $timestamp = null) {
-        return $key === $this->generateActivationKey($screenName, $email, $timestamp);
+    public function isValidUserActivationKey($key, $screenName, $email, $timestamp = null) {
+        return $key === $this->generateUserActivationKey($screenName, $email, $timestamp);
     }
 
     /**
@@ -507,11 +514,12 @@ class UserService extends AbstractCrudService
      * @param string $timestamp
      * @param string $salt - Default `EDM_SALT`
      * @param string $pepper - Default `EDM_PEPPER`
+     * @todos consider using pbkdf2 hasher for this key.
      * @return string
      */
-    public function generateActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
-        $timestamp = !isset($timestamp) ? time() : $timestamp;
-        return hash('md5', $salt . $timestamp . $screenName . $email . $pepper);
+    public function generateUserActivationKey($screenName, $email, $timestamp = null, $salt = EDM_SALT, $pepper = EDM_PEPPER) {
+        $timeStamp = !isset($timestamp) ? time() : $timestamp;
+        return hash('md5', $salt . $timeStamp . $screenName . $email . $pepper);
     }
 
     /**
@@ -519,38 +527,53 @@ class UserService extends AbstractCrudService
      * @param int $screenNameLength
      * @return string
      */
-    public function generateUniqueScreenName($screenNameLength = 8) {
+    public function generateUniqueUserScreenName($screenNameLength = 8) {
         do {
-            $screenName = $this->generateUUID($screenNameLength);
-        } while ($this->checkIfScreenNameExistsInDb($screenName));
+            $screenName = $this->generateUuid($screenNameLength);
+        } while ($this->isUserScreenNameInDb($screenName));
         return $screenName;
     }
 
     /**
-     * Generates short unique ids
+     * Generates short unique ids (8 chars or greater).  `8` is the hardcoded
+     *  minimum here (ensures unique characters by default if data set length 
+     * is 36 to the power of 8 entries (2821109907456 entries) or less by default).
      * @see http://stackoverflow.com/questions/307486/short-unique-id-in-php
      *      answer 4
      * @param int $len default 8
      * @param string $seed
      * @return string
      */
-    public function generateUUID($len = 8, $seed = EDM_TOKEN_SEED) {
+    public function generateUuid($len = 8, $seed = EDM_TOKEN_SEED) {
         $hex = md5(EDM_SALT . $seed . EDM_PEPPER . uniqid("", true));
-
         $pack = pack('H*', $hex);
+        
+        // max 22 chars
+        $base64Encoded = base64_encode($pack);        
+        
+        // mixed case
+        $filteredUid = preg_replace("/[^A-Za-z0-9]/", "", $base64Encoded);    
 
-        $uid = base64_encode($pack);        // max 22 chars
+        if ($len < 8) {
+            $len = 8;
+        }
+        
+        // prevent silliness, can remove
+        if ($len > 144) {
+            $len = 144;                                 
+        }
 
-        $uid = preg_replace("/[^A-Za-z0-9]/", "", $uid);    // mixed case
+        // append until length achieved
+        while (strlen($filteredUid) < $len) {
+            $uid = $filteredUid . $this->generateUuid(21);    
+        }
+        
+        // Ensure $uid is populated
+        if (empty($uid)) {
+            $uid = $filteredUid;
+        }
 
-        if ($len < 4)
-            $len = 4;
-        if ($len > 128)
-            $len = 128;                       // prevent silliness, can remove
-
-        while (strlen($uid) < $len)
-            $uid = $uid . $this->generateUUID(22);     // append until length achieved
-
+        // Return string of $len
         return substr($uid, 0, $len);
     }
 
@@ -596,11 +619,6 @@ class UserService extends AbstractCrudService
                 ->get('Edm\Db\TableGateway\ContactUserRelTable');
         }
         return $this->userContactRelTable;
-    }
-
-
-    public function normalizeCrudData ($nestedDataArray) {
-
     }
 
 }

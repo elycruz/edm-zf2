@@ -8,5 +8,5 @@
  */
 interface PasswordEncoderInterface
 {
-    public function encodePassword ($password);
+    public function encodeUserPassword ($password);
 }
