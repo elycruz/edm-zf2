@@ -1,11 +1,25 @@
 edmzf2
 ===========================================
-Edm - The Extensible Data Management System
+Edm - Extensible Data Management System, is a system written with
+Zend Framework 2, Mysql 5.6+, and Php 7.0+.  The system is written with 
+TDD approach and is designed to be developer centric.
+The system is currently in an alpha-refactor stage and will have it's upcoming 
+features and functionality all documented in this repo (for now).
 
-The system is written with Zend Framework 2 and mysql for it's database (see elycruz/edm-db-mysql).
-Also the system will follow a TDD approach where we test first and write service and business process code later.
+### Requirements
+- Zend Framework 2+
+- Php 7.0+
+- Mysql 5.6+
+- Installed database from github repo 'elycruz/edm-db-mysql'.
 
-More documentation coming soon.
+### Caveats
+- All development must be performed in a TDD format.
+
+#### Code rules:
+- No redeclaring of variables in same scope.
+- No methods or functions with more than 89 line length.
+- No classes with line length greater than 610.
+- Characters per line 89-144.
 
 ### Usage notes:
 
@@ -52,12 +66,6 @@ define("HASH_SALT_INDEX", 2);
 define("HASH_PBKDF2_INDEX", 3);
 
 ```
-
-### Code rules:
-- No redeclaring of variables in same scope.
-- No methods or functions with more than 89 line length.
-- No classes with line length greater than 610.
-- Chars per line 89-144.
 
 ### Todos:
 

@@ -78,12 +78,12 @@ class PostProto extends AbstractProto {
     public function getInputFilter() {
 
         // Return input filter if exists
-        if ($this->inputFilter !== null) {
-            return $this->inputFilter;
+        if ($this->_inputFilter !== null) {
+            return $this->_inputFilter;
         }
         
         // Return value (input filter)
-        $retVal = $this->inputFilter = new InputFilter();
+        $retVal = $this->_inputFilter = new InputFilter();
         
         // Input factory
         $factory = new InputFactory();
