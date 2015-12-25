@@ -74,12 +74,6 @@ abstract class AbstractProto extends \ArrayObject
      * @var array
      */
     protected $_snapshotValues = [];
-    
-    /**
-     * Same as `$_snapshotValues` but for proto's own self and it's sub protos.
-     * @var array
-     */
-    protected $_nestedSnapshotValues = [];
 
     /**
      * Constructor
@@ -362,28 +356,17 @@ abstract class AbstractProto extends \ArrayObject
      */
     public function storeSnapshot ($operation = null) {
         $this->_snapshotValues = $this->toArray($operation);
+        $this->forEachInSubProtos(function (AbstractProto $subProto) {
+            $subProto->storeSnapshot();
+        });
         return $this;
     }
     
     /**
-     * Stores snapshot of own 'allowed' key-value pairs and it's sub proto
-     * key-value pairs.
-     * @param string $operation - ['Update', 'Insert']
-     * @see \Edm\Db\ResultSet\Proto\ProtoInterface constants
-     * @return \Edm\Db\ResultSet\Proto\AbstractProto
+     * @return array
      */
-    public function storeNestedSnapshot ($operation = null) {
-        $this->_nestedSnapshotValues = $this->toNestedArray($operation);
-        return $this;
-    }
-    
-    public function getSnapshotValues() {
+    public function getStoredSnapshotValues() {
         return $this->_snapshotValues;
     }
 
-    public function getNestedSnapshotValues() {
-        return $this->_nestedSnapshotValues;
-    }
-
 }
-

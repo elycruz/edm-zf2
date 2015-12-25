@@ -27,7 +27,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     public static $qualifyingPostData = [
         'parent_id' => 0,
         'title' => 'Some Title',
-        'alias' => 'some-slug',
+//        'alias' => 'some-slug', // Should b
         'content' => 'Some content.',
         'excerpt' => 'Some exceprt.',
         'hits' => 0,
@@ -37,7 +37,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         'type' => 'post',
         'accessGroup' => 'guest',
         'status' => 'published',
-        'userParams' => '{}',
+//        'userParams' => ''
     ];
 
     /**
@@ -115,43 +115,32 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     }
     
     public function testUpdatePost () {
-//        $id = self::$createdPostId;
-//        
-//        // Get service
-//        $service = $this->postService();
-//        
-//        // Get post
-//        $postProto = $service->getPostById($id);
-//
-//        // Clone post proto
-//        $unchangedData = $this->postProtoFromNestedArray($postProto->toNestedArray());
-//
-//        // Get contact
-//        $contact = $postProto->getContactProto();
-//
-//        // Update row
-//        $contact->firstName = 'Rice';
-//        $contact->lastName = 'Krispies';
-//        $contact->middleName = 'Bob';
-//        $postProto->role = 'guest';
-//
-//        // Update row
-//        $rslt = $service->updatePost($postProto->post_id, $postProto, $unchangedData);
-//
-//        // Assert post was updated successfully
-//        $this->assertEquals(true, $rslt);
-//
-//        // Get updated row
-//        $updatedPostProto = $service->getPostById($postProto->post_id);
-//        $contact = $updatedPostProto->getContactProto();
-//
-//        // Assert updates were made successfully
-//        $this->assertEquals('Rice', $contact->firstName);
-//        $this->assertEquals('Krispies', $contact->lastName);
-//        $this->assertEquals('Bob', $contact->middleName);
-//        $this->assertEquals('guest', $updatedPostProto->role);
-//        
-//        self::$createdPostId = $updatedPostProto->post_id;
+        // Get previously created id
+        $id = self::$createdPostId;
+        
+        // Get service
+        $service = $this->postService();
+        
+        // Get post
+        $postProto = $service->getPostById($id);
+        $postProto->storeSnapshot();
+        $postProto->title = 'Hello World';
+        $postProto->alias = 'hello-world';
+        $postProto->accessGroup = 'cms-author';
+
+        // Update row
+        $rslt = $service->updatePost($postProto);
+
+        // Assert post was updated successfully
+        $this->assertEquals(true, $rslt);
+
+        // Get updated row
+        $updatedPostProto = $service->getPostById($postProto->post_id);
+
+        // Assert updates were made successfully
+        $this->assertEquals('cms-author', $updatedPostProto->accessGroup);
+        
+        self::$createdPostId = $updatedPostProto->post_id;
     }
 
     public function testDeletePost () {
@@ -174,7 +163,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testGetSelect () {
-//        $this->assertInstanceOf('Zend\Db\Sql\Select', $this->postService()->getSelect());
+        $this->assertInstanceOf('Zend\Db\Sql\Select', $this->postService()->getSelect());
     }
 
     public function testGetPostById () {
@@ -188,17 +177,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
      * @dataProvider truthyCreationProvider
      * @param array $postData
      */
-    public function testGetPostByScreenName ($postData) {
-//        $postService = $this->postService();
-//        $originalPostProto = $this->postProtoFromNestedArray($postData);
-//        $screenName = $originalPostProto->screenName;
-//        $post_id = $postService->createPost($originalPostProto);
-//        $proto = $postService->getPostByScreenName($screenName);
-//        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
-//        $this->assertEquals($screenName, $proto->screenName);
-//        $this->assertEquals($post_id, $proto->post_id);
-//        $postService->deletePost($proto);
-    }
+
 
     /**
      * @return \Edm\Service\PostService
@@ -221,8 +200,8 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     public static function tearDownAfterClass () {
-        self::$postService->getPostTable()->delete([1]);
-        self::$postService->getPostCategoryRelTable()->delete([1]);
+        self::$postService->getPostTable()->delete(['post_id' => self::$createdPostId]);
+        self::$postService->getPostCategoryRelTable()->delete(['post_id' => self::$createdPostId]);
     }
 
 }

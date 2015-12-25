@@ -161,81 +161,94 @@ class PostService extends AbstractCrudService
         return $retVal;
     }
     
-//    
-//    /**
-//     * Updates a post and it's constituants
-//     *   (postTermRel and post postTermRel relationship).  
-//     * @todo There are no safety checks being done in this method
-//     * @param int $id
-//     * @param Post $post
-//     * @return mixed boolean | Exception
-//     */
-//    public function updatePost(Post $post) {
-//                
-//        // Get current user
+    
+    /**
+     * Updates a post and optionally it's related rows.
+     * @todo There are no safety checks being done in this method
+     * @param Post $post
+     * @return mixed boolean | Exception
+     */
+    public function updatePost(PostProto $post) {
+                
+        // Get current user
 //        $user = $this->getUser();
 //        
 //        // Bail if no user
 //        if (empty($user)) {
 //            return false;
 //        }
-//        
-//        $id = $post->post_id;
-//        // Get Db Data Helper
-//        $dbDataHelper = $this->getDbDataHelper();
-//        
-//        // If empty alias
-//        if (empty($post->alias)) {
-//            $post->alias = $dbDataHelper->getValidAlias($post->title);
-//        }
-//        
-//        // Escape tuples 
-//        $postData = $dbDataHelper->escapeTuple($this->ensureOkForUpdate($post->toArray()));
-//        $postTermRelData = $dbDataHelper->escapeTuple(
-//                $this->ensureOkForUpdate($post->getPostTermRelProto()->toArray()));
-//        
-//        // If is array user params serialize it to string
-//        if (is_array($postData['userParams'])) {
-//            $postData['userParams'] = $this->serializeAndEscapeTuples($postData['userParams']);
-//        }
-//        
-//        // Db driver
-//        $driver = $this->getDb()->getDriver();
-//        
-//        // Get database platform object
-//        $conn = $driver->getConnection();
-//        
-//        // Begin transaction
-//        $conn->beginTransaction();
-//        try {
-//            // Insert date info
-//            $today = new \DateTime();
-//            
-//            // Update Date Info
-//            $this->getDateInfoTable()
-//                ->update(array(
-//                            'lastUpdated' => $today->getTimestamp(), 
-//                            'lastUpdatedById' => $user->user_id),
-//                         array(
-//                            'date_info_id' => $postData['date_info_id'] ));
-//            
-//            // Update postTermRel
-//            if (is_array($postTermRelData) && count($postTermRelData) > 0) {
-//                $this->getPostTermRelTable()
-//                        ->update($postTermRelData, array('post_id' => $id));
-//            }
-//            // Update post
-//            $this->getPostTable()->update($postData, array('post_id' => $id));
-//            // Commit and return true
-//            $conn->commit();
-//            $retVal = true;
-//        } catch (\Exception $e) {
-//            $conn->rollback();
-//            $retVal = $e;
-//        }
-//        return $retVal;
-//    }
-//    
+        
+        // If empty alias
+        if (empty($post->alias)) {
+            $slugger = new Slug();
+            $post->alias = $slugger($post->title);
+        }
+        
+        // If is array user params serialize it to string
+        if (is_array($post->userParams)) {
+            $post->userParams = $this->serializeAndEscapeTuples($post->userParams);
+        }
+        
+        // Get post category rel proto
+        $postCategoryRel = $post->getPostCategoryRelProto();
+        $oldTermTaxonomyId = $postCategoryRel->getStoredSnapshotValues()['term_taxonomy_id'];
+        
+        // Check if category changed
+        $changedTermTaxonomyId = $postCategoryRel->term_taxonomy_id !== $oldTermTaxonomyId 
+                ? $postCategoryRel->term_taxonomy_id : null;
+                
+        // Escape post and post category rel data
+        $escapedPost = $this->getDbDataHelper()->escapeTuple($post);
+        
+        // Db driver
+        $driver = $this->getDb()->getDriver();
+        
+        // Get database platform object
+        $conn = $driver->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        
+        // Try db transaction(s)
+        try {
+            // Insert date info
+            $today = new \DateTime();
+            
+            // Update Date Info
+            $this->getDateInfoTable()->update([
+                            'lastUpdated' => $today->getTimestamp(), 
+                            'lastUpdatedById' => 0, //$user->user_id
+                        ], [
+                            'date_info_id' => $post->date_info_id
+                        ]);
+            
+            if (isset($changedTermTaxonomyId)) {
+                $this->getPostCategroyRelTable()->update(
+                        ['term_taxonomy_id' => $changedTermTaxonomyId],  
+                        ['post_id' => $escapedPost->post_id] 
+                    );
+            }
+
+            // Update post
+            $this->getPostTable()->update(
+                $post->toArray(PostProto::FOR_OPERATION_DB_INSERT), 
+                array('post_id' => $escapedPost->post_id));
+            
+            // Return true to the user
+            $retVal = true;
+            
+            // Commit and return true
+            $conn->commit();
+        } 
+        catch (\Exception $e) {
+            $conn->rollback();
+            $retVal = $e;
+        }
+        
+        // Return result to user
+        return $retVal;
+    }
+    
 //    /**
 //     * Deletes a post and depends on RDBMS triggers and cascade rules to delete
 //     * it's related tables (postTermRel and post postTermRel rels)
@@ -306,18 +319,16 @@ class PostService extends AbstractCrudService
         
     }
     
-//    /**
-//     * Gets a post by id
-//     * @param integer $id
-//     * @param integer $fetchMode
-//     * @return mixed array | boolean
-//     */
-//    public function getPostById($id, $fetchMode = AbstractService::FETCH_FIRST_AS_ARRAY) {
-//        return $this->read(array(
-//                    'fetchMode' => $fetchMode,
-//                    'where' => array('post.post_id' => $id)));
-//    }
-//    
+    /**
+     * Gets a post by id.
+     * @param int $post_id
+     * @return mixed array | boolean
+     */
+    public function getPostById($post_id) {
+        return $this->read(array('where' => array('post.post_id' => $post_id)))
+                ->current();
+    }
+    
 //    /**
 //     * Fetches a post by screen name
 //     * @param string $alias
