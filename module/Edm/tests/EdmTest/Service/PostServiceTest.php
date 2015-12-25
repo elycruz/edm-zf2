@@ -113,6 +113,33 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         // Assert correct proto class was returned by `read`
         $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
     }
+        
+    public function testGetSelect () {
+        $this->assertInstanceOf('Zend\Db\Sql\Select', $this->postService()->getSelect());
+    }
+
+    public function testGetPostById () {
+        $post_id = self::$createdPostId;
+        $service = $this->postService();
+        $proto = $service->getPostById($post_id);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
+    }
+
+    public function testGetPostByAlias () {
+        $post_id = self::$createdPostId;
+        $service = $this->postService();
+        $post_alias = $service->getPostById($post_id)->alias;
+        $proto = $service->getPostByAlias($post_alias);
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
+    }
+
+    public function testIsPostAliasInPostsTable () {
+        $post_id = self::$createdPostId;
+        $service = $this->postService();
+        $post_alias = $service->getPostById($post_id)->alias;
+        $searchResult = $service->isPostAliasInPostsTable($post_alias);
+        $this->assertEquals(true, $searchResult);
+    }
     
     public function testUpdatePost () {
         // Get previously created id
@@ -144,16 +171,21 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testDeletePost () {
-//        // Get service
-//        $postService = $this->postService();
-//        
-//        $postProto = $postService->getPostById(self::$createdPostId);
-//
-//        // Delete post
-//        $rslt = $postService->deletePost($postProto);
-//
-//        // Test return value
-//        $this->assertEquals(true, $rslt);
+        // Get service
+        $postService = $this->postService();
+        
+        $postProto = $postService->getPostById(self::$createdPostId);
+
+        // Delete post
+        $rslt = $postService->deletePost($postProto);
+
+        // Test return value
+        $this->assertEquals(true, $rslt);
+        
+        $searchResult = $postService->getPostTable()
+            ->select(['post_id' => $postProto->post_id])->current();
+        
+        $this->assertEquals(false, $searchResult);
     }
 
     public function testPostServiceClass () {
@@ -161,23 +193,6 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Edm\Service\PostService', $service);
         $this->assertInstanceOf('Edm\Service\AbstractCrudService', $service);
     }
-
-    public function testGetSelect () {
-        $this->assertInstanceOf('Zend\Db\Sql\Select', $this->postService()->getSelect());
-    }
-
-    public function testGetPostById () {
-//        $id = 1;
-//        $service = $this->postService();
-//        $proto = $service->getPostById($id);
-//        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
-    }
-
-    /**
-     * @dataProvider truthyCreationProvider
-     * @param array $postData
-     */
-
 
     /**
      * @return \Edm\Service\PostService

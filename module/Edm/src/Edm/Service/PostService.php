@@ -86,9 +86,9 @@ class PostService extends AbstractCrudService
         $this->resultSet->setArrayObjectPrototype(new PostProto());
     }
     
-     /**
+    /**
      * Creates a post and it's constituants (post and post relationship)
-     * @param Post $post
+     * @param PostProto $post
      * @return mixed int | boolean | \Exception
      */
     public function createPost(PostProto $post) {
@@ -161,11 +161,10 @@ class PostService extends AbstractCrudService
         return $retVal;
     }
     
-    
     /**
      * Updates a post and optionally it's related rows.
      * @todo There are no safety checks being done in this method
-     * @param Post $post
+     * @param PostProto $post
      * @return mixed boolean | Exception
      */
     public function updatePost(PostProto $post) {
@@ -249,30 +248,36 @@ class PostService extends AbstractCrudService
         return $retVal;
     }
     
-//    /**
-//     * Deletes a post and depends on RDBMS triggers and cascade rules to delete
-//     * it's related tables (postTermRel and post postTermRel rels)
-//     * @param int $id
-//     * @return boolean
-//     */
-//    public function deletePost($id) {
-//        // Get database platform object
-//        $conn = $this->getDb()->getDriver()->getConnection();
-//        // Begin transaction
-//        $conn->beginTransaction();
-//        try {
-//            // Create post
-//            $this->getPostTable()->delete(array('post_id' => $id));
-//            // Commit and return true
-//            $conn->commit();
-//            $retVal = true;
-//        } catch (\Exception $e) {
-//            $conn->rollback();
-//            $retVal = $e;
-//        }
-//        return $retVal;
-//    }
-//    
+    /**
+     * Deletes a post and depends on RDBMS triggers and cascade rules to delete
+     * it's related tables (postTermRel and post postTermRel rels)
+     * @param PostProto $postProto
+     * @return boolean
+     */
+    public function deletePost(PostProto $postProto) {
+        // Get database platform object
+        $conn = $this->getDb()->getDriver()->getConnection();
+        
+        // Begin transaction
+        $conn->beginTransaction();
+        
+        try {
+            // Create post
+            $this->getPostTable()->delete(array('post_id' => $postProto->post_id));
+            
+            // Commit and return true
+            $conn->commit();
+            
+            $retVal = true;
+        } 
+        catch (\Exception $e) {
+            $conn->rollback();
+            $retVal = $e;
+        }
+        
+        return $retVal;
+    }
+    
     /**
      * @param Sql $sqlObj
      * @param array $options - Default null.
@@ -322,80 +327,60 @@ class PostService extends AbstractCrudService
     /**
      * Gets a post by id.
      * @param int $post_id
-     * @return mixed array | boolean
+     * @return PostProto | boolean
      */
-    public function getPostById($post_id) {
+    public function getPostById(int $post_id) {
         return $this->read(array('where' => array('post.post_id' => $post_id)))
                 ->current();
     }
     
-//    /**
-//     * Fetches a post by screen name
-//     * @param string $alias
-//     * @param int $fetchMode
-//     * @return mixed array | boolean
-//     */
-//    public function getPostByAlias($alias, $fetchMode = AbstractService::FETCH_FIRST_AS_ARRAY) {
-//        return $this->read(array(
-//                    'fetchMode' => $fetchMode,
-//                    'where' => array('post.alias' => $alias)));
-//    }
-//    
-//    public function checkPostAliasExistsInDb($alias) {
-//        $rslt = $this->getPostTermRelTable()->select(
-//                        array('alias' => $alias))->current();
-//        if (empty($rslt)) {
-//            return false;
-//        } else {
-//            return true;
-//        }
-//    }
-//    
-//    public function setListOrderForPost (Post $post) {
-//        if (!is_numeric($post->listOrder) || !is_numeric($post->post_id)) {
-//            throw new \Exception('Only numeric values are accepted for ' .
-//                    __CLASS__ .' -> '. __FUNCTION__ . '.');
-//        }
-//        return $this->getPostTable()->update(
-//                array('listOrder' => $post->listOrder), 
-//                array('post_id' => $post->post_id));
-//    }
-//    
-//    public function setTermTaxonomyForPost (Post $post, $taxonomyAlias, $value) {
-//        
-//        // If input filter is not valid (data in post is not valid) then
-//        // throw an exception
-//        if (!$post->getInputFilter()->isValid()) {
-//            throw new \Exception('Post object received in ' .
-//                    __CLASS__ .'->'. __FUNCTION__ . ' is invalid.');
-//            // @todo spit out error messages here
-//        }
-//        
-//        // If taxonomy alias is not valid
-//        if (!in_array($taxonomyAlias, $post->getValidKeys())) {
-//            throw new \Exception('"'. $taxonomyAlias . '" is not a valid ' .
-//                    'field of the post model in "' . 
-//                    __CLASS__ . '->' . __FUNCTION__ . '"');
-//        }
-//        
-//        // If post id is not set
-//        if (!is_numeric($post->post_id)) {
-//            throw new \Exception('Only numeric values are accepted for ' .
-//                    __CLASS__ .'->'. __FUNCTION__ . '\'s $post->post_id param.');
-//        }
-//        // Check if taxonomy alias indeed has $value else throw error
-//        $allowedCheck = $this->termTaxonomyService()->getByAlias($value, $taxonomyAlias);
-//        if (empty($allowedCheck)) {
-//            throw new \Exception('One of the values passed into "' .
-//                    __CLASS__ .'->'. __FUNCTION__ . '" are not allowed.');
-//        }
-//        
-//        // Update term taxonomy value and return outcome
-//        return $this->getPostTable()->update(
-//                array($taxonomyAlias => $value), 
-//                array('post_id' => $post->post_id));
-//    }
+    /**
+     * Fetches a post by screen name
+     * @param string $alias
+     * @return PostProto | boolean
+     */
+    public function getPostByAlias(string $alias) {
+        return $this->read(array('where' => array('post.alias' => $alias)))
+                ->current();
+    }
     
+    /**
+     * @param string $alias
+     * @return bool
+     */
+    public function isPostAliasInPostsTable(string $alias) {
+        $rslt = $this->getPostTable()->select(['alias' => $alias])->current();
+        return $rslt !== false;
+    }
+    
+    /**
+     * @param PostProto $post
+     * @return bool
+     */
+    public function setListOrderForPost (PostProto $post) {
+        return $this->getPostTable()->update(
+                array('listOrder' => $post->listOrder), 
+                array('post_id' => $post->post_id));
+    }
+    
+    /**
+     * @param PostProto $post
+     * @param int $termTaxonomyId
+     * @return bool
+     * @note If we implement the active record pattern then we don't need these
+     * type of methods in our services.
+     * @todo Implement active record patter for proto objects
+     */
+    public function setTermTaxonomyIdForPost (PostProto $post, int $termTaxonomyId) {
+        // Update term taxonomy value and return outcome
+        return $this->getPostCategoryRelTable()->update(
+                array('term_taxonomy_id' => $termTaxonomyId), 
+                array('post_id' => $post->post_id));
+    }
+    
+    /**
+     * @return \Edm\Service\PostService
+     */
     public function ensureTableNamesAndAliases() {
         // Bail if names already populated
         if ($this->_populatedTableNamesAndAliases) {
@@ -437,6 +422,9 @@ class PostService extends AbstractCrudService
         return $this;
     }
     
+    /**
+     * @return \Edm\Db\TableGateway\PostTable
+     */
     public function getPostTable() {
         if (empty($this->_postTable)) {
             $this->_postTable = 
@@ -445,6 +433,9 @@ class PostService extends AbstractCrudService
         return $this->_postTable;
     }
     
+    /**
+     * @return \Edm\Db\TableGateway\PostTable
+     */
     public function getPostCategoryRelTable() {
         if (empty($this->_postCategoryRelTable)) {
             $this->_postCategoryRelTable =
