@@ -15,17 +15,18 @@ defined ('APP_PATH') ||
  * file.
  */
 return array(
-    'db' => array(
+    'edm-db' => [
         'driver' => 'PDO_Mysql',
-        'dsn' => 'mysql:dbname=edm;host=127.0.0.1',
-        'driver_options' => array(
+        'host' => '127.0.0.1',
+        'dbname' => 'some-db-name-here',
+        'driver_options' => [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
-        ),
-    ),
-    'service_manager' => array(
-        'factories' => array(
+        ],
+    ],
+    'service_manager' => [
+        'factories' => [
             'Zend\Db\Adapter\Adapter'
             => 'Zend\Db\Adapter\AdapterServiceFactory',
-        )
-    ),
+        ]
+    ],
 );

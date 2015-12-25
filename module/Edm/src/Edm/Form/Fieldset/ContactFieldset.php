@@ -72,7 +72,7 @@ class ContactFieldset extends Fieldset {
         // Email
         $this->add(array(
             'name' => 'email',
-            'type' => 'Zend\Form\Element\Email',
+            'type' => 'hidden', //Zend\Form\Element\Email',
             'options' => array(
                 'label' => 'Email'
             ),
@@ -97,12 +97,9 @@ class ContactFieldset extends Fieldset {
         // Contact Type
         $this->add(array(
             'name' => 'type',
-            'type' => 'Zend\Form\Element\Select',
+            'type' => 'Zend\Form\Element\Hidden',
             'options' => array(
-                'label' => 'Contact Type',
-                'value_options' => array(
-                    'type' => '-- Select a Contact Type --'
-                )
+                'value' => ''
             ),
             'attributes' => array(
                 'id' => 'type',
@@ -113,10 +110,9 @@ class ContactFieldset extends Fieldset {
         // Parent Id
         $this->add(array(
             'name' => 'parent_id',
-            'type' => 'Zend\Form\Element\Select',
+            'type' => 'Zend\Form\Element\Hidden',
             'options' => array(
-                'label' => 'Parent',
-                'placeholder' => 'Parent'
+                'value' => ''
             ),
             'attributes' => array(
                 'id' => 'parent_id'

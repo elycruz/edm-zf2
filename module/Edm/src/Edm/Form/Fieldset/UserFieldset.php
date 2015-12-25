@@ -42,7 +42,6 @@ class UserFieldset extends Fieldset {
                 'id' => 'password'
             )
         ));
-        
 
         // Role
         $this->add(array(

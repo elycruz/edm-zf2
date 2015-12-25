@@ -13,7 +13,7 @@ features and functionality all documented in this repo (for now).
 - Installed database from github repo 'elycruz/edm-db-mysql'.
 
 ### Caveats
-- All development must be performed in a TDD format.
+- All development must be performed in TDD format.
 
 #### Code rules:
 - No redeclaring of variables in same scope.
@@ -24,46 +24,68 @@ features and functionality all documented in this repo (for now).
 ### Usage notes:
 
 The following defines have to be defined in one of your autoload files
-(preferably in one of your *.local.php files):
+(preferably in one of your *local.php files):
 
 ```
 <?php
 
-// Application path
-// 'APP_PATH' is already defined in global.php
-// defined('APP_PATH') ||
-// define('APP_PATH', realpath(__DIR__ . '/../../'));
-
 // Edm salt seed
 defined('EDM_SALT') ||
-define('EDM_SALT', 'somesalt');
-
-// Edm pepper seed
-defined('EDM_PEPPER') ||
-define('EDM_PEPPER', 'somepepper');
+        define('EDM_SALT', 'salt-goes-here');
 
 // Edm token seed
 defined('EDM_TOKEN_SEED') ||
-define('EDM_TOKEN_SEED', 'sometokenseed');
+        define('EDM_TOKEN_SEED', 'token-seed-goes-here');
 
 /**
- * These constants may be changed without breaking existing hashes.
- * ** Note ** Maybe put these constants in a protected user directory (maybe
- * outside of current user directories where application is running (?); I.e.,
- * instead of /home/user/site/our_website/some_dir/pbkdf2_hasher_constants.php,
- * maybe use something like /home/protected_user/hasher_constants/our_website-hasher_constants.php).
+ * ** Note ** Maybe put this config in an outer directory (outside of the application). I.e.,
+ * instead of using '/home/user/www/some-website/configs/local.php',
+ * use something like the following instead 
+ * '/home/protected_user/www/some-website/configs/local.php'.
  */
-// Note these are hashes from the initial port of the pbkdf2 code from crackstation.com
-// This will be refactored and cleaned up to maybe use a configuration file instead.
-define("PBKDF2_HASH_ALGORITHM", "sha256");
-define("PBKDF2_ITERATIONS", 1000);
-define("PBKDF2_SALT_BYTE_SIZE", 24);
-define("PBKDF2_HASH_BYTE_SIZE", 24);
-define("HASH_SECTIONS", 4);
-define("HASH_ALGORITHM_INDEX", 0);
-define("HASH_ITERATION_INDEX", 1);
-define("HASH_SALT_INDEX", 2);
-define("HASH_PBKDF2_INDEX", 3);
+define("EDM_PBKDF2_ALGORITIHM", "sha256");
+define("EDM_PBKDF2_ITERATIONS", 1597);
+define("EDM_PBKDF2_SALT_BYTE_SIZE", 21);
+define("EDM_PBKDF2_HASH_BYTE_SIZE", 21);
+define("EDM_PBKDF2_SECTIONS", 4);
+define("EDM_PBKDF2_SECTIONS_VERSION", 1);
+define("EDM_PBKDF2_ALGORITHM_INDEX", 0);
+define("EDM_PBKDF2_ITERATIONS_INDEX", 1);
+define("EDM_PBKDF2_SALT_INDEX", 2);
+define("EDM_PBKDF2_HASH_INDEX", 3);
+
+// Return our '*local.php' config
+return [
+    'edm-db' => [
+        'dbname' => 'db-name-here',
+        'host' => 'db-host-ip/url-here',
+        'username' => 'db-user-here',
+        'password' => 'db-password-here'
+    ],
+
+    // Not used yet but will be used in a later version
+    'edm-user-service' => [
+        // Pbkdf2Hasher
+        'hasher' => [
+            // Hasher parameters
+            'hashAlgorithm' => EDM_PBKDF2_ALGORITIHM,
+            'numIterations' => EDM_PBKDF2_ITERATIONS,
+            'saltByteSize' => EDM_PBKDF2_HASH_BYTE_SIZE,
+            'hashByteSize' => EDM_PBKDF2_SALT_BYTE_SIZE,
+            'hashSections' => EDM_PBKDF2_SECTIONS,
+            // Keep track of hasher constants` changes here
+            'hashSectionsTemplateVersion' => EDM_PBKDF2_SECTIONS_VERSION,
+            'hashSectionVersionTemplateMap' => [
+                1 => 'algorithm:iterations:salt:hash'
+            ],
+            // Indexes of pertinent parts of the hasher
+            'algorithmIndex' => EDM_PBKDF2_ALGORITHM_INDEX,
+            'iterationsIndex' => EDM_PBKDF2_ITERATIONS_INDEX,
+            'saltIndex' => EDM_PBKDF2_SALT_INDEX,
+            'hashIndex' => EDM_PBKDF2_HASH_INDEX,
+        ]
+    ]
+];
 
 ```
 
@@ -74,16 +96,21 @@ define("HASH_PBKDF2_INDEX", 3);
     - [ ] - `Edm\Db`:
         - [X] - ~~`Edm\Db\DatabaseDataHelper`~~ `Edm\Db\DbDataHelper`.
         - [ ] - `Edm\Db\ResultSet\Proto`:
-            - [X] - `Edm\Db\ResultSet\Proto\AbstractProto`.
+            - [ ] - `Edm\Db\ResultSet\Proto\AbstractProto`. (reinstantiating 
+                this as not complete because `AbstractProto` should have it's
+                own tests and not have it's tests mixed in with other classes' 
+                tests.
             - [X] - `Edm\Db\ResultSet\Proto\ContactProto`.
             - [X] - `Edm\Db\ResultSet\Proto\ContactUserRelProto`.
             - [X] - `Edm\Db\ResultSet\Proto\DateInfoProto`.
+            - [X] - `Edm\Db\ResultSet\Proto\PostProto`.
             - [X] - `Edm\Db\ResultSet\Proto\ProtoInterface`.
             - [X] - `Edm\Db\ResultSet\Proto\TermProto`.
             - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProto`.
             - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProxyProto`.
             - [X] - `Edm\Db\ResultSet\Proto\UserProto`.
         - [ ] - `Edm\Db\TableGateway`:
+            - [ ] - `Edm\Db\TableGateway\BaseTableGateway`.
             - [X] - `Edm\Db\TableGateway\ContactTable`.
             - [X] - `Edm\Db\TableGateway\ContactUserRelTable`.
             - [X] - `Edm\Db\TableGateway\DateInfoTable`.
@@ -98,7 +125,8 @@ define("HASH_PBKDF2_INDEX", 3);
         - [ ] - `Edm\Form\Fieldset`:
             - [X] - `Edm\Form\Fieldset\SubmitAndResetFieldset`.
             - [X] - `Edm\Form\Fieldset\TermFieldset`.
-        - [ ] - `Edm\Form\TermForm`.
+            - [X] - `Edm\Form\Fieldset\UserFieldset`.
+        - [ ] - `Edm\Form\TermFormTest`.
     - [X] - `Edm\Hasher\Pbkdf2Hasher`.
     - [X] - `Edm\InputFilter\DefaultInputOptions`.
     - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.

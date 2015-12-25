@@ -21,51 +21,6 @@ class Bootstrap
     protected static $bootstrap;
     protected static $autoload_config;
 
-    public static function init()
-    {
-        // Load the user-defined test configuration file
-        $testConfig = include __DIR__ . '/../TestConfig.php.dist';
-
-        $zf2ModulePaths = array();
-
-        if (isset($testConfig['module_listener_options']['module_paths'])) {
-            $modulePaths = $testConfig['module_listener_options']['module_paths'];
-            foreach ($modulePaths as $modulePath) {
-                if (($path = static::findParentPath($modulePath)) ) {
-                    $zf2ModulePaths[] = $path;
-                }
-            }
-        }
-
-        $zf2ModulePaths  = implode(PATH_SEPARATOR, $zf2ModulePaths) . PATH_SEPARATOR;
-        $zf2ModulePaths .= getenv('ZF2_MODULES_TEST_PATHS') ?: (defined('ZF2_MODULES_TEST_PATHS') ? ZF2_MODULES_TEST_PATHS : '');
-
-        static::initAutoloader();
-
-        // use ModuleManager to load this module and it's dependencies
-        $baseConfig = array(
-            'module_listener_options' => array(
-                'module_paths' => explode(PATH_SEPARATOR, $zf2ModulePaths),
-            ),
-        );
-
-        // Global configs
-        $global_autoload_options =  include __DIR__ . '/../../../../config/autoload/global.php';
-        $local_autoload_options =   include __DIR__ . '/../../../../config/autoload/local.php';
-        $autoload_config = static::$autoload_config = ArrayUtils::merge($global_autoload_options, $local_autoload_options);
-
-        // Application configs
-        $config = ArrayUtils::merge($baseConfig, $testConfig);
-        $serviceManager = new ServiceManager(new ServiceManagerConfig($autoload_config['service_manager']));
-        $serviceManager->setService('ApplicationConfig', $config);
-        $serviceManager->get('ModuleManager')->loadModules();
-
-        static::$serviceManager = $serviceManager;
-        static::$config = $config;
-        static::initDbAdapter();
-
-    }
-
     public static function getServiceManager()
     {
         return static::$serviceManager;
@@ -82,8 +37,16 @@ class Bootstrap
 
         // Initialize and set global db adapter
         GlobalAdapterFeature::setStaticAdapter(new DbAdapter(
-            $autoload_config['db']
+            $autoload_config['edm-db']
         ));
+    }
+    
+    public static function initUserService () {
+//        $autoload_config = static::$autoload_config;
+//        $serviceManager = self::$serviceManager;
+//        $userService = $serviceManager->get('Edm\Service\UserService');
+//        $userService->getHasher($autoload_config['edm-user-service']);
+//        $serviceManager->setService('edm-user-service', $userService);
     }
 
     protected static function initAutoloader()
@@ -144,6 +107,51 @@ class Bootstrap
         return $dir . '/' . $path;
     }
     
+    public static function init()
+    {
+        // Load the user-defined test configuration file
+        $testConfig = include __DIR__ . '/../TestConfig.php.dist';
+
+        $zf2ModulePaths = array();
+
+        if (isset($testConfig['module_listener_options']['module_paths'])) {
+            $modulePaths = $testConfig['module_listener_options']['module_paths'];
+            foreach ($modulePaths as $modulePath) {
+                if (($path = static::findParentPath($modulePath)) ) {
+                    $zf2ModulePaths[] = $path;
+                }
+            }
+        }
+
+        $zf2ModulePaths  = implode(PATH_SEPARATOR, $zf2ModulePaths) . PATH_SEPARATOR;
+        $zf2ModulePaths .= getenv('ZF2_MODULES_TEST_PATHS') ?: (defined('ZF2_MODULES_TEST_PATHS') ? ZF2_MODULES_TEST_PATHS : '');
+
+        static::initAutoloader();
+
+        // use ModuleManager to load this module and it's dependencies
+        $baseConfig = array(
+            'module_listener_options' => array(
+                'module_paths' => explode(PATH_SEPARATOR, $zf2ModulePaths),
+            ),
+        );
+
+        // Global configs
+        $global_autoload_options =  include __DIR__ . '/../../../../config/autoload/global.php';
+        $local_autoload_options =   include __DIR__ . '/../../../../config/autoload/local.php';
+        $autoload_config = static::$autoload_config = ArrayUtils::merge($global_autoload_options, $local_autoload_options);
+
+        // Application configs
+        $config = ArrayUtils::merge($baseConfig, $testConfig);
+        $serviceManager = new ServiceManager(new ServiceManagerConfig($autoload_config['service_manager']));
+        $serviceManager->setService('ApplicationConfig', $config);
+        $serviceManager->get('ModuleManager')->loadModules();
+        
+        static::$serviceManager = $serviceManager;
+        static::$config = $config;
+        static::initDbAdapter();
+        static::initUserService();
+
+    }
 }
 
 Bootstrap::init();

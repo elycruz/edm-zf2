@@ -48,6 +48,9 @@ namespace Edm\Hasher;
 //defined ("HASH_SALT_INDEX")        || define ("HASH_SALT_INDEX",       2);
 //defined ("HASH_PBKDF2_INDEX")      || define ("HASH_PBKDF2_INDEX",     3);
 
+// @todo don't forget to cleanup this class (remove setters we don't want used 
+// more than once).
+
 class Pbkdf2Hasher {
     
     /**
@@ -102,6 +105,16 @@ class Pbkdf2Hasher {
      */
     protected $_hashIndex = 3;
     
+    /**
+     * @var int
+     */
+    protected $_hashSectionsTemplateVersion = 1;
+    
+    /**
+     * @var array
+     */
+    protected $_hashSectionsVersionTemplateMap = [];
+    
     public function __construct(array $options = null) {
         if (!isset($options)) {
             return;
@@ -111,6 +124,9 @@ class Pbkdf2Hasher {
             $methodName = 'set' . ucfirst($key);
             if (method_exists($this, $methodName)) {
                 $this->{$methodName}($value);
+            }
+            else {
+                
             }
         }
     }
@@ -282,10 +298,6 @@ class Pbkdf2Hasher {
         return $this->_algorithmIndex;
     }
 
-    public function getIterationIndex() {
-        return $this->_iterationsIndex;
-    }
-
     public function getSaltIndex() {
         return $this->_saltIndex;
     }
@@ -324,11 +336,6 @@ class Pbkdf2Hasher {
         return $this;
     }
 
-    public function setIterationIndex(int $iterationsIndex) {
-        $this->_iterationsIndex = $iterationsIndex;
-        return $this;
-    }
-
     public function setSaltIndex(int $saltIndex) {
         $this->_saltIndex = $saltIndex;
         return $this;
@@ -336,6 +343,33 @@ class Pbkdf2Hasher {
 
     public function setHashIndex(int $hashIndex) {
         $this->_hashIndex = $hashIndex;
+        return $this;
+    }
+    
+    public function getIterationsIndex() {
+        return $this->_iterationsIndex;
+    }
+
+    public function getHashSectionsTemplateVersion() {
+        return $this->_hashSectionsTemplateVersion;
+    }
+
+    public function getHashSectionsVersionTemplateMap() {
+        return $this->_hashSectionsVersionTemplateMap;
+    }
+
+    public function setIterationsIndex($iterationsIndex) {
+        $this->_iterationsIndex = $iterationsIndex;
+        return $this;
+    }
+
+    public function setHashSectionsTemplateVersion($hashSectionsTemplateVersion) {
+        $this->_hashSectionsTemplateVersion = $hashSectionsTemplateVersion;
+        return $this;
+    }
+
+    public function setHashSectionsVersionTemplateMap($hashSectionsVersionTemplateMap) {
+        $this->_hashSectionsVersionTemplateMap = $hashSectionsVersionTemplateMap;
         return $this;
     }
 
