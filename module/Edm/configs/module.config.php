@@ -15,14 +15,15 @@ return array(
 
             // Db invokables
             'Edm\Db\DatabaseDataHelper'                  => 'Edm\Db\DatabaseDataHelper',
-            'Edm\Db\TableGateway\TermTable'              => 'Edm\Db\TableGateway\TermTable',
-            'Edm\Db\TableGateway\TermTaxonomyTable'      => 'Edm\Db\TableGateway\TermTaxonomyTable',
-            'Edm\Db\TableGateway\TermTaxonomyProxyTable' => 'Edm\Db\TableGateway\TermTaxonomyProxyTable',
-            'Edm\Db\TableGateway\UserTable'              => 'Edm\Db\TableGateway\UserTable',
-            'Edm\Db\TableGateway\PostTable'              => 'Edm\Db\TableGateway\PostTable',
-            'Edm\Db\TableGateway\ContactUserRelTable'    => 'Edm\Db\TableGateway\ContactUserRelTable',
             'Edm\Db\TableGateway\ContactTable'           => 'Edm\Db\TableGateway\ContactTable',
+            'Edm\Db\TableGateway\ContactUserRelTable'    => 'Edm\Db\TableGateway\ContactUserRelTable',
             'Edm\Db\TableGateway\DateInfoTable'          => 'Edm\Db\TableGateway\DateInfoTable',
+            'Edm\Db\TableGateway\PostCategoryRelTable'   => 'Edm\Db\TableGateway\PostCategoryRelTable',
+            'Edm\Db\TableGateway\PostTable'              => 'Edm\Db\TableGateway\PostTable',
+            'Edm\Db\TableGateway\TermTable'              => 'Edm\Db\TableGateway\TermTable',
+            'Edm\Db\TableGateway\TermTaxonomyProxyTable' => 'Edm\Db\TableGateway\TermTaxonomyProxyTable',
+            'Edm\Db\TableGateway\TermTaxonomyTable'      => 'Edm\Db\TableGateway\TermTaxonomyTable',
+            'Edm\Db\TableGateway\UserTable'              => 'Edm\Db\TableGateway\UserTable',
 
             // Form invokables
             'Edm\Form\TermForm'           => 'Edm\Form\TermForm',

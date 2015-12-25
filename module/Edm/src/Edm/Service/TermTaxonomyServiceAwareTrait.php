@@ -5,7 +5,7 @@ namespace Edm\Service;
 /**
  * Gives the implementing class/trait a getter and setter for the term taxonomy service.
  * @note Assumes service locator aware interface.
- * @requires ServiceLocatorAware
+ * @requires Zend\ServiceManager\ServiceLocatorAwareInterface
  * @author ElyDeLaCruz
  */
 trait TermTaxonomyServiceAwareTrait {

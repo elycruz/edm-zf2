@@ -62,6 +62,7 @@ class PostProto extends AbstractProto {
      * @var array
      */
     protected $_subProtoGetters = [
+        'getPostCategoryRelProto',
         'getDateInfoProto'
     ];
 
@@ -174,6 +175,18 @@ class PostProto extends AbstractProto {
         
         return $retVal;
 
+    }
+   
+    /**
+     * Gets our Date Info Proto.
+     * @param array|null $data - Default `null`.
+     * @return DateInfoProto
+     */
+    public function getPostCategoryRelProto($data = null) {
+        if (empty($this->postCategoryRelProto)) {
+            $this->postCategoryRelProto = new PostCategoryRelProto($data);
+        }
+        return $this->postCategoryRelProto;
     }
    
     /**

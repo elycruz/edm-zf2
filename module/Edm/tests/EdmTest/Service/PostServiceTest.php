@@ -13,24 +13,31 @@ use EdmTest\Bootstrap,
 
 class PostServiceTest extends \PHPUnit_Framework_TestCase
 {
+    
+    /**
+     * @var \Edm\Service\TermTaxonomyService
+     */
     public static $postService;
+    
+    /**
+     * @var \Edm\Service\TermTaxonomyService
+     */
+    public static $termTaxonomyService;
 
     public static $qualifyingPostData = [
-        // Only include required columns (others are defaulted in db)
-        'post' => [
-            'screenName' => 'SomeScreenName',
-            'password' => 'helloworld',
-            'activationKey' => 'helloworld'
-        ],
-        'contact' => [
-            'email' => 'some@email.com',
-            'altEmail' => 'some-alt@email.com',
-            'name' => 'Some name',
-            'firstName' => 'First Name',
-            'lastName' => 'Last Name',
-            'middleName' => 'Middle Name',
-            'postParams' => ''
-        ]
+        'parent_id' => 0,
+        'title' => 'Some Title',
+        'alias' => 'some-slug',
+        'content' => 'Some content.',
+        'excerpt' => 'Some exceprt.',
+        'hits' => 0,
+        'listOrder' => 1,
+        'commenting' => 'enabled',
+        'commentCount' => 0,
+        'type' => 'post',
+        'accessGroup' => 'guest',
+        'status' => 'published',
+        'userParams' => '{}',
     ];
 
     /**
@@ -40,8 +47,9 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     public static $postProtosToDelete = [];
 
     public static function setUpBeforeClass () {
-        self::$postService = Bootstrap::getServiceManager()
-            ->get('Edm\Service\PostService');
+        self::$postService = Bootstrap::getServiceManager()->get('Edm\Service\PostService');
+        self::$termTaxonomyService = Bootstrap::getServiceManager()->get('Edm\Service\TermTaxonomyService');
+        self::$postService->ensureTableNamesAndAliases();
     }
     
     /**
@@ -51,23 +59,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
 
     public function truthyCreationProvider () {
         return [
-            [[
-                // Only include required columns (others are defaulted in db)
-                'post' => [
-                    'screenName' => 'SomeScreenName',
-                    'password' => 'helloworld',
-                    'activationKey' => 'helloworld'
-                ],
-                'contact' => [
-                    'email' => 'some@email.com',
-                    'altEmail' => 'some-alt@email.com',
-                    'name' => 'Some name',
-                    'firstName' => 'First Name',
-                    'lastName' => 'Last Name',
-                    'middleName' => 'Middle Name',
-                    'postParams' => ''
-                ]
-            ]]
+            [self::$qualifyingPostData]
         ];
     }
 
@@ -76,41 +68,50 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
      * @param array $postData
      */
     public function testCreatePost ($postData) {
-
+        // Get term tax service
+        $termTaxService = $this->termTaxonomyService();
+        
         // Get post service
         $postService = $this->postService();
-//
-//        // Get post id
-//        $id = $postService->createPost(
-//            $this->postProtoFromNestedArray($postData));
-//
-//        // Assert id returned
-//        $this->assertInternalType('int', $id);
-//
-//        self::$createdPostId = $id;
+        
+        // Get 'unpublished' term taxonomy
+        $termTaxonomy = $termTaxService->getByAlias('unpublished', 'post-status');
+        $postObj = new PostProto($postData);
+        $postObj->getPostCategoryRelProto()->term_taxonomy_id = 
+                $termTaxonomy->term_taxonomy_id;
+
+        // Get post id
+        $id = $postService->createPost($postObj);
+
+        // Assert id returned
+        $this->assertInternalType('int', $id);
+
+        self::$createdPostId = $id;
     }
 
     public function testRead () {
-//        // Set id to search for
-//        $id = 1;
-//
-//        // Get service
-//        $service = $this->postService();
-//
-//        // Get read result
-//        $rslt = $service->read(['where' => ['post_id' => $id]]);
-//
-//        // Get row
-//        $proto = $rslt->current();
-//
-//        // Assert correct result set type
-//        $this->assertInstanceOf('Zend\Db\ResultSet\ResultSet', $rslt);
-//
-//        // Assert only one item with current id
-//        $this->assertEquals(1, $rslt->count());
-//
-//        // Assert correct proto class was returned by `read`
-//        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
+        // Set id to search for
+        $id = self::$createdPostId;
+        
+        // Get service
+        $service = $this->postService();
+        
+        $postTableAlias = $service->getPostTable()->alias;
+
+        // Get read result
+        $rslt = $service->read(['where' => [$postTableAlias . '.post_id' => $id]]);
+
+        // Get row
+        $proto = $rslt->current();
+
+        // Assert correct result set type
+        $this->assertInstanceOf('Zend\Db\ResultSet\ResultSet', $rslt);
+
+        // Assert only one item with current id
+        $this->assertEquals(1, $rslt->count());
+
+        // Assert correct proto class was returned by `read`
+        $this->assertInstanceOf('Edm\Db\ResultSet\Proto\PostProto', $proto);
     }
     
     public function testUpdatePost () {
@@ -206,6 +207,13 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         return self::$postService;
     }
 
+    /**
+     * @return \Edm\Service\TermTaxonomyService
+     */
+    public function termTaxonomyService () {
+        return self::$termTaxonomyService;
+    }
+
     public function postProtoFromNestedArray ($nestedArray) {
         $proto = new PostProto();
         $proto->exchangeNestedArray($nestedArray);
@@ -213,12 +221,8 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     public static function tearDownAfterClass () {
-//        $postService = self::$postService;
-//        $post = $postService->getPostByScreenName('SomeScreenName');
-//        if ($post instanceof PostProto === false) {
-//            return;
-//        }
-//        self::$postService->deletePost($post);
+        self::$postService->getPostTable()->delete([1]);
+        self::$postService->getPostCategoryRelTable()->delete([1]);
     }
 
 }
