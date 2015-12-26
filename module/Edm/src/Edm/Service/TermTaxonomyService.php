@@ -133,7 +133,7 @@ class TermTaxonomyService extends AbstractCrudService {
      * @return \Exception|int
      * @throws \Exception
      */
-    public function create($data) {
+    public function createTermTaxonomy($data) {
         // Throw error if term or termTaxonomy not set
         if (!isset($data['term']) || !isset($data['termTaxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
@@ -211,7 +211,7 @@ class TermTaxonomyService extends AbstractCrudService {
      * @return \Exception|int
      * @throws \Exception
      */
-    public function update($id, $data) {
+    public function updateTermTaxonomy ($id, $data) {
         // Throw error if term or termTaxonomy not set
         if (!isset($data['term']) || !isset($data['termTaxonomy'])) {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' requires ' .
@@ -274,35 +274,16 @@ class TermTaxonomyService extends AbstractCrudService {
         }
     }
 
-    public function delete($id) {
-        // Throw error if term or termTaxonomy not set
-        if (!is_numeric($id)) {
-            throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' expects id to be numeric.');
-        }
-
-        // Set return value 
-        $retVal = null;
-
+    /**
+     * 
+     * @param TermTaxonomyProto $termTaxonomy
+     * @return \Exception | bool
+     * @throws \Exception
+     */
+    public function deleteTermTaxonomy(TermTaxonomyProto $termTaxonomy) {
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
-
-        // Find taxonomy to delete
-        $foundTermTaxonomy = $this->getTermTaxonomyById($id);
-
-        // If term taxonomy to delete is not found throw error for now
-        // @todo decide what to do here except throwing an error
-        if (empty($foundTermTaxonomy)) {
-            throw new \Exception('Invalid id passed in for term taxonomy delete.');
-        }
-
-        // Check for other usages of term_alias
-        $otherRslts = $this->read([
-            'where' => ['term_alias' => $foundTermTaxonomy->term_alias]
-        ]);
-
-        // If term of term taxonomy to delete is not being used anywhere else delete it
-        $deleteTerm = $otherRslts->count() == 1;
 
         // Begin transaction
         $conn->beginTransaction();
@@ -312,16 +293,10 @@ class TermTaxonomyService extends AbstractCrudService {
 
             // Delete term taxonomy
             $this->getTermTaxonomyTable()
-                ->delete(['term_taxonomy_id' => $id]);
-
-            // Delete 'term' if necessary
-            if ($deleteTerm) {
-                $this->getTermTable()
-                    ->delete(['alias' => $foundTermTaxonomy->term_alias]);
-            }
-
-            // Return last generated/updated value (primary key)
-            $retVal = $driver->getLastGeneratedValue();
+                ->delete(['term_taxonomy_id' => $termTaxonomy->term_taxonomy_id]);
+            
+            // Return true
+            $retVal = true;
 
             // Commit changes
             $conn->commit();

@@ -132,7 +132,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('Zend\Db\Sql\Select', $select);
     }
 
-    public function testCreate () {
+    public function testCreateTermTaxonomy () {
         $data = [
             'termTaxonomy' => [
                 'term_alias' => 'some-termTaxonomy-here',
@@ -147,22 +147,17 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
             ]];
 
         // Create test term taxonomy
-        $retVal = $this->termTaxService()->create($data);
+        $term_taxonomy_id = $this->termTaxService()->createTermTaxonomy($data);
+        $termTaxonomy = $this->termTaxService()->getTermTaxonomyById($term_taxonomy_id);
 
         // Delete inserted row
-        $this->termTaxService()->delete($retVal);
+        $this->termTaxService()->deleteTermTaxonomy($termTaxonomy);
 
         // Assert an 'id' was returned from `create` process
-        $this->assertEquals(true, is_numeric($retVal), $retVal);
-
-        // Return result of creation process
-        return $retVal;
+        $this->assertEquals(true, is_numeric($term_taxonomy_id));
     }
 
-    /**
-     * @return int
-     */
-    public function testUpdate () {
+    public function testUpdateTermTaxonomy () {
         $data = [
             'termTaxonomy' => [
                 'term_alias' => 'some-termTaxonomy-here',
@@ -180,7 +175,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $termTaxService = $this->termTaxService();
 
         // Create test term taxonomy
-        $id = $termTaxService->create($data);
+        $id = $termTaxService->createTermTaxonomy($data);
 
         $originalRslt = $termTaxService->getTermTaxonomyById($id);
         $originalRslt->description = 'Some description here.';
@@ -189,13 +184,13 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $data = $originalRslt->toNestedArray(TermTaxonomyProto::FOR_OPERATION_DB_UPDATE);
 
         // Create test term taxonomy
-        $retVal = $termTaxService->update($id, $data);
+        $retVal = $termTaxService->updateTermTaxonomy($id, $data);
 
         // Get updated row
         $rslt = $termTaxService->getTermTaxonomyById($id);
 
         // Delete inserted row
-        $this->termTaxService()->delete($id);
+        $this->termTaxService()->deleteTermTaxonomy($originalRslt);
 
         // Assert an 'id' was returned from `create` process
         $this->assertNotInstanceOf('\Exception', $retVal, $retVal);
@@ -205,12 +200,9 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($data['termTaxonomy']['accessGroup'], $rslt->accessGroup);
         $this->assertEquals($data['term']['name'], $rslt->getTermProto()->name);
         $this->assertEquals($data['term']['term_group_alias'], $rslt->getTermProto()->term_group_alias);
-
-        // Return result of creation process
-        return $retVal;
     }
 
-    public function testDelete () {
+    public function testDeleteTermTaxonomy () {
         $data = [
             'termTaxonomy' => [
                 'term_alias' => 'some-termTaxonomy-here',
@@ -228,8 +220,9 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $termTaxService = $this->termTaxService();
 
         // Create test term taxonomy
-        $id = $termTaxService->create($data);
-        $this->assertEquals(true, is_numeric($termTaxService->delete($id)));
+        $term_taxonomy_id = $termTaxService->createTermTaxonomy($data);
+        $termTaxonomy = $termTaxService->getTermTaxonomyById($term_taxonomy_id);
+        $this->assertEquals(true, $termTaxService->deleteTermTaxonomy($termTaxonomy));
     }
 
     public function testGetTermTaxonomyTable () {
