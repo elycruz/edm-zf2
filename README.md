@@ -138,7 +138,7 @@ return [
                  padding even if it means abstracting away the last '=' or '=='
                  that `base64_encode` adds depending on how much padding the last
                 character has).
-        - [ ] - `Edm\Service\PostService`.
+        - [X] - `Edm\Service\PostService`.
         - [ ] - `Edm\Service\PostCommentService`.
         - [ ] - `Edm\Service\PostGalleryService`.
         - [ ] - `Edm\Service\PostMediaService`.
