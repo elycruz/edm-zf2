@@ -50,6 +50,9 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         self::$postService = Bootstrap::getServiceManager()->get('Edm\Service\PostService');
         self::$termTaxonomyService = Bootstrap::getServiceManager()->get('Edm\Service\TermTaxonomyService');
         self::$postService->ensureTableNamesAndAliases();
+        $userService = Bootstrap::getServiceManager()->get('Edm\Service\UserService');
+        $user = $userService->read()->current();
+        self::$postService->setUser($user);
     }
     
     /**

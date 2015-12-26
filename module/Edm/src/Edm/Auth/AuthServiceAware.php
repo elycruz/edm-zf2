@@ -2,7 +2,7 @@
 
 namespace Edm\Auth;
 
-use Zend\Authentication\Adapter\AdapterInterface;
+use Zend\Authentication\AuthenticationServiceInterface;
 
 /**
  * Assumes a service locator aware interface is being used in parent class.
@@ -10,5 +10,5 @@ use Zend\Authentication\Adapter\AdapterInterface;
  */
 interface AuthServiceAware {
     public function getAuthService ();
-    public function setAuthService (AdapterInterface $authService);
+    public function setAuthService (AuthenticationServiceInterface $authService);
 }

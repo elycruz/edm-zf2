@@ -4,9 +4,10 @@
 
 namespace Edm;
 
-use Edm\Db\ResultSet\Proto\UserProto;
+use Edm\Db\ResultSet\Proto\UserProto,
+    Edm\Auth\AuthServiceAware;
 
-interface UserAware {
+interface UserAware extends AuthServiceAware {
     public function getUser(); // :UserProto;
     public function setUser(UserProto $user);
 }

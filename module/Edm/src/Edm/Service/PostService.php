@@ -90,12 +90,15 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
      * @return mixed int | boolean | \Exception
      */
     public function createPost(PostProto $post) {
-        // Get current user
-//        $user = $this->getUser();
-        // Bail if no user
-//        if (empty($user)) {
-//            return false;
-//        }
+        
+        // Get currently logged in user
+        $user = $this->getUser();
+        
+        // If no user exit function
+        if (empty($user)) {
+            return false;
+        }
+        
         // Get slugger
         $slugger = new Slug();
 
@@ -124,7 +127,8 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
             $today = new \DateTime();
             $this->getDateInfoTable()->insert(
                     array('createdDate' => $today->getTimestamp(),
-                        'createdById' => 0)); //$user->user_id));
+                        'createdById' => $user->user_id));
+            
             // Get date_info_id for post
             $post->date_info_id = $driver->getLastGeneratedValue();
 
@@ -145,7 +149,8 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
 
             // Commit and return true
             $conn->commit();
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e;
         }
@@ -161,14 +166,14 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
      * @return mixed boolean | Exception
      */
     public function updatePost(PostProto $post) {
-
         // Get current user
-//        $user = $this->getUser();
-//        
-//        // Bail if no user
-//        if (empty($user)) {
-//            return false;
-//        }
+        $user = $this->getUser();
+        
+        // Exit function if no user
+        if (empty($user)) {
+            return false;
+        }
+        
         // If empty alias
         if (empty($post->alias)) {
             $slugger = new Slug();
@@ -207,7 +212,7 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
             // Update Date Info
             $this->getDateInfoTable()->update([
                 'lastUpdated' => $today->getTimestamp(),
-                'lastUpdatedById' => 0, //$user->user_id
+                'lastUpdatedById' => $user->user_id
                     ], [
                 'date_info_id' => $post->date_info_id
             ]);
@@ -255,9 +260,9 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
 
             // Commit and return true
             $conn->commit();
-
             $retVal = true;
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             $conn->rollback();
             $retVal = $e;
         }

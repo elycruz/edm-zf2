@@ -2,6 +2,9 @@
 
 namespace Edm\Auth;
 
+use Zend\Authentication\AuthenticationService,
+    Zend\Authentication\AuthenticationServiceInterface;
+
 /**
  * Description of AuthServiceAware
  *
@@ -16,20 +19,12 @@ trait AuthServiceAwareTrait {
     protected $authService;
     
     /**
-     * Authentication Service Class Name
-     * @var \Zend\Authentication\AuthenticationService
-     */
-    public $authServiceClassName = 'Zend\Authentication\AuthenticationService';
-
-    /**
      * Gets our Authentication Service
      * @return \Zend\Authentication\AuthenticationService
      */
     public function getAuthService() {
         if (!isset($this->authService)) {
-            $this->authService = 
-                    $this->getServiceLocator()
-                        ->get($this->authServiceClassName);
+            $this->authService = new AuthenticationService();
         }
         return $this->authService;
     }
@@ -37,7 +32,7 @@ trait AuthServiceAwareTrait {
     /**
      * @param ServiceInterface $authService
      */
-    public function setAuthService(ServiceInterface $authService) {
+    public function setAuthService(AuthenticationServiceInterface $authService) {
         $this->authService = $authService;
     }
     
