@@ -1,54 +1,49 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Ely
- * Date: 11/27/2015
- * Time: 8:04 PM
- */
 
 namespace Edm\Service;
 
 /**
- * Assumes class using trait implements DbDataHelperAware interface
+ * Assumes implements DbDataHelperAware interface
+ * @author ElyDeLaCruz
  */
-trait SerializedDataTypeColumnAwareTrait
-{
+trait ObjectStorageColumnAwareTrait {
     /**
      * Un-serializes and un-escapes serialized and escaped string to an array
      * reverse escaped array.
      * @param string $data
-     * @return array $user
+     * @return array
      */
-    public function unserializeAndUnescapeArray($data) {
+    public function unSerializeAndUnescapeArray($data) {
         return $this->getDbDataHelper()->reverseEscapeTuple(
-            unserialize($data));
+                    unserialize($data));
     }
-
+    
     /**
      * Un serializes and un escapes a string to an array
      * @param array $data
      * @return array
      */
-    public function unserializeAndUnEscapeTuples($data) {
+    public function unSerializeAndUnEscapeTuples($data) {
         return $this->getDbDataHelper()->reverseEscapeTuples(
-            unserialize($data));
+                    unserialize($data));
     }
-
+    
     /**
-     * Serializes and escapes an array to string for insertion into db
+     * Serializes and escapes an array to string for insertion into db 
      * @param array $data
-     * @return string
+     * @return string 
      */
-    public function serializeAndEscapeArray(array $data) {
+    public function serializeAndEscapeArray($data) {
         return serialize($this->getDbDataHelper()->escapeTuple($data));
     }
-
+    
     /**
      * Serializes and escapes tuples into a string
      * @param array $data
      * @return string
      */
-    public function serializeAndEscapeTuples(array $data) {
+    public function serializeAndEscapeTuples($data) {
         return serialize($this->getDbDataHelper()->escapeTuples($data));
     }
+    
 }

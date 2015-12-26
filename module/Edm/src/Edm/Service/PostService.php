@@ -15,9 +15,14 @@ use Zend\Db\ResultSet\ResultSet,
     Edm\UserAware,
     Edm\UserAwareTrait;
 
-class PostService extends AbstractCrudService implements DateInfoTableAware, TermTaxonomyServiceAware, UserAware {
+class PostService extends AbstractCrudService 
+implements DateInfoTableAware, 
+        ObjectStorageColumnAware,
+        TermTaxonomyServiceAware, 
+        UserAware {
 
     use DateInfoTableAwareTrait,
+        ObjectStorageColumnAwareTrait,
         TermTaxonomyServiceAwareTrait,
         UserAwareTrait;
 
@@ -113,9 +118,11 @@ class PostService extends AbstractCrudService implements DateInfoTableAware, Ter
         // Get some help for cleaning data to be submitted to db
         $this->getDbDataHelper()->escapeTuple($post);
 
-//        if (is_array($cleanPost['userParams'])) {
-//            $cleanPost['userParams'] = $this->serializeAndEscapeTuples($cleanPost['userParams']);
-//        }
+        // If object storage column data is set normalize it's data
+        if (is_array($post->userParams)) {
+            $post->userParams = $this->serializeAndEscapeTuples($post->userParams);
+        }
+        
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
