@@ -24,21 +24,18 @@ class TermTaxonomyService extends AbstractCrudService {
     protected $termTaxProxyTable_alias = 'termTaxonomyProxy';
     protected $resultSet;
 
-    public function __construct($serviceLocator = null) {
-        if ($serviceLocator != null) {
-            $this->setServiceLocator($serviceLocator);
-        }
+    public function __construct() {
         $this->termTaxonomyProto = new TermTaxonomyProto();
         $this->resultSet = new ResultSet();
         $this->resultSet->setArrayObjectPrototype($this->termTaxonomyProto);
     }
 
     /**
-     * Gets a term taxonomy by id
+     * Gets a term taxonomy by id.
      * @param int $term_taxonomy_id
      * @return TermTaxonomyProto | bool (false)
      */
-    public function getById($term_taxonomy_id) {
+    public function getTermTaxonomyById($term_taxonomy_id) {
         return $this->read([
             'where' => [$this->termTaxTable_alias . '.term_taxonomy_id' => $term_taxonomy_id]
         ])->current();
@@ -51,7 +48,7 @@ class TermTaxonomyService extends AbstractCrudService {
      * @param array $options default null
      * @return TermTaxonomyProto | bool (false)
      */
-    public function getByAlias($alias, $taxonomy = 'taxonomy',
+    public function getTermTaxonomyByAlias($alias, $taxonomy = 'taxonomy',
                                array $options = null) {
         // Default options
         $options1 = array(
@@ -73,7 +70,7 @@ class TermTaxonomyService extends AbstractCrudService {
      * @param mixed $options
      * @return ResultSet
      */
-    public function getByTaxonomy($taxonomy, $options = null) {
+    public function getTermTaxonomyByTaxonomy($taxonomy, $options = null) {
         // Default options
         $options1 = array(
             'where' => array(
@@ -89,14 +86,14 @@ class TermTaxonomyService extends AbstractCrudService {
 
     /**
      * Sets a term taxonomy's list order value
-     * @param int $id
-     * @param int $listOrder
-     * @return mixed boolean | ?
+     * @param TermTaxonomyProto $termTaxonomy
+     * @return boolean
      * @throws \Exception
      */
-    public function setListOrderById($id, $listOrder) {
+    public function setListOrderForTaxonomy(TermTaxonomyProto $termTaxonomy) {
         return $this->getTermTaxonomyTable()->update(
-            ['listOrder' => $listOrder], ['term_taxonomy_id' => $id]
+            ['listOrder' => $termTaxonomy->listOrder], 
+            ['term_taxonomy_id' => $termTaxonomy->term_taxonomy_id]
         );
     }
 
@@ -104,12 +101,12 @@ class TermTaxonomyService extends AbstractCrudService {
      * Returns our pre-prepared select statement
      * for our term taxonomy model
      * @todo select should include: (parent_name, parent_alias, taxonomy_name)
-     * @param Sql $sql
+     * @param Sql $sqlObj
      * @param array $options - Default null.
      * @return \Zend\Db\Sql\Select
      */
-    public function getSelect(Sql $sql = null, array $options = null) {
-        $sql = isset($sql) ? $sql : $this->getSql();
+    public function getSelect(Sql $sqlObj = null, array $options = null) {
+        $sql = isset($sqlObj) ? $sqlObj : $this->getSql();
         $select = $sql->select();
         $termTaxTable = $this->getTermTaxonomyTable();
         $termTaxProxyTable = $this->getTermTaxonomyProxyTable();
@@ -283,7 +280,7 @@ class TermTaxonomyService extends AbstractCrudService {
             throw new \Exception(__CLASS__ . '.' . __FUNCTION__ . ' expects id to be numeric.');
         }
 
-        // Set return value
+        // Set return value 
         $retVal = null;
 
         // Get database platform object
@@ -291,7 +288,7 @@ class TermTaxonomyService extends AbstractCrudService {
         $conn = $driver->getConnection();
 
         // Find taxonomy to delete
-        $foundTermTaxonomy = $this->getById($id);
+        $foundTermTaxonomy = $this->getTermTaxonomyById($id);
 
         // If term taxonomy to delete is not found throw error for now
         // @todo decide what to do here except throwing an error

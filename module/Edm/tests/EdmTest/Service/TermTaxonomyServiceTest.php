@@ -68,7 +68,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetById () {
-        $rslt = $this->termTaxService()->getById(1);
+        $rslt = $this->termTaxService()->getTermTaxonomyById(1);
         $this->assertCorrectProtoClass($rslt);
         $id = (int) $rslt->term_taxonomy_id;
         $this->assertEquals(1, $id);
@@ -77,7 +77,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
 
     public function testGetByAlias () {
         $termTaxService = $this->termTaxService();
-        $rslt = $termTaxService->getByAlias('user-group', 'taxonomy');
+        $rslt = $termTaxService->getTermTaxonomyByAlias('user-group', 'taxonomy');
         $this->assertCorrectProtoClass($rslt);
         $this->assertProtoContainsRequiredKeys($rslt);
         $this->assertEquals('user-group', $rslt->term_alias);
@@ -86,7 +86,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
 
     public function testGetByTaxonomy () {
         $termTaxService = $this->termTaxService();
-        $rslt = $termTaxService->getByTaxonomy('taxonomy');
+        $rslt = $termTaxService->getTermTaxonomyByTaxonomy('taxonomy');
         $item0 = $rslt->current();
 
         // Check first item in result set for correct proto
@@ -102,26 +102,29 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         }
     }
 
-    public function testSetListOrderById () {
+    public function testSetListOrderForTermTaxonomy () {
         $termTaxService = $this->termTaxService();
 
         // Fetch
-        $rslt = $termTaxService->getById(1);
+        $termTaxonomy = $termTaxService->getTermTaxonomyById(1);
 
         // Store
-        $oldListOrder = $rslt->listOrder;
+        $termTaxonomy->storeSnapshot();
+        $oldListOrder = $termTaxonomy->getStoredSnapshotValues()['listOrder'];
+        $termTaxonomy->listOrder = 1000;
 
         // Update
-        $termTaxService->setListOrderById(1, 1000);
+        $termTaxService->setListOrderForTaxonomy($termTaxonomy);
 
         // Test
-        $rslt = $termTaxService->getById(1);
-        $this->assertEquals(1000, $rslt->listOrder);
+        $fetchedTermTaxonomy = $termTaxService->getTermTaxonomyById(1);
+        $this->assertEquals(1000, $fetchedTermTaxonomy->listOrder);
 
         // Revert
-        $termTaxService->setListOrderById(1, $oldListOrder);
-        $rslt = $termTaxService->getById(1);
-        $this->assertEquals($oldListOrder, $rslt->listOrder);
+        $termTaxonomy->listOrder = $oldListOrder;
+        $termTaxService->setListOrderForTaxonomy($termTaxonomy);
+        $fetchedTermTaxonomy1 = $termTaxService->getTermTaxonomyById(1);
+        $this->assertEquals($oldListOrder, $fetchedTermTaxonomy1->listOrder);
     }
 
     public function testGetSelect () {
@@ -179,7 +182,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         // Create test term taxonomy
         $id = $termTaxService->create($data);
 
-        $originalRslt = $termTaxService->getById($id);
+        $originalRslt = $termTaxService->getTermTaxonomyById($id);
         $originalRslt->description = 'Some description here.';
         $originalRslt->accessGroup = 'user';
         $originalRslt->getTermProto()->name = 'Some Term Taxonomy Hereio Bob';
@@ -189,7 +192,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $retVal = $termTaxService->update($id, $data);
 
         // Get updated row
-        $rslt = $termTaxService->getById($id);
+        $rslt = $termTaxService->getTermTaxonomyById($id);
 
         // Delete inserted row
         $this->termTaxService()->delete($id);
