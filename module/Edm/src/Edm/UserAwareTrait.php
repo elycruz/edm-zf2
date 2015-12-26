@@ -7,7 +7,8 @@
 
 namespace Edm;
 
-use Edm\Auth\AuthServiceAwareTrait;
+use Edm\Auth\AuthServiceAwareTrait,
+    Edm\Db\ResultSet\Proto\UserProto;
 
 /**
  * Getter and Setters for a user std object.  
@@ -20,13 +21,13 @@ trait UserAwareTrait {
 
     /**
      * User variable
-     * @var \stdClass
+     * @var \Edm\Db\ResultSet\Proto\
      */
     protected $user = null;
 
     /**
      * Gets a user
-     * @return \stdClass
+     * @return \Edm\Db\ResultSet\Proto\UserProto
      */
     public function getUser() {
         $authService = $this->getAuthService();
@@ -40,11 +41,12 @@ trait UserAwareTrait {
 
     /**
      * Set our user
-     * @param \stdClass $user
+     * @param \Edm\Db\ResultSet\Proto\UserProto
+     * @return \Edm\UserAware;
      */
-    public function setUser(\stdClass $user) {
+    public function setUser(UserProto $user) {
         $this->user = $user;
+        return $this;
     }
 
 }
-

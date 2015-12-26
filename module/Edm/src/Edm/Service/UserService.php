@@ -426,8 +426,10 @@ class UserService extends AbstractCrudService
      */
     public function logUserIn(UserProto $user,
                               $identityColumn = 'screenName',
-                              $credentialColumn = 'password')
-    {
+                              $credentialColumn = 'password') {
+        // Return value
+        $retVal = false;
+        
         // Get auth adapter
         $authService = $this->getAuthService();
 
@@ -445,23 +447,24 @@ class UserService extends AbstractCrudService
         $authAdapter->setIdentity($user->screenName);
         $authAdapter->setCredential($user->password);
         $authAdapter->getDbSelect()->where(array('status' => 'activated'));
+        
+        // Authenticate user
         $rslt = $authService->authenticate($authAdapter);
 
         // Check if credentials are valid
         if ($rslt->isValid()) {
             // store the username, first and last names of the user
             $storage = $authService->getStorage();
-            $storage->write($authAdapter->getResultRowObject(array(
+            $storage->write(new UserProto($authAdapter->getResultRowObject(array(
                 'user_id', $identityColumn, 'lastLogin',
-                'role')));
+                'role'))));
 
             // Update user lastLogin
-            $this->updateLastLoginForId($authService->getIdentity()->user_id);
-            return true;
+            $this->updateUserLastLoginById($authService->getIdentity()->user_id);
+            $retVal = true;
         }
-        else {
-            return false;
-        }
+        
+        return $retVal;
     }
 
     /**
