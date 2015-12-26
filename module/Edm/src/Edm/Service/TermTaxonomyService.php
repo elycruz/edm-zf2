@@ -4,7 +4,7 @@
  * User: Ely
  * Date: 11/16/2015
  * Time: 8:20 AM
- * @todo Look further into ZF's implementation of the ResultSet object and it's uses.
+ * @todo Allow only accescroupgs that have access to edit taxonomies to edit them.
  */
 
 namespace Edm\Service;

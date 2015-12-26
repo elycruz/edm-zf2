@@ -283,6 +283,10 @@ implements DateInfoTableAware,
      * @return \Zend\Db\Sql\Select
      */
     public function getSelect(Sql $sqlObj = null, array $options = null) {
+        if ($options) {
+            // Merge options here
+        }
+        
         // Sql objects
         $sql = $sqlObj !== null ? $sqlObj : $this->getSql();
 
@@ -292,27 +296,27 @@ implements DateInfoTableAware,
         // @todo implement return values only for current role level
         return $select
 
-                        // Post Table
-                        ->from([$this->_postTableAlias => $this->_postTableName])
+            // Post Table
+            ->from([$this->_postTableAlias => $this->_postTableName])
 
-                        // Post Category Rel Table
-                        ->join([$this->_postCategoryRelTableAlias => $this->_postCategoryRelTableName], $this->_postCategoryRelTableAlias . '.post_id=' .
-                                $this->_postTableAlias . '.post_id', ['term_taxonomy_id'])
+            // Post Category Rel Table
+            ->join([$this->_postCategoryRelTableAlias => $this->_postCategoryRelTableName], $this->_postCategoryRelTableAlias . '.post_id=' .
+                    $this->_postTableAlias . '.post_id', ['term_taxonomy_id'])
 
-                        // Date Info Table
-                        ->join([$this->_dateInfoTableAlias => $this->_dateInfoTableName], $this->_postTableAlias . '.date_info_id=' .
-                                $this->_dateInfoTableAlias . '.date_info_id', [
-                            'createdDate', 'createdById',
-                            'lastUpdated', 'lastUpdatedById'])
+            // Date Info Table
+            ->join([$this->_dateInfoTableAlias => $this->_dateInfoTableName], $this->_postTableAlias . '.date_info_id=' .
+                    $this->_dateInfoTableAlias . '.date_info_id', [
+                'createdDate', 'createdById',
+                'lastUpdated', 'lastUpdatedById'])
 
-                        // Term Taxonomy
-                        ->join([$this->_termTaxonomyTableAlias => $this->_termTaxonomyTableName], $this->_termTaxonomyTableAlias .
-                                '.term_taxonomy_id=' .
-                                $this->_postCategoryRelTableAlias . '.term_taxonomy_id', ['term_alias'])
+            // Term Taxonomy
+            ->join([$this->_termTaxonomyTableAlias => $this->_termTaxonomyTableName], $this->_termTaxonomyTableAlias .
+                    '.term_taxonomy_id=' .
+                    $this->_postCategoryRelTableAlias . '.term_taxonomy_id', ['term_alias'])
 
-                        // Term
-                        ->join([$this->_termTableAlias => $this->_termTableName], $this->_termTableAlias . '.alias=' .
-                                $this->_termTaxonomyTableAlias . '.term_alias', ['term_name' => 'name']);
+            // Term
+            ->join([$this->_termTableAlias => $this->_termTableName], $this->_termTableAlias . '.alias=' .
+                    $this->_termTaxonomyTableAlias . '.term_alias', ['term_name' => 'name']);
     }
 
     /**
