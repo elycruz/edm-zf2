@@ -55,9 +55,23 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $locator = Bootstrap::getServiceManager();
         self::$termTaxService = $locator->get('Edm\\Service\\TermTaxonomyService');
     }
-
-    public function testExistence () {
-        $this->assertInstanceOf('Edm\\Service\\TermTaxonomyService', self::$termTaxService);
+    
+    public function qualifiedTermTaxonomyDataProvider () {
+        return [
+            [[
+                'termTaxonomy' => [
+                    'term_alias' => 'some-termTaxonomy-here',
+                    'taxonomy' => 'uncategorized',
+                    'description' => '',
+                    'accessGroup' => 'cms-manager'
+                ],
+                'term' => [
+                    'name' => 'Some Term Taxonomy Here',
+                    'alias' => 'some-termTaxonomy-here',
+                    'term_group_alias' => 'edm-termTaxonomy-service-test'
+                ]
+            ]]
+        ];
     }
 
     /**
@@ -67,7 +81,11 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         return self::$termTaxService;
     }
 
-    public function testGetById () {
+    public function testExistence () {
+        $this->assertInstanceOf('Edm\\Service\\TermTaxonomyService', self::$termTaxService);
+    }
+
+    public function testGetTermTaxonomyById () {
         $rslt = $this->termTaxService()->getTermTaxonomyById(1);
         $this->assertCorrectProtoClass($rslt);
         $id = (int) $rslt->term_taxonomy_id;
@@ -75,7 +93,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertProtoContainsRequiredKeys($rslt);
     }
 
-    public function testGetByAlias () {
+    public function testGetTermTaxonomyByAlias () {
         $termTaxService = $this->termTaxService();
         $rslt = $termTaxService->getTermTaxonomyByAlias('user-group', 'taxonomy');
         $this->assertCorrectProtoClass($rslt);
@@ -84,7 +102,7 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('taxonomy', $rslt->taxonomy);
     }
 
-    public function testGetByTaxonomy () {
+    public function testGetTermTaxonomyByTaxonomy () {
         $termTaxService = $this->termTaxService();
         $rslt = $termTaxService->getTermTaxonomyByTaxonomy('taxonomy');
         $item0 = $rslt->current();
@@ -132,20 +150,11 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('Zend\Db\Sql\Select', $select);
     }
 
-    public function testCreateTermTaxonomy () {
-        $data = [
-            'termTaxonomy' => [
-                'term_alias' => 'some-termTaxonomy-here',
-                'taxonomy' => 'uncategorized',
-                'description' => '',
-                'accessGroup' => 'cms-manager'
-            ],
-            'term' => [
-                'name' => 'Some Term Taxonomy Here',
-                'alias' => 'some-termTaxonomy-here',
-                'term_group_alias' => 'edm-termTaxonomy-service-test'
-            ]];
-        
+    /**
+     * @dataProvider qualifiedTermTaxonomyDataProvider
+     * @param array[string => array[string => *]] $data
+     */
+    public function testCreateTermTaxonomy ($data) {
         // Create proto
         $termTaxonomyProto = new TermTaxonomyProto();
         $termTaxonomyProto->exchangeNestedArray($data);
@@ -161,21 +170,11 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(true, is_numeric($term_taxonomy_id));
     }
 
-    public function testUpdateTermTaxonomy () {
-        $data = [
-            'termTaxonomy' => [
-                'term_alias' => 'some-termTaxonomy-here',
-                'taxonomy' => 'uncategorized',
-                'description' => '',
-                'accessGroup' => 'cms-manager'
-            ],
-            'term' => [
-                'name' => 'Some Term Taxonomy Here',
-                'alias' => 'some-termTaxonomy-here',
-                'term_group_alias' => 'edm-termTaxonomy-service-test'
-            ]];
-
-        
+    /**
+     * @dataProvider qualifiedTermTaxonomyDataProvider
+     * @param array[string => array[string => *]] $data
+     */
+    public function testUpdateTermTaxonomy ($data) {
         // Get term taxonomy service
         $termTaxService = $this->termTaxService();
                 
@@ -211,20 +210,11 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($fetchedTerm->term_group_alias, $fetchedUpdatedTerm->term_group_alias);
     }
 
-    public function testDeleteTermTaxonomy () {
-        $data = [
-            'termTaxonomy' => [
-                'term_alias' => 'some-termTaxonomy-here',
-                'taxonomy' => 'uncategorized',
-                'description' => '',
-                'accessGroup' => 'cms-manager'
-            ],
-            'term' => [
-                'name' => 'Some Term Taxonomy Here',
-                'alias' => 'some-termTaxonomy-here',
-                'term_group_alias' => 'edm-termTaxonomy-service-test'
-            ]];
-
+    /**
+     * @dataProvider qualifiedTermTaxonomyDataProvider
+     * @param array[string => array[string => *]] $data
+     */
+    public function testDeleteTermTaxonomy ($data) {
         // Get term taxonomy service
         $termTaxService = $this->termTaxService();
         
