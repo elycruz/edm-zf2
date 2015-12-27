@@ -154,5 +154,5 @@ class TermTaxonomyProto extends AbstractProto  {
         }
         return $this->termTaxonomyProxyProto;
     }
-
+    
 }

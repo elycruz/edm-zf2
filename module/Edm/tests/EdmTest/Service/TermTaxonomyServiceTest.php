@@ -145,11 +145,15 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
                 'alias' => 'some-termTaxonomy-here',
                 'term_group_alias' => 'edm-termTaxonomy-service-test'
             ]];
+        
+        // Create proto
+        $termTaxonomyProto = new TermTaxonomyProto();
+        $termTaxonomyProto->exchangeNestedArray($data);
 
         // Create test term taxonomy
-        $term_taxonomy_id = $this->termTaxService()->createTermTaxonomy($data);
+        $term_taxonomy_id = $this->termTaxService()->createTermTaxonomy($termTaxonomyProto);
         $termTaxonomy = $this->termTaxService()->getTermTaxonomyById($term_taxonomy_id);
-
+        
         // Delete inserted row
         $this->termTaxService()->deleteTermTaxonomy($termTaxonomy);
 
@@ -171,35 +175,40 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
                 'term_group_alias' => 'edm-termTaxonomy-service-test'
             ]];
 
+        
         // Get term taxonomy service
         $termTaxService = $this->termTaxService();
-
+                
+        // Create proto
+        $termTaxonomyProto = new TermTaxonomyProto();
+        $termTaxonomyProto->exchangeNestedArray($data);
+        
         // Create test term taxonomy
-        $id = $termTaxService->createTermTaxonomy($data);
+        $term_taxonomy_id = $termTaxService->createTermTaxonomy($termTaxonomyProto);
+        
+        // Fetch and alter created term taxonomy
+        $fetchedTermTaxonomy = $termTaxService->getTermTaxonomyById($term_taxonomy_id);
+        $fetchedTermTaxonomy->description = 'Some description here.';
+        $fetchedTermTaxonomy->accessGroup = 'user';
+        $fetchedTermTaxonomy->getTermProto()->name = 'Some Term Taxonomy Hereio Bob';
+        $fetchedTerm = $fetchedTermTaxonomy->getTermProto();
 
-        $originalRslt = $termTaxService->getTermTaxonomyById($id);
-        $originalRslt->description = 'Some description here.';
-        $originalRslt->accessGroup = 'user';
-        $originalRslt->getTermProto()->name = 'Some Term Taxonomy Hereio Bob';
-        $data = $originalRslt->toNestedArray(TermTaxonomyProto::FOR_OPERATION_DB_UPDATE);
-
-        // Create test term taxonomy
-        $retVal = $termTaxService->updateTermTaxonomy($id, $data);
-
-        // Get updated row
-        $rslt = $termTaxService->getTermTaxonomyById($id);
+        // Record and fetch updates
+        $updateResult = $termTaxService->updateTermTaxonomy($fetchedTermTaxonomy);
+        $fetchedUpdatedTermTaxonomy = $termTaxService->getTermTaxonomyById($term_taxonomy_id);
+        $fetchedUpdatedTerm = $fetchedUpdatedTermTaxonomy->getTermProto();
 
         // Delete inserted row
-        $this->termTaxService()->deleteTermTaxonomy($originalRslt);
+        $this->termTaxService()->deleteTermTaxonomy($fetchedTermTaxonomy);
 
         // Assert an 'id' was returned from `create` process
-        $this->assertNotInstanceOf('\Exception', $retVal, $retVal);
+        $this->assertNotInstanceOf('\Exception', $updateResult, $updateResult);
 
         // Assert that updates were made
-        $this->assertEquals($data['termTaxonomy']['description'], $rslt->description);
-        $this->assertEquals($data['termTaxonomy']['accessGroup'], $rslt->accessGroup);
-        $this->assertEquals($data['term']['name'], $rslt->getTermProto()->name);
-        $this->assertEquals($data['term']['term_group_alias'], $rslt->getTermProto()->term_group_alias);
+        $this->assertEquals($fetchedTermTaxonomy->description, $fetchedUpdatedTermTaxonomy->description);
+        $this->assertEquals($fetchedTermTaxonomy->accessGroup, $fetchedUpdatedTermTaxonomy->accessGroup);
+        $this->assertEquals($fetchedTerm->name, $fetchedUpdatedTerm->name);
+        $this->assertEquals($fetchedTerm->term_group_alias, $fetchedUpdatedTerm->term_group_alias);
     }
 
     public function testDeleteTermTaxonomy () {
@@ -218,9 +227,13 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
 
         // Get term taxonomy service
         $termTaxService = $this->termTaxService();
-
+        
+        // Create proto
+        $termTaxonomyProto = new TermTaxonomyProto();
+        $termTaxonomyProto->exchangeNestedArray($data);
+        
         // Create test term taxonomy
-        $term_taxonomy_id = $termTaxService->createTermTaxonomy($data);
+        $term_taxonomy_id = $termTaxService->createTermTaxonomy($termTaxonomyProto);
         $termTaxonomy = $termTaxService->getTermTaxonomyById($term_taxonomy_id);
         $this->assertEquals(true, $termTaxService->deleteTermTaxonomy($termTaxonomy));
     }

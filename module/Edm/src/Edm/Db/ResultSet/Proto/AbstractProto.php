@@ -226,7 +226,8 @@ abstract class AbstractProto extends \ArrayObject
         $this->forEachInSubProtos(function ($subProto) use ($input){
             $this->setAllowedKeysOnProto($input, $subProto);
         });
-        $this->setAllowedKeysOnProto($input);
+        $this->setAllowedKeysOnProto($input)
+             ->afterExchangeArray();
         return $oldArray;
     }
 
@@ -246,17 +247,18 @@ abstract class AbstractProto extends \ArrayObject
                     $this->setAllowedKeysOnProto($input[$formKey], $subProto);
                 }
             });
-        $this->setAllowedKeysOnProto($input[$this->getFormKey()]);
+        $this->setAllowedKeysOnProto($input[$this->getFormKey()])
+             ->afterExchangeNestedArray();
         return $oldArray;
     }
 
     /**
      * @param array $inputData
-     * @param ProtoInterface $proto
+     * @param ProtoInterface $protoObj
      * @return ProtoInterface $proto
      */
-    public function setAllowedKeysOnProto($inputData, $proto = null) {
-        $proto = $proto === null ? $this : $proto;
+    public function setAllowedKeysOnProto($inputData, $protoObj = null) {
+        $proto = $protoObj === null ? $this : $protoObj;
         $validKeys = $proto->getAllowedKeysForProto();
         foreach ($validKeys as $key) {
             if (isset($inputData[$key])) {
@@ -346,6 +348,27 @@ abstract class AbstractProto extends \ArrayObject
             }
         }
         return $out;
+    }
+    
+    /**
+     * @return \Edm\Db\ResultSet\Proto\AbstractProto
+     */
+    public function enforceBusinessRules () {
+        return $this->afterExchangeArray();
+    }
+    
+    /**
+     * @return \Edm\Db\ResultSet\Proto\AbstractProto
+     */
+    public function afterExchangeArray () {
+        return $this;
+    }
+
+    /**
+     * @return \Edm\Db\ResultSet\Proto\AbstractProto
+     */    
+    public function afterExchangeNestedArray () {
+        return $this;
     }
     
     /**

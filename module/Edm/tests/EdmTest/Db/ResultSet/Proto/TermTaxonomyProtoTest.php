@@ -214,7 +214,7 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
         // Exchange array
         $rslt = $termTaxonomy->exchangeArray($input);
 
-        // Assert returned empty array
+        // Assert returned array only contains one key value pair ('description' key-value)
         $this->assertCount(0, $rslt);
 
         // Protos to get valid keys from
