@@ -82,9 +82,10 @@ class DbDataHelper implements DbDataHelperInterface {
     /**
      * @param array $tuple
      * @param null|array $skipFields - Fields to not escape.
+     * @param null | array $jsonFields
      * @return array - Escaped $tuple.
      */
-    public function escapeArrayTuple ($tuple, $skipFields = null) {
+    public function escapeArrayTuple ($tuple, $skipFields = null, $jsonFields = null) {
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
             if (is_array($skipFields) && in_array($key, $skipFields)) {
@@ -106,9 +107,10 @@ class DbDataHelper implements DbDataHelperInterface {
     /**
      * @param ArrayObject $tuple
      * @param null|array $skipFields - Fields to not escape.
+     * @param null | array $jsonFields
      * @return ArrayObject - Escaped $tuple.
      */
-    public function escapeArrayObjectTuple ($tuple, $skipFields = null) {
+    public function escapeArrayObjectTuple ($tuple, $skipFields = null, $jsonFields = null) {
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
             if (is_array($skipFields) && in_array($key, $skipFields)) {
@@ -130,11 +132,12 @@ class DbDataHelper implements DbDataHelperInterface {
     /**
      * Escapes a tuple for insertion into db
      * @param array|ArrayObject $tuple - array, ArrayObject
-     * @param array $skipFields
+     * @param null | array $skipFields
+     * @param null | array $jsonFields
      * @throws Exception if $tuple type(s) are not matched.
      * @return array|ArrayObject - Escaped $tuple.
      */
-    public function escapeTuple($tuple, $skipFields = null) {
+    public function escapeTuple($tuple, $skipFields = null, $jsonFields = null) {
         if (is_array($tuple)) {
             $retVal = $this->escapeArrayTuple($tuple, $skipFields);
         }
@@ -152,9 +155,10 @@ class DbDataHelper implements DbDataHelperInterface {
      * Reverse escape a collection of rows/tuples
      * @param array $tuples
      * @param array $skipFields - Fields to skip or not escape.
+     * @param null | array $jsonFields
      * @return array - Array of escaped tuples<array|ArrayObject>.
      */
-    public function escapeTuples($tuples, $skipFields = null) {
+    public function escapeTuples($tuples, $skipFields = null, $jsonFields = null) {
         $new_array = array();
         // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {
@@ -166,9 +170,10 @@ class DbDataHelper implements DbDataHelperInterface {
     /**
      * @param array $tuple
      * @param null|array $skipFields - Fields to not reverse-escape.
+     * @param null | array $jsonFields
      * @return array $tuple
      */
-    public function reverseEscapeArrayTuple ($tuple, $skipFields = null) {
+    public function reverseEscapeArrayTuple ($tuple, $skipFields = null, $jsonFields = null) {
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
             if (is_array($skipFields) && in_array($key, $skipFields)) {
@@ -190,9 +195,10 @@ class DbDataHelper implements DbDataHelperInterface {
     /**
      * @param ArrayObject $tuple
      * @param null|array $skipFields - Fields to not reverse-escape.
+     * @param null | array $jsonFields
      * @return ArrayObject $tuple
      */
-    public function reverseEscapeArrayObjectTuple ($tuple, $skipFields = null) {
+    public function reverseEscapeArrayObjectTuple ($tuple, $skipFields = null, $jsonFields = null) {
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
             if (is_array($skipFields) && in_array($key, $skipFields)) {
@@ -215,10 +221,11 @@ class DbDataHelper implements DbDataHelperInterface {
      * Un-escapes our values from our db via the Service layer
      * @param array|ArrayObject $tuple - Also subclass of ArrayObject allowed.
      * @param null|array $skipFields - Fields to not reverse-escape.
+     * @param null | array $jsonFields
      * @throws Exception - Throws exception when $tuple type(s) are not matched.
      * @return array
      */
-    public function reverseEscapeTuple($tuple, $skipFields = null) {
+    public function reverseEscapeTuple($tuple, $skipFields = null, $jsonFields = null) {
         if (is_array($tuple)) {
             $retVal = $this->reverseEscapeArrayTuple($tuple, $skipFields);
         }
@@ -236,15 +243,34 @@ class DbDataHelper implements DbDataHelperInterface {
      * Reverse escape a collection of rows/tuples
      * @param array $tuples
      * @param null|array $skipFields - Fields to not reverse-escape.
+     * @param null | array $jsonFields
      * @return array
      */
-    public function reverseEscapeTuples($tuples, $skipFields = null) {
+    public function reverseEscapeTuples($tuples, $skipFields = null, $jsonFields = null) {
         $new_array = array();
         // Loop through rows and escape them for our view
         foreach ($tuples as $tuple) {
             $new_array[] = $this->reverseEscapeTuple($tuple);
         }
         return $new_array;
+    }
+    
+    /**
+     * @param array $array
+     * @param bool $htmlEntityEncode
+     * @return string
+     */
+    public function jsonEncodeAndEscapeArray ($array, $htmlEntityEncode = false) {
+        return $this->mega_escape_string(json_encode($array), $htmlEntityEncode);
+    }
+    
+    /**
+     * @param string $string
+     * @param bool $htmlEntityDecode
+     * @return array
+     */
+    public function unEscapeAndJsonDecodeString ($string, $htmlEntityDecode = false) {
+        return $this->reverse_mega_escape_string(json_encode($string), $htmlEntityDecode);
     }
 
 }

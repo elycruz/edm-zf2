@@ -13,7 +13,7 @@ trait ObjectStorageColumnAwareTrait {
      * @param string $data
      * @return array
      */
-    public function unSerializeAndUnescapeArray($data) {
+    public function unSerializeAndUnescapeTuple($data) {
         return $this->getDbDataHelper()->reverseEscapeTuple(
                     unserialize($data));
     }
@@ -33,7 +33,7 @@ trait ObjectStorageColumnAwareTrait {
      * @param array $data
      * @return string 
      */
-    public function serializeAndEscapeArray($data) {
+    public function serializeAndEscapeTuple($data) {
         return serialize($this->getDbDataHelper()->escapeTuple($data));
     }
     

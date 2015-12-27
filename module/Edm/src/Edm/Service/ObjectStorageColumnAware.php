@@ -10,8 +10,8 @@ namespace Edm\Service;
  * @author ElyDeLaCruz
  */
 interface ObjectStorageColumnAware {
-    public function serializeAndEscapeArray ($data);
+    public function serializeAndEscapeTuple ($data);
     public function serializeAndEscapeTuples ($data);
-    public function unSerializeAndUnEscapeArray ($data);
+    public function unSerializeAndUnEscapeTuple ($data);
     public function unSerializeAndUnEscapeTuples ($data);
 }

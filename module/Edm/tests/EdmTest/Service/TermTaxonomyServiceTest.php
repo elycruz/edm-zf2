@@ -262,7 +262,6 @@ class TermTaxonomyServiceTest  extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('\\Zend\\Db\\ResultSet\\ResultSet', $rsltSet);
     }
 
-    public static function tearDownAfterClass () {
-    }
+    //public static function tearDownAfterClass () {}
 
 }
