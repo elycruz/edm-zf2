@@ -62,26 +62,6 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
         ];
     }
     
-    /**
-     * @dataProvider megaEscapeStringTestProvider
-     * @param array $testCase
-     */
-    public function test_mega_escape_string ($testCase) {
-        $dbDataHelper = $this->dbDataHelper();
-        $escapedValue = $dbDataHelper->mega_escape_string($testCase['value']);
-        $this->assertEquals($escapedValue, $testCase['escapedValue']);
-    }
-
-    /**
-     * @dataProvider megaEscapeStringTestProvider
-     * @param array $testCase
-     */
-    public function test_reverse_mega_escape_string ($testCase) {
-        $dbDataHelper = $this->dbDataHelper();
-        $unescapedValue = $dbDataHelper->reverse_mega_escape_string($testCase['escapedValue']);
-        $this->assertEquals($unescapedValue, $testCase['value']);
-    }
-
     // @todo  Add json strings to data provider
     public function escapeTupleTestProvider () {
         return [
@@ -137,7 +117,7 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
     }
 
     public function escapeTupleTestProxy ($tuple, $expectedTuple) {
-    $escapedTuple = $this->dbDataHelper()->escapeTuple($tuple);
+        $escapedTuple = $this->dbDataHelper()->escapeTuple($tuple);
 
         // Array object version of `$tuple`
         $arrayObjectTuple = new \ArrayObject();
@@ -162,6 +142,55 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
         }    
     }
     
+    public function reverseEscapeTupleTestProxy ($tuple, $expectedTuple) {
+        $reversedEsc = $this->dbDataHelper()->reverseEscapeTuple($expectedTuple);
+
+        // Array object version of `$tuple`
+        $originalUnescapedObj = new \ArrayObject();
+
+        // Array object version of `$expectedTuple`
+        $expectedArrayObject = new \ArrayObject();
+
+        // Get keys to check
+        $expectedTupleKeys = array_keys($expectedTuple);
+
+        // Test reverse-escaped tuple and populate array object version of it
+        foreach ($expectedTupleKeys as $key) {
+            $this->assertEquals($reversedEsc[$key], $tuple[$key],
+                'Tuple should have key "' . $key . '".');
+            $originalUnescapedObj->{$key} = $tuple[$key];
+            $expectedArrayObject->{$key} = $expectedTuple[$key];
+        }
+
+        // Reverse escape array object tuple
+        $revEscObj = $this->dbDataHelper()->reverseEscapeTuple($expectedArrayObject);
+
+        // Test reverse-escaped array object
+        foreach ($originalUnescapedObj as $key => $value) {
+            $this->assertEquals($revEscObj->{$key}, $originalUnescapedObj->{$key});
+        }
+    }
+    
+    /**
+     * @dataProvider megaEscapeStringTestProvider
+     * @param array $testCase
+     */
+    public function test_mega_escape_string ($testCase) {
+        $dbDataHelper = $this->dbDataHelper();
+        $escapedValue = $dbDataHelper->mega_escape_string($testCase['value']);
+        $this->assertEquals($escapedValue, $testCase['escapedValue']);
+    }
+
+    /**
+     * @dataProvider megaEscapeStringTestProvider
+     * @param array $testCase
+     */
+    public function test_reverse_mega_escape_string ($testCase) {
+        $dbDataHelper = $this->dbDataHelper();
+        $unescapedValue = $dbDataHelper->reverse_mega_escape_string($testCase['escapedValue']);
+        $this->assertEquals($unescapedValue, $testCase['value']);
+    }
+
     /**
      * Test `escapeTuple` method.  Should work on both `ArrayObject`'s and `Array`s.
      * @param array $tuple
@@ -198,32 +227,7 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
      * @dataProvider escapeTupleTestProvider
      */
     public function testReverseEscapeTuple ($tuple, $expectedTuple) {
-        $reversedEsc = $this->dbDataHelper()->reverseEscapeTuple($expectedTuple);
-
-        // Array object version of `$tuple`
-        $originalUnescapedObj = new \ArrayObject();
-
-        // Array object version of `$expectedTuple`
-        $expectedArrayObject = new \ArrayObject();
-
-        // Get keys to check
-        $expectedTupleKeys = array_keys($expectedTuple);
-
-        // Test reverse-escaped tuple and populate array object version of it
-        foreach ($expectedTupleKeys as $key) {
-            $this->assertEquals($reversedEsc[$key], $tuple[$key],
-                'Tuple should have key "' . $key . '".');
-            $originalUnescapedObj->{$key} = $tuple[$key];
-            $expectedArrayObject->{$key} = $expectedTuple[$key];
-        }
-
-        // Reverse escape array object tuple
-        $revEscObj = $this->dbDataHelper()->reverseEscapeTuple($expectedArrayObject);
-
-        // Test reverse-escaped array object
-        foreach ($originalUnescapedObj as $key => $value) {
-            $this->assertEquals($revEscObj->{$key}, $originalUnescapedObj->{$key});
-        }
+        $this->reverseEscapeTupleTestProxy($tuple, $expectedTuple);
     }
 
     /**
@@ -233,7 +237,16 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
      * @dataProvider escapeTuplesTestProvider
      */
     public function testReverseEscapeTuples ($tuples, $expectedTuples) {
-
+        $tuplesLength = count($tuples);
+        $this->assertTrue($tuplesLength === count($expectedTuples));
+        for ($i = 0; $i < $tuplesLength; $i += 1) {
+            $tuple = $tuples[$i];
+            $expectedTuple = $expectedTuples[$i];
+            $tupleLength = count($tuple);
+            $expectedTupleLength = count($expectedTuple);
+            $this->assertTrue($tupleLength === $expectedTupleLength);
+            $this->reverseEscapeTupleTestProxy($tuple, $expectedTuple);
+        }
     }
     
     /**
