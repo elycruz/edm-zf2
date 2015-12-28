@@ -27,7 +27,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
     public static $qualifyingPostData = [
         'parent_id' => 0,
         'title' => 'Some Title',
-//        'alias' => 'some-slug', // Should b
+        'alias' => 'some-slug',
         'content' => 'Some content.',
         'excerpt' => 'Some exceprt.',
         'hits' => 0,
@@ -37,7 +37,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         'type' => 'post',
         'accessGroup' => 'guest',
         'status' => 'published',
-//        'userParams' => ''
+        'userParams' => ''
     ];
 
     /**

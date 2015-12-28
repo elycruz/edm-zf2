@@ -95,7 +95,6 @@ implements DateInfoTableAware,
      * @return mixed int | boolean | \Exception
      */
     public function createPost(PostProto $post) {
-        
         // Get currently logged in user
         $user = $this->getUser();
         
@@ -104,26 +103,12 @@ implements DateInfoTableAware,
             return false;
         }
         
-        // Get slugger
-        $slugger = new Slug();
-
         // Post Category Rel
         $postCategoryRel = $post->getPostCategoryRelProto();
 
-        // If empty alias
-        // @todo remove all per-field business logic from services
-        if (empty($post->alias)) {
-            $post->alias = $slugger($post->title);
-        }
-
         // Get some help for cleaning data to be submitted to db
-        $this->getDbDataHelper()->escapeTuple($post);
+        $this->getDbDataHelper()->escapeTuple($post, null, ['userParams']);
 
-        // If object storage column data is set normalize it's data
-        if (is_array($post->userParams)) {
-            $post->userParams = $this->serializeAndEscapeTuples($post->userParams);
-        }
-        
         // Get database platform object
         $driver = $this->getDb()->getDriver();
         $conn = $driver->getConnection();
@@ -182,17 +167,6 @@ implements DateInfoTableAware,
             return false;
         }
         
-        // If empty alias
-        if (empty($post->alias)) {
-            $slugger = new Slug();
-            $post->alias = $slugger($post->title);
-        }
-
-        // If is array user params serialize it to string
-        if (is_array($post->userParams)) {
-            $post->userParams = $this->serializeAndEscapeTuples($post->userParams);
-        }
-
         // Get post category rel proto
         $postCategoryRel = $post->getPostCategoryRelProto();
         $oldTermTaxonomyId = $postCategoryRel->getStoredSnapshotValues()['term_taxonomy_id'];
@@ -201,7 +175,7 @@ implements DateInfoTableAware,
         $changedTermTaxonomyId = $postCategoryRel->term_taxonomy_id !== $oldTermTaxonomyId ? $postCategoryRel->term_taxonomy_id : null;
 
         // Escape post and post category rel data
-        $escapedPost = $this->getDbDataHelper()->escapeTuple($post);
+        $escapedPost = $this->getDbDataHelper()->escapeTuple($post, null, ['userParams']);
 
         // Db driver
         $driver = $this->getDb()->getDriver();
