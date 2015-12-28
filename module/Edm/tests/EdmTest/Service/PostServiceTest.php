@@ -78,7 +78,7 @@ class PostServiceTest extends \PHPUnit_Framework_TestCase
         $postService = $this->postService();
         
         // Get 'unpublished' term taxonomy
-        $termTaxonomy = $termTaxService->getByAlias('unpublished', 'post-status');
+        $termTaxonomy = $termTaxService->getTermTaxonomyByAlias('unpublished', 'post-status');
         $postObj = new PostProto($postData);
         $postObj->getPostCategoryRelProto()->term_taxonomy_id = 
                 $termTaxonomy->term_taxonomy_id;

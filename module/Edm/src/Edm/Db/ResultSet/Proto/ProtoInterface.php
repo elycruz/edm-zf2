@@ -27,5 +27,8 @@ interface ProtoInterface {
     public function setAllowedKeysOnProto($inputData, $proto);
     public function filterArrayBasedOnOp ($array, $operation = null);
     public function forEachInSubProtos (callable $callback);
+    // An opportunity to enforce business rules on row objects (protos) before performing 
+    // further CRUD operations on them.
+    public function enforceBusinessRules (); 
 
 }

@@ -111,6 +111,7 @@ implements DateInfoTableAware,
         $postCategoryRel = $post->getPostCategoryRelProto();
 
         // If empty alias
+        // @todo remove all per-field business logic from services
         if (empty($post->alias)) {
             $post->alias = $slugger($post->title);
         }
