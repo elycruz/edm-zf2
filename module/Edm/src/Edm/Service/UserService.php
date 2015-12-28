@@ -38,7 +38,6 @@ class UserService extends AbstractCrudService
     /**
      * @param UserProto $user
      * @return \Exception|int
-     * @throws UnqualifiedDataException
      */
     public function createUser (UserProto $user) {
         // Get today's date
@@ -259,7 +258,6 @@ class UserService extends AbstractCrudService
     /**
      * @param UserProto $userProto
      * @return bool|\Exception
-     * @throws UnqualifiedDataException
      * @todo Protect this method so that it actually only operates for `superadmins` and `cms-managers`.
      * @todo Optionally, also, only mark user as `marked-for-deleted` instead of actually deleting user.
      */

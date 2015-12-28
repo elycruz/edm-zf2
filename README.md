@@ -130,6 +130,8 @@ return [
     - [X] - `Edm\Hasher\Pbkdf2Hasher`.
     - [X] - `Edm\InputFilter\DefaultInputOptions`.
     - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.
+    - [ ] - `Edm\Permissions\Acl`.
+    - [ ] - `Edm\Permissions\Rbac`.
     - [ ] - `Edm\Service`:
         - [X] - Preliminary `Edm\Service\TermTaxonomyService` tests.
         - [X] - `Edm\Service\UserService`
