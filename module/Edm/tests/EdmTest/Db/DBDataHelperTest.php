@@ -4,6 +4,8 @@
  * User: Ely
  * Date: 11/13/2015
  * Time: 6:44 PM
+ * @todo finish tests for `$skipFields` and `$jsonFields` features of the 
+ *  escape and unescape methods of `DbDataHelper`.
  */
 
 namespace EdmTest\Db;
@@ -70,11 +72,16 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
                 'field2' => 'All your base are\' belong to us.',
                 'field3' => ';All ;your\' ;base ;are\' ;%%% ;belong ;to ;us.',
                 'field4' => " \\ \\ \\ \\ ",
+                'userParams' => [
+                    'someKey' => '`someKey\'s` value.',
+                    'all' => ['your' => ['base' => ['are' => ['belong' => ['to' => ['us' => true]]]]]]
+                ]
             ], [
                 'field1' => 'All your\\\' base are\\\' belong to\\\' us.',
                 'field2' => 'All your base are\\\' belong to us.',
                 'field3' => '\\;All \\;your\\\' \\;base \\;are\\\' \\;\\%\\%\\% \\;belong \\;to \\;us.',
-                'field4' => " \\%5C \\%5C \\%5C \\%5C "
+                'field4' => " \\%5C \\%5C \\%5C \\%5C ",
+                'userParams' => '{\"someKey\":\"`someKey\\\'s` value.\",\"all\":{\"your\":{\"base\":{\"are\":{\"belong\":{\"to\":{\"us\":true}}}}}}}'
             ]]
         ];
     }
@@ -117,7 +124,7 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
     }
 
     public function escapeTupleTestProxy ($tuple, $expectedTuple) {
-        $escapedTuple = $this->dbDataHelper()->escapeTuple($tuple);
+        $escapedTuple = $this->dbDataHelper()->escapeTuple($tuple, null, ['userParams']);
 
         // Array object version of `$tuple`
         $arrayObjectTuple = new \ArrayObject();
@@ -134,7 +141,7 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
         }
 
         // Escape array object tuple
-        $escapedArrayObject = $this->dbDataHelper()->escapeTuple($tuple);
+        $escapedArrayObject = $this->dbDataHelper()->escapeTuple($tuple, null, ['userParams']);
 
         // Test escaped array object
         foreach ($arrayObjectTuple as $key => $value) {
@@ -143,7 +150,7 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
     }
     
     public function reverseEscapeTupleTestProxy ($tuple, $expectedTuple) {
-        $reversedEsc = $this->dbDataHelper()->reverseEscapeTuple($expectedTuple);
+        $reversedEsc = $this->dbDataHelper()->reverseEscapeTuple($expectedTuple, null, ['userParams']);
 
         // Array object version of `$tuple`
         $originalUnescapedObj = new \ArrayObject();
@@ -163,7 +170,7 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
         }
 
         // Reverse escape array object tuple
-        $revEscObj = $this->dbDataHelper()->reverseEscapeTuple($expectedArrayObject);
+        $revEscObj = $this->dbDataHelper()->reverseEscapeTuple($expectedArrayObject, null, ['userParams']);
 
         // Test reverse-escaped array object
         foreach ($originalUnescapedObj as $key => $value) {

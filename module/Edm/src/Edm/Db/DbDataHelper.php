@@ -12,9 +12,11 @@ use \ArrayObject;
  * @todo create a validator/filter for valid html id strings
  * @todo create a validator/filter for valid edm alias 
  *  (aliases used for post, links, terms etc.)
- * @todo change all escape and unescape methods in this class to accept 
- * an options parameter instead of multiple parameters.  Params we need in options
- * array: 'htmlEncodeFields/htmlDecodeFields', 'jsonFields', 'skipFields'
+ * @note the nested use of mega_escape_string and reverse_mega_escape_string
+ * found in this class do not accept the decode/encode html entities param (
+ * they only accept that param directly as we don't want the service layer
+ * controlling view logic (or deciding how things should look to in the view
+ * layer).
  * @author ElyDeLaCruz
  */
 
@@ -44,22 +46,13 @@ class DbDataHelper implements DbDataHelperInterface {
      * Returns:
      *    string -- safe!!!!!
      *
-     * Notes:
-     *    No, ereg_replace is NOT the fastest function ever.
-     *    However, it is very UTF-8 safe, which is critcal for
-     *    us.  We did some timings, and this took an average of
-     *    5x10e-5 seconds per string
-     * 
      * Original Code from Mark Wandschneider
      *
      * @param string $str
      * @param bool $in_markup
      * @return string
      */
-    public function mega_escape_string($str, $in_markup = false) {
-        if ($str === null) {
-            return '';
-        }
+    public function mega_escape_string(string $str, bool $in_markup = false) {
         $str = preg_replace('/(\\\\)/', '%5C', $str); // backslash needs to be doubled in the regex for it to work
         $str = preg_replace('/(["\'%;])/', '\\\\$1', $str);
         if ($in_markup == true) {
@@ -74,10 +67,7 @@ class DbDataHelper implements DbDataHelperInterface {
      * @param boolean $in_markup
      * @return string
      */
-    public function reverse_mega_escape_string($str, $in_markup = false) {
-        if ($str === null) {
-            return '';
-        }
+    public function reverse_mega_escape_string(string $str, bool $in_markup = false) {
         $str = str_replace('\\', '', $str);
         $str = str_replace('%5C', '\\', $str);
         if ($in_markup == true) {
@@ -109,7 +99,7 @@ class DbDataHelper implements DbDataHelperInterface {
             else if (is_array($val)) {
                 $tuple[$key] = $this->_escapeArrayTuple($val, $skipFields, $jsonFields);
             }
-            else {
+            else if (is_string($val)) {
                 $tuple[$key] = $this->mega_escape_string($val);
             }
         }
@@ -139,7 +129,7 @@ class DbDataHelper implements DbDataHelperInterface {
             else if (is_object($val) && is_a($val, 'ArrayObject')) {
                 $tuple->{$key} = $this->_escapeArrayObjectTuple($val);
             }
-            else {
+            else if (is_string($val)) {
                 $tuple->{$key} = $this->mega_escape_string($val);
             }
         }
@@ -190,19 +180,24 @@ class DbDataHelper implements DbDataHelperInterface {
      * @param null | array $jsonFields
      * @return array $tuple
      */
-    protected function reverseEscapeArrayTuple ($tuple, array $skipFields = null, array $jsonFields = null) {
+    protected function _reverseEscapeArrayTuple ($tuple, array $skipFields = null, array $jsonFields = null) {
+        $isPopulatedSkipFields = !empty($skipFields);
+        $isPopulatedJsonFields = !empty($jsonFields);
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
-            if (is_array($skipFields) && in_array($key, $skipFields)) {
+            if ($isPopulatedSkipFields && in_array($key, $skipFields)) {
                 continue;
             }
+            if ($isPopulatedJsonFields && in_array($key, $jsonFields)) {
+                $tuple[$key] = $this->unEscapeAndJsonDecodeString($val);
+            }
             else if (is_object($val) && is_a($val, 'ArrayObject')) {
-                $tuple[$key] = $this->reverseEscapeArrayObjectTuple($val, $skipFields, $jsonFields);
+                $tuple[$key] = $this->_reverseEscapeArrayObjectTuple($val, $skipFields, $jsonFields);
             }
             else if (is_array($val)) {
-                $tuple[$key] = $this->reverseEscapeArrayTuple($val, $skipFields, $jsonFields);
+                $tuple[$key] = $this->_reverseEscapeArrayTuple($val, $skipFields, $jsonFields);
             }
-            else {
+            else if (is_string($val)) {
                 $tuple[$key] = $this->reverse_mega_escape_string($val);
             }
         }
@@ -215,19 +210,24 @@ class DbDataHelper implements DbDataHelperInterface {
      * @param null | array $jsonFields
      * @return ArrayObject $tuple
      */
-    protected function reverseEscapeArrayObjectTuple ($tuple, array $skipFields = null, array $jsonFields = null) {
+    protected function _reverseEscapeArrayObjectTuple ($tuple, array $skipFields = null, array $jsonFields = null) {
+        $isPopulatedSkipFields = !empty($skipFields);
+        $isPopulatedJsonFields = !empty($jsonFields);
         foreach ($tuple as $key => $val) {
             // Check if field needs to be skipped
-            if (is_array($skipFields) && in_array($key, $skipFields)) {
+            if ($isPopulatedSkipFields && in_array($key, $skipFields)) {
                 continue;
             }
+            if ($isPopulatedJsonFields && in_array($key, $jsonFields)) {
+                $tuple->{$key} = $this->unEscapeAndJsonDecodeString($val);
+            }
             else if (is_array($val)) {
-                $tuple->{$key} = $this->reverseEscapeArrayTuple($val);
+                $tuple->{$key} = $this->_reverseEscapeArrayTuple($val, $skipFields, $jsonFields);
             }
             else if (is_object($val) && is_a($val, 'ArrayObject')) {
-                $tuple->{$key} = $this->reverseEscapeArrayObjectTuple($val);
+                $tuple->{$key} = $this->_reverseEscapeArrayObjectTuple($val, $skipFields, $jsonFields);
             }
-            else {
+            else if (is_string($val)) {
                 $tuple->{$key} = $this->reverse_mega_escape_string($val);
             }
         }
@@ -244,10 +244,10 @@ class DbDataHelper implements DbDataHelperInterface {
      */
     public function reverseEscapeTuple($tuple, array $skipFields = null, array $jsonFields = null) {
         if (is_array($tuple)) {
-            $retVal = $this->reverseEscapeArrayTuple($tuple, $skipFields, $jsonFields);
+            $retVal = $this->_reverseEscapeArrayTuple($tuple, $skipFields, $jsonFields);
         }
         else if (is_subclass_of($tuple, 'ArrayObject') || get_class($tuple) == 'ArrayObject') {
-            $retVal = $this->reverseEscapeArrayObjectTuple($tuple, $skipFields, $jsonFields);
+            $retVal = $this->_reverseEscapeArrayObjectTuple($tuple, $skipFields, $jsonFields);
         }
         else {
             throw new Exception('`' . __CLASS__ . '->' . __FUNCTION__ . '` expects a `$tuple` parameter of type ' .
@@ -277,7 +277,7 @@ class DbDataHelper implements DbDataHelperInterface {
      * @param bool $htmlEntityEncode
      * @return string
      */
-    public function jsonEncodeAndEscapeArray ($array, $htmlEntityEncode = false) {
+    public function jsonEncodeAndEscapeArray (array $array, bool $htmlEntityEncode = false) {
         return $this->mega_escape_string(json_encode($array), $htmlEntityEncode);
     }
     
@@ -286,7 +286,7 @@ class DbDataHelper implements DbDataHelperInterface {
      * @param bool $htmlEntityDecode
      * @return array
      */
-    public function unEscapeAndJsonDecodeString ($string, $htmlEntityDecode = false) {
+    public function unEscapeAndJsonDecodeString (string $string, bool $htmlEntityDecode = false) {
         return json_decode($this->reverse_mega_escape_string($string, $htmlEntityDecode), true);
     }
 
