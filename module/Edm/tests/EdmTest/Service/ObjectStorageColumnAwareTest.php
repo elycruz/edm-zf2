@@ -121,10 +121,10 @@ class ObjectStorageColumnAwareTest extends \PHPUnit_Framework_TestCase {
      */
     public function testUnSerializeAndUnEscapeTuples (array $data) {
         $objStorageAware = new ExampleObjectStorageColumnAwareClass();
-        $serializedData = $objStorageAware->serializeAndEscapeTuples($data);
+        $serializedData = $objStorageAware->serializeAndEscapeTuples($data, null);
         $unserializedData = $objStorageAware->unSerializeAndUnescapeTuples($serializedData);
         $this->assertTrue(is_array($unserializedData));
-        $this->assertCount(count($data), $unserializedData);
+        $this->assertCount(count($data), $unserializedData);        
 //        for ($i = 0; $i <= count($data); $i += 1) {
 //            $tuple = $data[$i];
 //            $unserializedTuple = $unserializedData[$i];

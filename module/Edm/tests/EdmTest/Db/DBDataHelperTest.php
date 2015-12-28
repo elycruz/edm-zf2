@@ -12,6 +12,9 @@ use Edm\Db\DbDataHelper;
 
 class DBDataHelperTest  extends \PHPUnit_Framework_TestCase  {
 
+    /**
+     * @var \Edm\Db\DbDataHelper
+     */
     public static $dbDataHelper;
 
     public static function setUpBeforeClass () {
@@ -57,7 +60,7 @@ class DBDataHelperTest  extends \PHPUnit_Framework_TestCase  {
             ]]
         ];
     }
-
+    
     /**
      * @dataProvider megaEscapeStringTestProvider
      * @param array $testCase
@@ -216,5 +219,74 @@ class DBDataHelperTest  extends \PHPUnit_Framework_TestCase  {
     public function testReverseEscapeTuples ($tuples, $expectedTuples) {
 
     }
+    
+    /**
+     * @dataProvider escapeTuplesTestProvider
+     * @param array $tuple
+     * @param array $expectedTuple
+     */
+    public function testJsonEncodeAndEscapeArray ($tuple, $expectedTuple) {
+        $dbDataHelper = $this->dbDataHelper();
+        $jsonString = $dbDataHelper->jsonEncodeAndEscapeArray($tuple);
+        $unEscapedJson = $dbDataHelper->unEscapeAndJsonDecodeString($jsonString);
+        $this->assertTrue(strlen($jsonString) > 0, 'Assert JSON string has a length greater than 0.');
+        $this->assertTrue(preg_match('/^\[\{/', $jsonString) === 1, 'Assert json has expected opening delimiters.');
+        $this->assertTrue(preg_match('/\}\]$/', $jsonString) === 1, 'Assert json has expected closing delimiters.');
+        $keys = array_keys($tuple);
+        foreach ($keys as $key) {
+            $valueType = gettype($tuple[$key]);
+            $unEscapedValueType = gettype($unEscapedJson[$key]);
+            $this->assertEquals($valueType, $unEscapedValueType, 'Assert typeof value unescaped matches original value type (type before escaped).');
+        }
+    }
+    
+    /**
+     * @dataProvider escapeTuplesTestProvider
+     * @param array $tuple
+     * @param array $expectedTuple
+     */
+    public function testUnEscapeAndJsonDecodeString ($tuple, $expectedTuple) {
+        $dbDataHelper = $this->dbDataHelper();
+        $jsonString = '[{\"hi\": \"ola\"}, {\"hello\": \"world\"}, '
+                . '{"all": {"your": {"base": {"are": {"belong": {"to": {"us": true}}}}}}}]';
+        $item3ExpectedKeys = ['all', 'your', 'base', 'are', 'belong', 'to', 'us'];
+        $unEscapedJson = $dbDataHelper->unEscapeAndJsonDecodeString($jsonString);
+        
+        // Assert expected  objects are returned in first array
+        foreach($unEscapedJson as $tuple) {
+            $this->assertTrue(gettype($tuple) === 'array');
+        }
+        
+        // Assert object one from JSON string
+        $this->assertArrayHasKey ('hi', $unEscapedJson[0]);
+        $this->assertEquals ('ola', $unEscapedJson[0]['hi']);
+        
+        // Assert object two from JSON string
+        $this->assertArrayHasKey ('hello', $unEscapedJson[1]);
+        $this->assertEquals('world', $unEscapedJson[1]['hello']);
+        
+        function inlineRecursiveCheck ($element, $index = 0, $keysToCheck, $self) {
+            foreach($element as $key => $value) {
+                $self->assertEquals($keysToCheck[$index], $key);
+                // If not at the end of `keysToCheck` assume every object is an array (as is defined above).
+                if ($index !== count($keysToCheck) - 1) {
+                    $self->assertInternalType('array', $value);
+                }
+                // Else assert hardcoded, predefined final nested value is true
+                else {
+                    $self->assertTrue($value);
+                }
+                // If `value` is an array rercursively check it
+                if (is_array($value)) {
+                    inlineRecursiveCheck($value, $index + 1, $keysToCheck, $self);
+                }
+            }
+        }
+        
+        // Recursively check element 3 of unencoded json array.
+        inlineRecursiveCheck($unEscapedJson[2], 0, $item3ExpectedKeys, $this);
+    }
+    
+    
 
 }

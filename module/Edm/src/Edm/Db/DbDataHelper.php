@@ -261,7 +261,7 @@ class DbDataHelper implements DbDataHelperInterface {
      * @return string
      */
     public function jsonEncodeAndEscapeArray ($array, $htmlEntityEncode = false) {
-        return $this->mega_escape_string(json_encode($array), $htmlEntityEncode);
+        return $this->mega_escape_string(json_encode($array, true), $htmlEntityEncode);
     }
     
     /**
@@ -270,7 +270,7 @@ class DbDataHelper implements DbDataHelperInterface {
      * @return array
      */
     public function unEscapeAndJsonDecodeString ($string, $htmlEntityDecode = false) {
-        return $this->reverse_mega_escape_string(json_encode($string), $htmlEntityDecode);
+        return json_decode($this->reverse_mega_escape_string($string, $htmlEntityDecode), true);
     }
 
 }
