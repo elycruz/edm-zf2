@@ -136,14 +136,8 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
         ];
     }
 
-    /**
-     * Test `escapeTuple` method.
-     * @param array $tuple
-     * @param array $expectedTuple
-     * @dataProvider escapeTupleTestProvider
-     */
-    public function testEscapeTuple ($tuple, $expectedTuple) {
-        $escapedTuple = $this->dbDataHelper()->escapeTuple($tuple);
+    public function escapeTupleTestProxy ($tuple, $expectedTuple) {
+    $escapedTuple = $this->dbDataHelper()->escapeTuple($tuple);
 
         // Array object version of `$tuple`
         $arrayObjectTuple = new \ArrayObject();
@@ -165,7 +159,17 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
         // Test escaped array object
         foreach ($arrayObjectTuple as $key => $value) {
             $this->assertEquals($expectedArrayObject->{$key}, $escapedArrayObject->{$key});
-        }
+        }    
+    }
+    
+    /**
+     * Test `escapeTuple` method.  Should work on both `ArrayObject`'s and `Array`s.
+     * @param array $tuple
+     * @param array $expectedTuple
+     * @dataProvider escapeTupleTestProvider
+     */
+    public function testEscapeTuple ($tuple, $expectedTuple) {
+        $this->escapeTupleTestProxy($tuple, $expectedTuple);
     }
 
     /**
@@ -175,7 +179,16 @@ class DbDataHelperTest  extends \PHPUnit_Framework_TestCase  {
      * @dataProvider escapeTuplesTestProvider
      */
     public function testEscapeTuples ($tuples, $expectedTuples) {
-
+        $tuplesLength = count($tuples);
+        $this->assertTrue($tuplesLength === count($expectedTuples));
+        for ($i = 0; $i < $tuplesLength; $i += 1) {
+            $tuple = $tuples[$i];
+            $expectedTuple = $expectedTuples[$i];
+            $tupleLength = count($tuple);
+            $expectedTupleLength = count($expectedTuple);
+            $this->assertTrue($tupleLength === $expectedTupleLength);
+            $this->escapeTupleTestProxy($tuple, $expectedTuple);
+        }
     }
     
     /**
