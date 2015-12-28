@@ -3,13 +3,13 @@
 namespace Edm\Db;
 
 /**
- * Interface for data helpers that escape values for db and 
- * reverse escapes them from db.
+ * Interface for data helpers that escape values for RDBMS and 
+ * reverse escapes values from RDBMS.
  * @author ElyDeLaCruz
  */
 interface DbDataHelperInterface {
-    public function escapeTuple($tuple, $skipFields = null);
-    public function escapeTuples($tuples, $skipFields = null);
-    public function reverseEscapeTuple($tuple, $skipFields = null);
-    public function reverseEscapeTuples($tuples, $skipFields = null);
+    public function escapeTuple($tuple, array $skipFields = null, array $jsonFields = null);
+    public function escapeTuples($tuples, array $skipFields = null, array $jsonFields = null);
+    public function reverseEscapeTuple($tuple, array $skipFields = null, array $jsonFields = null);
+    public function reverseEscapeTuples($tuples, array $skipFields = null, array $jsonFields = null);
 }
