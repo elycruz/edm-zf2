@@ -17,11 +17,11 @@ defined ('APP_PATH') ||
 return array(
     'edm-admin-acl' => [
         'resources' => [
-            'index' => '',
-            'post' => 'term',
-            'term' => 'index',
-            'term-taxonomy' => 'term',
-            'user' => 'index'
+            'edm-admin-index' => '',
+            'edm-admin-term' => 'edm-admin-index',
+            'edm-admin-post' => 'edm-admin-term',
+            'edm-admin-term-taxonomy' => 'edm-admin-term',
+            'edm-admin-user' => 'edm-admin-index'
         ],
         'roles' => [
             'cms-guest' => null,
@@ -32,17 +32,21 @@ return array(
             'cms-super-admin' => 'cms-super-admin'
         ],
         'relationship_map' => [
-            'allow' => [
-                'cms-guest' => [
+            'cms-guest' => [
+                'allow' => [
                     '*' => 'index',
-                    'index' => ['index', 'login', 'logout']
-                ],
-                'cms-user' => [
-                    'post' => ['index', 'create', 'read', 'update', 'delete'],
-                    'term-taxonomy' => ['index', 'create', 'read', 'update', 'delete']
-                ],
-                'cms-admin' => [
-                    'user' => ['index', 'create', 'read', 'update', 'delete']
+                    'edm-admin-index' => ['index', 'login', 'logout']
+                ]
+            ],
+            'cms-user' => [
+                'allow' => [
+                    'edm-admin-post' => ['index', 'create', 'read', 'update', 'delete'],
+                    'edm-admin-term-taxonomy' => ['index', 'create', 'read', 'update', 'delete']
+                ]
+            ],
+            'cms-admin' => [
+                'allow' => [
+                    'edm-admin-user' => ['index', 'create', 'read', 'update', 'delete']
                 ]
             ]
         ]

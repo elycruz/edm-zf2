@@ -29,12 +29,12 @@ class Acl extends ZendAcl {
             array $resources = null, 
             array $relationsMap = null
     ) {
-        return $this->_addRoles($roles)
-                    ->_addResources($resources)
-                    ->_addPermissions($relationsMap);
+        return $this->addRoles($roles)
+                    ->addResources($resources)
+                    ->addPermissionsForRoleAndAclDefinitionMap($relationsMap);
     }
 
-    protected function _addRoles(array $roles = null) {
+    public function addRoles(array $roles = null) {
         if (!isset($roles)) {
             return $this;
         }
@@ -48,7 +48,7 @@ class Acl extends ZendAcl {
         return $this;
     }
 
-    protected function _addResources(array $resources = null) {
+    public function addResources(array $resources = null) {
         if (!isset($resources)) {
             return $this;
         }
@@ -62,19 +62,35 @@ class Acl extends ZendAcl {
         return $this;
     }
 
-    protected function _addPermissionsForRole (
+    public function addPermissionsForRole (
             string $roleName, 
             string $allowOrDeny = 'allow', 
             array $resourceAndPermissionsPair = null
     ) {
+        // Throw an exception if `$allowOrDeny` is not equal to 'allow' or 'deny'
+        if ($allowOrDeny !== 'allow' || $allowOrDeny !== 'deny') {
+            throw new Exception ('`' . __CLASS__ . '->' . __FUNCTION__ 
+                    . '` only allows a value of "allow" or "deny" for it\'s '
+                    . '`$allowOrDeny` parameter.  Value recieved "' . $allowOrDeny . '".');
+        }
         foreach ($resourceAndPermissionsPair as $resource => $permissions) {
             $this->{$allowOrDeny}($roleName, $resource, $permissions);
         }
         return $this;
     }
     
-    protected function _addPermissions () {
-        
+    protected function _processRoleAclDefinition (string $roleName, array $roleDefinition) {
+        foreach ($roleDefinition as $allowOrDeny => $resourceAndPermissionsMap) {
+            $this->_addPermissionsForRole($roleName, $allowOrDeny, $resourceAndPermissionsMap);
+        }
+        return $this;
     }
-
+    
+    public function addPermissionsForRoleAndAclDefinitionMap (array $rolesAndPermissionsMap) {
+        foreach ($rolesAndPermissionsMap as $role => $definition) {
+            $this->_processRoleAclDefinition($role, $definition);
+        }
+        return $this;
+    }
+    
 }
