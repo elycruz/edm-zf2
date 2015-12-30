@@ -31,6 +31,10 @@ class Bootstrap
         return static::$config;
     }
     
+    public static function getAutoloadConfig() {
+        return static::$autoload_config;
+    }
+    
     public static function initDbAdapter () {
         // Autoload configs
         $autoload_config = static::$autoload_config;
