@@ -15,6 +15,41 @@ defined ('APP_PATH') ||
  * file.
  */
 return array(
+    'edm-admin-acl' => [
+        'resources' => [
+            'index' => '',
+            'post' => 'term',
+            'term' => 'index',
+            'term-taxonomy' => 'term',
+            'user' => 'index'
+        ],
+        'roles' => [
+            'cms-guest' => null,
+            'cms-author' => 'cms-guest',
+            'cms-editor' => 'cms-editor',
+            'cms-publisher' => 'cms-publisher',
+            'cms-admin' => 'cms-admin',
+            'cms-super-admin' => 'cms-super-admin'
+        ],
+        'relationship_map' => [
+            'allow' => [
+                'cms-guest' => [
+                    '*' => 'index',
+                    'index' => ['index', 'login', 'logout']
+                ],
+                'cms-user' => [
+                    'post' => ['index', 'create', 'read', 'update', 'delete'],
+                    'term-taxonomy' => ['index', 'create', 'read', 'update', 'delete']
+                ],
+                'cms-admin' => [
+                    'user' => ['index', 'create', 'read', 'update', 'delete']
+                ]
+            ]
+        ]
+    ],
+    'edm-rbac' => [
+        
+    ],
     'edm-db' => [
         'driver' => 'PDO_Mysql',
         'host' => '127.0.0.1',
