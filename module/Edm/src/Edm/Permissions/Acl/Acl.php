@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Edm\Permissions;
+namespace Edm\Permissions\Acl;
 
 use Zend\Permissions\Acl\Acl as ZendAcl,
     Zend\Permissions\Acl\Role\GenericRole;
@@ -25,15 +25,19 @@ class Acl extends ZendAcl {
             array $resources = null, 
             array $relationsMap = null
     ) {
-        return $this->addRoles($roles)
-                    ->addResources($resources)
-                    ->addPermissionsForRoleAndAclDefinitionMap($relationsMap);
+        if (isset($roles)) {
+            $this->addRoles($roles);
+        }
+        if (isset($resources)) {
+            $this->addResources($resources);
+        }
+        if (isset($relationsMap)) {
+            $this->addPermissionsForRoleAndAclDefinitionMap($relationsMap);
+        }
+        return $this;
     }
 
-    public function addRoles(array $roles = null) {
-        if (!isset($roles)) {
-            return $this;
-        }
+    public function addRoles(array $roles) {
         foreach ($roles as $name => $parents) {
             if ($this->hasRole($name)) {
                 continue;
@@ -44,10 +48,7 @@ class Acl extends ZendAcl {
         return $this;
     }
 
-    public function addResources(array $resources = null) {
-        if (!isset($resources)) {
-            return $this;
-        }
+    public function addResources(array $resources) {
         foreach ($resources as $resource => $parent) {
             if ($this->hasResource($resource)) {
                 continue;
@@ -61,15 +62,18 @@ class Acl extends ZendAcl {
     public function addPermissionsForRole (
             string $roleName, 
             string $allowOrDeny = 'allow', 
-            array $resourceAndPermissionsPair = null
+            array $resourceAndPermissionPairs = null
     ) {
         // Throw an exception if `$allowOrDeny` is not equal to 'allow' or 'deny'
-        if ($allowOrDeny !== 'allow' || $allowOrDeny !== 'deny') {
-            throw new Exception ('`' . __CLASS__ . '->' . __FUNCTION__ 
+        if ($allowOrDeny !== 'allow' && $allowOrDeny !== 'deny') {
+            throw new \Exception ('`' . __CLASS__ . '->' . __FUNCTION__ 
                     . '` only allows a value of "allow" or "deny" for it\'s '
                     . '`$allowOrDeny` parameter.  Value recieved "' . $allowOrDeny . '".');
         }
-        foreach ($resourceAndPermissionsPair as $resource => $permissions) {
+        foreach ($resourceAndPermissionPairs as $resource => $permissions) {
+            if ($resource === '*' || $resource === 'all') {
+                $resource = null;
+            }
             $this->{$allowOrDeny}($roleName, $resource, $permissions);
         }
         return $this;
@@ -77,7 +81,7 @@ class Acl extends ZendAcl {
     
     protected function _processRoleAclDefinition (string $roleName, array $roleDefinition) {
         foreach ($roleDefinition as $allowOrDeny => $resourceAndPermissionsMap) {
-            $this->_addPermissionsForRole($roleName, $allowOrDeny, $resourceAndPermissionsMap);
+            $this->addPermissionsForRole($roleName, $allowOrDeny, $resourceAndPermissionsMap);
         }
         return $this;
     }

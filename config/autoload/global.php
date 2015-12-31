@@ -17,7 +17,7 @@ defined ('APP_PATH') ||
 return array(
     'edm-admin-acl' => [
         'resources' => [
-            'edm-admin-index' => '',
+            'edm-admin-index' => null,
             'edm-admin-term' => 'edm-admin-index',
             'edm-admin-post' => 'edm-admin-term',
             'edm-admin-term-taxonomy' => 'edm-admin-term',
@@ -25,13 +25,14 @@ return array(
         ],
         'roles' => [
             'cms-guest' => null,
-            'cms-author' => 'cms-guest',
-            'cms-editor' => 'cms-editor',
-            'cms-publisher' => 'cms-publisher',
-            'cms-admin' => 'cms-admin',
-            'cms-super-admin' => 'cms-super-admin'
+            'cms-user' => 'cms-guest',
+            'cms-author' => 'cms-user',
+            'cms-editor' => 'cms-author',
+            'cms-publisher' => 'cms-editor',
+            'cms-admin' => 'cms-publisher',
+            'cms-super-admin' => 'cms-admin'
         ],
-        'relationship_map' => [
+        'relationships_map' => [
             'cms-guest' => [
                 'allow' => [
                     '*' => 'index',
