@@ -7,7 +7,7 @@ namespace EdmTest\Permission\Acl;
 use Edm\Permissions\Acl\Acl,
     EdmTest\Bootstrap;
 
-class TermProtoTest extends \PHPUnit_Framework_TestCase
+class AclTest extends \PHPUnit_Framework_TestCase
 {
     public static $config;
     
@@ -55,6 +55,32 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase
         foreach ($expectedResources as $resource) {
             $this->assertTrue($acl->hasResource($resource), 'It should have `resource` "' . $resource . '".');
         }
+    }
+    
+    public function testAddAclDefinitionForRole () {
+        $roleAclDefinition = [
+            'roles' => [
+                'guest' => null,
+                'user' => 'guest',
+                'admin' => 'user'
+            ],
+            'resources' => [
+                'index' => null,
+                'post' => 'index',
+                'contact' => null
+            ],
+            'relationships' => [
+                'guest' => [
+                    'allow' => [
+                        'index' => '*',
+                        'post' => '*'
+                    ],
+                    'deny' => [
+                        'conact' => '*'
+                    ]
+                ],
+            ]
+        ];
     }
     
     public function testPopulatesRolesViaConstruction () {
