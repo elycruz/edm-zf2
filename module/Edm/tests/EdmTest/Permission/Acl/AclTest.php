@@ -30,11 +30,31 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Edm\Permissions\Acl\Acl', $acl,
                 'Should be of expected class type `Edm\Permissions\Acl\Acl`.');
     }
-    
+        
     public function testConstructWithOutConfig () {
         $acl = new Acl();
         $this->assertInstanceOf('Edm\Permissions\Acl\Acl', $acl,
             'Should be of expected class type `Edm\Permissions\Acl\Acl`.');
+    }
+    
+    public function testAddRoles () {
+        $acl = new Acl();
+        $roles = ['role1' => null, 'role2' => 'role1', 'role3' => 'role2', 'role4' => 'role3'];
+        $acl->addRoles($roles);
+        $expectedRoles = array_keys($roles);
+        foreach ($expectedRoles as $role) {
+            $this->assertTrue($acl->hasRole($role), 'It should have `role` "' . $role . '".');
+        }
+    }
+    
+    public function testAddResources () {
+        $acl = new Acl();
+        $resources = ['resource1' => null, 'resource2' => 'resource1', 'resource3' => 'resource2', 'resource4' => 'resource3'];
+        $acl->addResources($resources);
+        $expectedResources = array_keys($resources);
+        foreach ($expectedResources as $resource) {
+            $this->assertTrue($acl->hasResource($resource), 'It should have `resource` "' . $resource . '".');
+        }
     }
     
     public function testPopulatesRolesViaConstruction () {
