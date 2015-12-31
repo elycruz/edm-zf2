@@ -79,7 +79,7 @@ class Acl extends ZendAcl {
         return $this;
     }
     
-    protected function _processRoleAclDefinition (string $roleName, array $roleDefinition) {
+    public function addRoleAclDefinition (string $roleName, array $roleDefinition) {
         foreach ($roleDefinition as $allowOrDeny => $resourceAndPermissionsMap) {
             $this->addPermissionsForRole($roleName, $allowOrDeny, $resourceAndPermissionsMap);
         }
@@ -88,7 +88,7 @@ class Acl extends ZendAcl {
     
     public function addPermissionsForRoleAndAclDefinitionMap (array $rolesAndPermissionsMap) {
         foreach ($rolesAndPermissionsMap as $role => $definition) {
-            $this->_processRoleAclDefinition($role, $definition);
+            $this->addRoleAclDefinition($role, $definition);
         }
         return $this;
     }

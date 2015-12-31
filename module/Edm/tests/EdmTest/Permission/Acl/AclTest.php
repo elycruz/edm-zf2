@@ -9,17 +9,11 @@ use Edm\Permissions\Acl\Acl,
 
 class TermProtoTest extends \PHPUnit_Framework_TestCase
 {
-    public static $expectectRoles;
-    
-    public static $expectectResources;
-    
     public static $config;
     
     public static function setUpBeforeClass() {
         $config = Bootstrap::getAutoloadConfig()['edm-admin-acl'];
         self::$config = $config;
-        static::$expectectResources = $config['resources'];
-        static::$expectectRoles = $config['roles'];
     }
     
     public function getConfig() {
@@ -54,6 +48,16 @@ class TermProtoTest extends \PHPUnit_Framework_TestCase
     } 
     
     public function testPopulatesResourcesViaConstruction () {
+        $acl = $this->acl();
+        $config = $this->getConfig();
+        $resources = array_keys($config['resources']);
+        foreach ($resources as $resource) {
+            $hasResource = $acl->hasResource($resource);
+            $this->assertTrue($hasResource, 'Should have resource "' . $resource . '".');
+        }
+    }
+    
+    public function testSetsAclRulesViaConstruction () {
         $acl = $this->acl();
         $config = $this->getConfig();
         $resources = array_keys($config['resources']);
