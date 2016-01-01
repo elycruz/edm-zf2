@@ -131,11 +131,11 @@ class UserServiceTest extends \PHPUnit_Framework_TestCase
         // Update row
         $contact->firstName = 'Rice';
         $contact->lastName = 'Krispies';
-        $contact->middleName = 'Bob';
+        $contact->middleName = 'Bob';   
         $userProto->role = 'guest';
 
         // Update row
-        $rslt = $service->updateUser($userProto->user_id, $userProto, $unchangedData);
+        $rslt = $service->updateUser($userProto, $unchangedData);
 
         // Assert user was updated successfully
         $this->assertEquals(true, $rslt);

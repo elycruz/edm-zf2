@@ -140,7 +140,9 @@ class UserService extends AbstractCrudService
      * @throws \Exception
      */
     public function updateUser (
-        $id, UserProto $userProto, UserProto $originalProto, $escapeOriginalData = false)
+            UserProto $userProto, 
+            UserProto $originalProto, 
+            $escapeOriginalData = false)
     {
         // Get today's date
         $today = new \DateTime();
@@ -222,7 +224,7 @@ class UserService extends AbstractCrudService
 
             // Update user
             $this->getUserTable()->update(
-                $cleanedUserProto->toArray(UserProto::FOR_OPERATION_DB_UPDATE), ['user_id' => $id]);
+                $cleanedUserProto->toArray(UserProto::FOR_OPERATION_DB_UPDATE), ['user_id' => $userProto->user_id]);
 
             // Resolve data for contact user rel table if necessary
             if ($screenNameChanged || $emailChanged) {

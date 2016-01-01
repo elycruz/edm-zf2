@@ -134,7 +134,6 @@ return [
     - [X] - `Edm\InputFilter\DefaultInputOptions`.
     - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.
     - [X] - `Edm\Permissions\Acl`.
-    - [ ] - `Edm\Permissions\Rbac`.
     - [ ] - `Edm\Service`:
         - [X] - Preliminary `Edm\Service\TermTaxonomyService` tests.
         - [X] - `Edm\Service\UserService`
@@ -144,10 +143,6 @@ return [
                  that `base64_encode` adds depending on how much padding the last
                 character has).
         - [X] - `Edm\Service\PostService`.
-        - [ ] - `Edm\Service\PostCommentService`.
-        - [ ] - `Edm\Service\PostGalleryService`.
-        - [ ] - `Edm\Service\PostMediaService`.
-        - [ ] - `Edm\Service\PostFlaggingService`.
         - [ ] - Upgrade all `*\Service\*` tests to use `Edm\Db\ResultSet\Proto\*` classes
          as their data objects.
         
@@ -162,6 +157,15 @@ return [
 - [ ] - Add UML diagrams of system.
 - [ ] - Add UML diagrams of the database (edm-db-mysql) as it stands.
 - [ ] - Add RDBMS as git sub-module to the project.
+
+#### 0.4.0 MVP 
+- [ ] - Add tests.
+    - [ ] - `Edm\Permissions\Rbac`.
+    - [ ] - `Edm\Service`.
+        - [ ] - `Edm\Service\PostCommentService`.
+        - [ ] - `Edm\Service\PostGalleryService`.
+        - [ ] - `Edm\Service\PostMediaService`.
+        - [ ] - `Edm\Service\PostFlaggingService`.
 
 #### Other:
  - [ ] - Look into using `Expressive`

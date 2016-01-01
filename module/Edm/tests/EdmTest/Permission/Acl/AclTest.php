@@ -50,7 +50,7 @@ class AclTest extends \PHPUnit_Framework_TestCase
     
     public function acl () {
         $config = Bootstrap::getAutoloadConfig()['edm-admin-acl'];
-        return new Acl($config, 'roles', 'resources', 'relationships_map');
+        return new Acl($config, 'roles', 'resources', 'acl_definition');
     }
     
     public function testConstructorType () {
