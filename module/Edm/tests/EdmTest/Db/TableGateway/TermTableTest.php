@@ -10,7 +10,7 @@
 namespace EdmTest\Db\TableGateway;
 
 use EdmTest\Bootstrap,
-    Edm\ServiceManager\ServiceLocatorAwareTrait;
+    Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Class TermTableTest.

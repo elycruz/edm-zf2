@@ -11,7 +11,7 @@ namespace Edm\Service;
 use Edm\Db\DbAware,
     Edm\Db\DbDataHelperAware,
     Edm\Db\DbAwareTrait,
-    Edm\ServiceManager\ServiceLocatorAwareTrait,
+    Zend\ServiceManager\ServiceLocatorAwareTrait,
     Edm\Db\DbDataHelperAwareTrait,
     Zend\ServiceManager\ServiceLocatorAwareInterface,
     Zend\Db\Sql\Sql,
