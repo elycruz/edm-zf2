@@ -12,14 +12,17 @@ features and functionality all documented in this repo (for now).
 - Mysql 5.6+
 - Installed database from github repo 'elycruz/edm-db-mysql'.
 
-### Caveats
+### Caveats for developing on this project
 - All development must be performed in TDD format.
 
 #### Code rules:
 - No redeclaring of variables in same scope.
-- No methods or functions with more than 89 line length.
-- No classes with line length greater than 610.
-- Characters per line 89-144.
+- Short class methods.  Try to keep class methods under or around 144 lines of
+code (including comments).
+- Short classes.  Try to keep classes around, at most, 610 lines 
+of code (including comments).
+- No hard characters per line rule but either use a max line length of 
+80, 89, or 144 characters per line.
 
 ### Usage notes:
 
@@ -130,7 +133,7 @@ return [
     - [X] - `Edm\Hasher\Pbkdf2Hasher`.
     - [X] - `Edm\InputFilter\DefaultInputOptions`.
     - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.
-    - [ ] - `Edm\Permissions\Acl`.
+    - [X] - `Edm\Permissions\Acl`.
     - [ ] - `Edm\Permissions\Rbac`.
     - [ ] - `Edm\Service`:
         - [X] - Preliminary `Edm\Service\TermTaxonomyService` tests.
