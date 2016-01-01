@@ -12,18 +12,18 @@ class Acl extends ZendAcl {
     public function __construct(array $array_map = null, 
             string $rolesKey = 'roles',
             string $resourcesKey = 'resources',
-            string $relationsMapKey = 'relationships_map') {
-        $this->populateFromArrayMap(
+            string $aclDefinitionKey = 'acl_definition') {
+        $this->populate (
             is_array($array_map[$rolesKey]) ? $array_map[$rolesKey] : null,
             is_array($array_map[$resourcesKey]) ? $array_map[$resourcesKey] : null,
-            is_array($array_map[$relationsMapKey]) ? $array_map[$relationsMapKey] : null
+            is_array($array_map[$aclDefinitionKey]) ? $array_map[$aclDefinitionKey] : null
         );
     }
 
-    public function populateFromArrayMap(
+    public function populate (
             array $roles = null, 
             array $resources = null, 
-            array $relationsMap = null
+            array $aclDefinition = null
     ) {
         if (isset($roles)) {
             $this->addRoles($roles);
@@ -31,8 +31,8 @@ class Acl extends ZendAcl {
         if (isset($resources)) {
             $this->addResources($resources);
         }
-        if (isset($relationsMap)) {
-            $this->addPermissionsForRoleAndAclDefinitionMap($relationsMap);
+        if (isset($aclDefinition)) {
+            $this->addAclDefinition($aclDefinition);
         }
         return $this;
     }
@@ -79,16 +79,16 @@ class Acl extends ZendAcl {
         return $this;
     }
     
-    public function addRoleAclDefinition (string $roleName, array $roleDefinition) {
+    public function addAclDefinitionForRole (string $roleName, array $roleDefinition) {
         foreach ($roleDefinition as $allowOrDeny => $resourceAndPermissionsMap) {
             $this->addPermissionsForRole($roleName, $allowOrDeny, $resourceAndPermissionsMap);
         }
         return $this;
     }
     
-    public function addPermissionsForRoleAndAclDefinitionMap (array $rolesAndPermissionsMap) {
-        foreach ($rolesAndPermissionsMap as $role => $definition) {
-            $this->addRoleAclDefinition($role, $definition);
+    public function addAclDefinition (array $aclDefinition) {
+        foreach ($aclDefinition as $role => $definition) {
+            $this->addAclDefinitionForRole($role, $definition);
         }
         return $this;
     }

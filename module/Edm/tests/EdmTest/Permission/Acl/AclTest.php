@@ -20,9 +20,37 @@ class AclTest extends \PHPUnit_Framework_TestCase
         return self::$config;
     }
     
+    public function aclConfigProvider () {
+        return [
+            [[
+                'roles' => [
+                    'guest' => null,
+                    'user' => 'guest',
+                    'admin' => 'user'
+                ],
+                'resources' => [
+                    'index' => null,
+                    'post' => 'index',
+                    'contact' => null
+                ],
+                'acl_definition' => [
+                    'guest' => [
+                        'allow' => [
+                            'index' => null,
+                            'post' => null
+                        ],
+                        'deny' => [
+                            'contact' => '*'
+                        ]
+                    ],
+                ]
+            ]]
+        ];
+    }
+    
     public function acl () {
         $config = Bootstrap::getAutoloadConfig()['edm-admin-acl'];
-        return new Acl($config);
+        return new Acl($config, 'roles', 'resources', 'relationships_map');
     }
     
     public function testConstructorType () {
@@ -57,38 +85,18 @@ class AclTest extends \PHPUnit_Framework_TestCase
         }
     }
     
-    public function testAddAclDefinitionForRole () {
-        $aclDefinition = [
-            'roles' => [
-                'guest' => null,
-                'user' => 'guest',
-                'admin' => 'user'
-            ],
-            'resources' => [
-                'index' => null,
-                'post' => 'index',
-                'contact' => null
-            ],
-            'relationships' => [
-                'guest' => [
-                    'allow' => [
-                        'index' => null,
-                        'post' => null
-                    ],
-                    'deny' => [
-                        'contact' => '*'
-                    ]
-                ],
-            ]
-        ];
-        
+    /**
+     * @dataProvider aclConfigProvider
+     * @param array $aclConfig
+     */
+    public function testAddAclDefinitionForRole (array $aclConfig) {        
         // Create `acl`
         $acl = new Acl();
         
         // Add role acl definition
-        $result = $acl->addRoles($aclDefinition['roles'])
-            ->addResources($aclDefinition['resources'])
-            ->addRoleAclDefinition('guest', $aclDefinition['relationships']['guest']);
+        $result = $acl->addRoles($aclConfig['roles'])
+            ->addResources($aclConfig['resources'])
+            ->addAclDefinitionForRole('guest', $aclConfig['acl_definition']['guest']);
         
         // Assert `acl` is returned from adding acl role definition operation
         $this->assertEquals($acl, $result);
@@ -106,6 +114,87 @@ class AclTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($acl->isAllowed('guest', 'contact'),
                 '"guest" role should not be allowed to access resource "contact".');
     }
+    
+    /**
+     * @dataProvider aclConfigProvider
+     * @param array $aclConfig
+     */
+    public function testAddAclDefinition (array $aclConfig) {
+        $acl = new Acl();
+        $result = $acl->addRoles($aclConfig['roles'])
+                ->addResources($aclConfig['resources'])
+                ->addAclDefinition($aclConfig['acl_definition']);
+                
+        // Assert `acl` is returned from adding acl role definition operation
+        $this->assertEquals($acl, $result);
+        
+        // Make some assertions
+        // Assert 'guest' has access to 'index' resource
+        $this->assertTrue($acl->isAllowed('guest', 'index'), 
+                '"guest" role should be allowed to access resource "index".');
+        
+        // Assert guest has access to 'post' resource
+        $this->assertTrue($acl->isAllowed('guest', 'post'), 
+                '"guest" role should be allowed to access resource "post".');
+        
+        // Assert guest is denied access to 'contact' resource
+        $this->assertFalse($acl->isAllowed('guest', 'contact'),
+                '"guest" role should not be allowed to access resource "contact".');
+    }
+    
+    /**
+     * @dataProvider aclConfigProvider
+     * @param array $aclConfig
+     */
+    public function testAddPermissionsForUser (array $aclConfig) {
+        $acl = new Acl();
+        $result = $acl->addRoles($aclConfig['roles'])
+                ->addResources($aclConfig['resources'])
+                ->addPermissionsForRole('guest', 'allow', $aclConfig['acl_definition']['guest']['allow'])
+                ->addPermissionsForRole('guest', 'deny', $aclConfig['acl_definition']['guest']['deny']);
+                
+        // Assert `acl` is returned from adding acl role definition operation
+        $this->assertEquals($acl, $result);
+        
+        // Make some assertions
+        // Assert 'guest' has access to 'index' resource
+        $this->assertTrue($acl->isAllowed('guest', 'index'), 
+                '"guest" role should be allowed to access resource "index".');
+        
+        // Assert guest has access to 'post' resource
+        $this->assertTrue($acl->isAllowed('guest', 'post'), 
+                '"guest" role should be allowed to access resource "post".');
+        
+        // Assert guest is denied access to 'contact' resource
+        $this->assertFalse($acl->isAllowed('guest', 'contact'),
+                '"guest" role should not be allowed to access resource "contact".');
+    }
+    
+    /**
+     * @dataProvider aclConfigProvider
+     * @param array $aclConfig
+     */
+    public function testPopulateFromArrayMap (array $aclConfig) {
+        $acl = new Acl();
+        $result = $acl->populate($aclConfig['roles'], $aclConfig['resources'], $aclConfig['acl_definition']);
+                
+        // Assert `acl` is returned from adding acl role definition operation
+        $this->assertEquals($acl, $result);
+        
+        // Make some assertions
+        // Assert 'guest' has access to 'index' resource
+        $this->assertTrue($acl->isAllowed('guest', 'index'), 
+                '"guest" role should be allowed to access resource "index".');
+        
+        // Assert guest has access to 'post' resource
+        $this->assertTrue($acl->isAllowed('guest', 'post'), 
+                '"guest" role should be allowed to access resource "post".');
+        
+        // Assert guest is denied access to 'contact' resource
+        $this->assertFalse($acl->isAllowed('guest', 'contact'),
+                '"guest" role should not be allowed to access resource "contact".');
+    }
+    
     
     public function testPopulatesRolesViaConstruction () {
         $acl = $this->acl();
