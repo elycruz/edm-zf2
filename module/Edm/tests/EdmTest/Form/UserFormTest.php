@@ -2,7 +2,9 @@
 
 namespace EdmTest\Form;
 
-use Edm\Form\UserForm;
+use EdmTest\Bootstrap,
+    Edm\Form\AbstractForm,
+    Edm\Form\UserForm;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,8 +18,10 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
      * @return array <[UserFrom]>
      */
     public function userFormProvider () {
+        $userForm = new UserForm();
+        $userForm->setServiceLocator(Bootstrap::getServiceManager());
         return [
-            [new UserForm()]
+            [$userForm]
         ];
     }
 
@@ -27,7 +31,7 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
     public function truthyFormDataProvider () {
         return [
             [
-                new UserForm(), [
+                $this->injectServiceLocatorIntoForm(new UserForm()), [
                     'user' => [
                         'screenName' => 'helloWorld',
                         'password' => 'helloworld',
@@ -52,28 +56,28 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
         // at least 1 error message in $form->getMessages()
         return [
             [
-                new UserForm(), [
+                $this->injectServiceLocatorIntoForm(new UserForm()), [
                 'user' => [
                     'name' => 'Missing alias field',
                     'user_group_alias' => 'missing-field'
                 ]
             ]],
             [
-                new UserForm(), [
+                $this->injectServiceLocatorIntoForm(new UserForm()), [
                 'user' => [
                     'name' => 'No spaces allowed in `alias`.',
                     'alias' => 'no spaces allowed in alias'
                 ]
             ]],
             [
-                new UserForm(), [
+                $this->injectServiceLocatorIntoForm(new UserForm()), [
                 'user' => [
                     'alias' => 'missing-name-field',
                     'user_group_alias' => 'missing-field'
                 ]
             ]],
             [
-                new UserForm(), [
+                $this->injectServiceLocatorIntoForm(new UserForm()), [
                 'user' => [
                     'name' => '',
                     'alias' => 'invalid-name-property'
@@ -131,6 +135,9 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
         ];
         
         // Set data to validate
+        $userForm->init();
+        
+//        var_dump($userForm->get('user')->get('status'));
         $userForm->setData($formData);
 
         // Expect form data to be valid
@@ -174,4 +181,9 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
 //        }
     }
 
+    public function injectServiceLocatorIntoForm (AbstractForm $form) {
+        $form->setServiceLocator(Bootstrap::getServiceManager());
+        return $form;
+    }
+    
 }

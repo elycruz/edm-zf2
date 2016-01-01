@@ -27,6 +27,7 @@ return array(
             'Edm\Db\TableGateway\UserTable'              => 'Edm\Db\TableGateway\UserTable',
 
             // Form invokables
+            'Edm\Form\UserForm'           => 'Edm\Form\UserForm',
             'Edm\Form\TermForm'           => 'Edm\Form\TermForm',
             //'Edm\Form\TermTaxonomyForm'   => 'Edm\Form\TermTaxonomyForm',
 

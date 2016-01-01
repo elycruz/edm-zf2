@@ -62,8 +62,7 @@ trait TermTaxonomyOptionsTrait
         
         // Fetch taxonomies 
         $output = array();
-        $rslt = $this->termTaxonomyService()->read($readOptions);
-        
+        $rslt = $this->getTermTaxonomyService()->read($readOptions);
         // Set the default option
         if (isset($options->defaultOption)) {
             $output[$options->defaultOption->value] = 
@@ -78,8 +77,8 @@ trait TermTaxonomyOptionsTrait
 
         // Compose select element html options data
         foreach ($rslt as $item) {
-            $output[$item[$options->optionValueAndLabelKeys->value]] = 
-                    $item[$options->optionValueAndLabelKeys->label];
+            $output[$item->{$options->optionValueAndLabelKeys->value}] = 
+                    $item->{$options->optionValueAndLabelKeys->label};
         }
         
         // Return output

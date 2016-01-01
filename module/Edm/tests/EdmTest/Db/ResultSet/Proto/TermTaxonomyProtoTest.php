@@ -29,7 +29,11 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
         'description',
         'accessGroup',
         'listOrder',
-        'parent_id'
+        'parent_id',
+        'term_name',
+        'name',
+        'alias',
+        'term_group_alias',
     ];
 
     /**
@@ -52,6 +56,7 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
     public function fullyQualifiedTermTaxonomyProvider () {
         return [[
             new TermTaxonomyProto([
+                'term_name' => 'Some Term Taxonomy',
                 'name' => 'Some Term Taxonomy',
                 'alias' => 'some-term-taxonomy',
                 'term_group_alias' => 'some-term-taxonomy-group',
@@ -81,6 +86,7 @@ class TermTaxonomyProtoTest extends \PHPUnit_Framework_TestCase
     public function exchangeArrayTruthyProvider () {
         return [[
             [
+                'term_name' => 'Some Term Taxonomy',
                 'name' => 'Some Term Taxonomy',
                 'alias' => 'some-term-taxonomy',
                 'term_group_alias' => 'some-term-taxonomy-group',

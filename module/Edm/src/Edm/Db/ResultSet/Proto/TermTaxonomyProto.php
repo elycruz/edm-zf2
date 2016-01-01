@@ -24,21 +24,33 @@ class TermTaxonomyProto extends AbstractProto  {
         'description',
         'accessGroup',
         'listOrder',
-        'parent_id'
+        'parent_id',
+        'term_name',
+        'name',
+        'alias',
+        'term_group_alias'
     );
 
     /**
      * @var array
      */
     protected $_notAllowedKeysForInsert = [
-        'term_taxonomy_id'
+        'term_taxonomy_id',
+        'name',
+        'alias',
+        'term_group_alias',
+        'term_name'
     ];
 
     /**
      * @var array
      */
     protected $_notAllowedKeysForUpdate = [
-        'term_taxonomy_id'
+        'term_taxonomy_id',
+        'name',
+        'alias',
+        'term_group_alias',
+        'term_name'
     ];
 
     /**

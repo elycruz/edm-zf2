@@ -13,7 +13,9 @@ use Edm\Form\Fieldset\ContactFieldset,
  *
  * @author Ely
  */
-class UserForm extends AbstractForm {
+class UserForm extends TermTaxonomyServiceAwareForm {
+   
+    use TermTaxonomyOptionsTrait;
     
     public function __construct(string $name = 'user-form', array $options = null) {
         // Call parent constructor
