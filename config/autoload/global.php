@@ -32,7 +32,7 @@ return array(
             'cms-admin' => 'cms-publisher',
             'cms-super-admin' => 'cms-admin'
         ],
-        'relationships_map' => [
+        'acl_definition' => [
             'cms-guest' => [
                 'allow' => [
                     '*' => 'index',
