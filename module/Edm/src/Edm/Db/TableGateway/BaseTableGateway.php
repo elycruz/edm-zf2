@@ -47,15 +47,6 @@ class BaseTableGateway extends TableGateway {
     }
 
     /**
-     * Simple `get one where` method.  Only accepts `where` options.
-     * @param array $where
-     * @return array|\ArrayObject|null
-     */
-    public function getOneWhere(array $where) {
-        return $this->select($where)->current();
-    }
-
-    /**
      * __get - Overridden @see parent class.
      *
      * @param  string $property
@@ -79,7 +70,8 @@ class BaseTableGateway extends TableGateway {
         if ($this->featureSet->canCallMagicGet($property)) {
             return $this->featureSet->callMagicGet($property);
         }
-        throw new InvalidArgumentException('Invalid magic property access in ' . __CLASS__ . '::__get()');
+        throw new InvalidArgumentException('Invalid magic property access in ' . 
+                __CLASS__ . '::__get()');
     }
 
 }

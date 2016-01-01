@@ -38,7 +38,8 @@ class TermFormTest extends \PHPUnit_Framework_TestCase
                 new TermForm(), [
                 'term' => [
                     'name' => 'Some other value with no `term_group_alias`',
-                    'alias' => 'some-other-value-with-no-term_group_alias'
+                    'alias' => 'some-other-value-with-no-term_group_alias',
+                    'term_group_alias' => 'some-group-alias'
                 ]
             ]],
             [
@@ -140,7 +141,7 @@ class TermFormTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $validatedData);
 
         // Expect required fields to be set as data can't pass validation unless required fields are valid
-        foreach (['name', 'alias'] as $key) {
+        foreach (['name', 'alias', 'term_group_alias'] as $key) {
             $this->assertEquals(true, isset($validatedData['term'][$key]));
         }
     }
@@ -152,16 +153,22 @@ class TermFormTest extends \PHPUnit_Framework_TestCase
      */
     public function testFalsyFormDataAfterValidation ($termForm, $formData) {
         $termForm->setData($formData);
-
-        // Expect form data to be valid
-        $this->assertEquals(false, $termForm->isValid());
+        // Expect form data to be invalid
+        $this->assertFalse($termForm->isValid());
+        
+        // Get error messages
         $termErrorMessages = $termForm->getMessages()['term'];
-        $this->assertEquals(true,
-            in_array(
-                array_keys($termErrorMessages)[0],
-                ['name', 'alias', 'term_group_alias']
-            )
-        );
+        
+        // Get error message keys
+        $termErrorMessageKeys = array_keys($termErrorMessages);
+        
+        // Get possible keys for error messages
+        $possibleKeys = ['name', 'alias', 'term_group_alias'];
+        
+        // Check that error keys are in possible keys
+        foreach($termErrorMessageKeys as $key) {
+            $this->assertTrue(in_array($key, $possibleKeys));
+        }
     }
 
 }

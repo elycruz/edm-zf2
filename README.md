@@ -112,11 +112,12 @@ return [
             - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProto`.
             - [X] - `Edm\Db\ResultSet\Proto\TermTaxonomyProxyProto`.
             - [X] - `Edm\Db\ResultSet\Proto\UserProto`.
-        - [ ] - `Edm\Db\TableGateway`:
-            - [ ] - `Edm\Db\TableGateway\BaseTableGateway`.
+        - [X] - `Edm\Db\TableGateway`:
+            - [X] - `Edm\Db\TableGateway\BaseTableGateway`.
             - [X] - `Edm\Db\TableGateway\ContactTable`.
             - [X] - `Edm\Db\TableGateway\ContactUserRelTable`.
             - [X] - `Edm\Db\TableGateway\DateInfoTable`.
+            - [X] - `Edm\Db\TableGateway\PostTable`.
             - [X] - `Edm\Db\TableGateway\TermTable`.
             - [X] - `Edm\Db\TableGateway\TermTaxonomyTable`.
             - [X] - `Edm\Db\TableGateway\TermTaxonomyProxyTable`.
@@ -129,7 +130,7 @@ return [
             - [X] - `Edm\Form\Fieldset\SubmitAndResetFieldset`.
             - [X] - `Edm\Form\Fieldset\TermFieldset`.
             - [X] - `Edm\Form\Fieldset\UserFieldset`.
-        - [ ] - `Edm\Form\TermFormTest`.
+        - [X] - `Edm\Form\TermForm`.
     - [X] - `Edm\Hasher\Pbkdf2Hasher`.
     - [X] - `Edm\InputFilter\DefaultInputOptions`.
     - [X] - ~~`Edm\InputFilter\DefaultInputOptionsAware`.~~  The tests above cover this item.
@@ -140,11 +141,10 @@ return [
             - [ ] - Solve the `Pbkdf2Hasher->create_hash` output length mystery 
                 (we need to know the strings exact length with and without
                  padding even if it means abstracting away the last '=' or '=='
-                 that `base64_encode` adds depending on how much padding the last
-                character has).
+                 that `base64_encode` adds (base64_encdoe adds this depending on 
+                 how much padding/bits the last character has applied near it).
         - [X] - `Edm\Service\PostService`.
-        - [ ] - Upgrade all `*\Service\*` tests to use `Edm\Db\ResultSet\Proto\*` classes
-         as their data objects.
+        - [X] - Upgrade all `*\Service\*` tests to use `Edm\Db\ResultSet\Proto\*` classes as their data objects.
         
 - [X] - Re-evaluate how 'aliases' are used in the EDM system.
     Resources:
@@ -168,7 +168,8 @@ return [
         - [ ] - `Edm\Service\PostFlaggingService`.
 
 #### Other:
- - [ ] - Look into using `Expressive`
+- [ ] - Look into using `Expressive`.
+- [ ] - clean up './module/Edm/configs/module.config.php'.
 
 #### Other tasks
  - [ ] List all forms in module.config.php so that we can take advantage of

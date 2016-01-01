@@ -1,5 +1,6 @@
 <?php
 
+// @todo remove all old `array()` invocations.
 // Module Configuration
 return array(
 
@@ -9,9 +10,9 @@ return array(
             // Service invokables
             'Edm\Service\TermTaxonomyService'   => 'Edm\Service\TermTaxonomyService',
             'Edm\Service\UserService'           => 'Edm\Service\UserService',
-            'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
+            //'Edm\Service\ViewModuleService'     => 'Edm\Service\ViewModuleService',
             'Edm\Service\PostService'           => 'Edm\Service\PostService',
-            'Edm\Service\PageService'           => 'Edm\Service\PageService',
+            //'Edm\Service\PageService'           => 'Edm\Service\PageService',
 
             // Db invokables
             'Edm\Db\DatabaseDataHelper'                  => 'Edm\Db\DatabaseDataHelper',
@@ -27,7 +28,7 @@ return array(
 
             // Form invokables
             'Edm\Form\TermForm'           => 'Edm\Form\TermForm',
-            'Edm\Form\TermTaxonomyForm'   => 'Edm\Form\TermTaxonomyForm',
+            //'Edm\Form\TermTaxonomyForm'   => 'Edm\Form\TermTaxonomyForm',
 
             // Config invokables
             // --------------------------------------------------------------
@@ -35,11 +36,17 @@ return array(
             'Edm\InputFilter\DefaultInputOptions' 
                 => 'Edm\InputFilter\DefaultInputOptions',
             
-            'Zend\Authentication\AuthService' => 
-                'Zend\Authentication\AuthenticationService'
+            //'Zend\Authentication\AuthService' => 
+                //'Zend\Authentication\AuthenticationService'
         )
     ),
-    'controllers' => array(
+    'aliases' => [
+        // Service aliases
+        'edm-post-service'          => 'Edm\Service\PostService',
+        'edm-term-taxonomy-service' => 'Edm\Service\TermTaxonomyService',
+        'edm-user-service'          => 'Edm\Service\TermTaxonomyService'
+    ],
+    /*'controllers' => array(
         'invokables' => array(
             'Edm\Controller\Index'        => 'Edm\Controller\IndexController',
             'Edm\Controller\Term'         => 'Edm\Controller\TermController',
@@ -185,5 +192,5 @@ return array(
             'layout/edm-admin-login'    => APP_PATH .'/public/module-templates/edm-polymer-ui/login.phtml',
             'layout/edm-admin-ajax-ui'  => APP_PATH . '/public/module-templates/edm-polymer-ui/index.phtml'
         )
-    ),
+    ),*/
 );
