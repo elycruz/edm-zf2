@@ -134,10 +134,15 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
             'status'
         ];
         
-        // Set data to validate
+        $contactKeys = [
+            'email',
+            'altEmail'
+        ];
+        
+        // Initialize form select element options
         $userForm->init();
         
-//        var_dump($userForm->get('user')->get('status'));
+        // Set data to validate
         $userForm->setData($formData);
 
         // Expect form data to be valid
@@ -153,6 +158,11 @@ class UserFormTest extends \PHPUnit_Framework_TestCase
         // Expect required fields to be set as data can't pass validation unless required fields are valid
         foreach ($userKeys as $key) {
             $this->assertEquals(true, isset($validatedData['user'][$key]));
+        }
+
+        // Expect required fields to be set as data can't pass validation unless required fields are valid
+        foreach ($contactKeys as $key) {
+            $this->assertEquals(true, isset($validatedData['contact'][$key]));
         }
     }
 

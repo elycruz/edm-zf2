@@ -36,9 +36,6 @@ return array(
             // Shared global input filter options (mostly validators and filters)
             'Edm\InputFilter\DefaultInputOptions' 
                 => 'Edm\InputFilter\DefaultInputOptions',
-            
-            //'Zend\Authentication\AuthService' => 
-                //'Zend\Authentication\AuthenticationService'
         )
     ),
     'aliases' => [

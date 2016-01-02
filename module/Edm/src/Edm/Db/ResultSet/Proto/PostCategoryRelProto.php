@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Edm\Db\ResultSet\Proto;
 
 use Zend\InputFilter\Factory as InputFactory,
@@ -7,21 +9,26 @@ use Zend\InputFilter\Factory as InputFactory,
 
 class PostCategoryRelProto extends AbstractProto {
 
-    protected $_allowedKeysForProto = array(
+    protected $_allowedKeysForProto = [
         'post_id',
         'term_taxonomy_id'
-    );
+    ];
 
-    protected $_formKey = 'postTermTaxonomyRel';
+    protected $_formKey = 'postCategoryRel';
 
+    protected $_notAllowedKeysForUpdate = [
+        'post_id'
+    ];
+    
     public function getInputFilter() {
      
         // Return input filter if exists
-        if ($this->inputFilter !== null) {
-            return $this->inputFilter;
+        if ($this->_inputFilter !== null) {
+            return $this->_inputFilter;
         }
         // Return value (input filter)
-        $inputFilter = $this->inputFilter = new InputFilter();
+        $inputFilter = 
+            $this->_inputFilter = new InputFilter();
         
         // Input factory
         $factory = new InputFactory();

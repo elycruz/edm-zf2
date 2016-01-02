@@ -31,7 +31,7 @@ class Module implements
 //    }
 
     public function getFormElementConfig () {
-        return include __DIR__ . '/configs/form.element.config.php';
+        return include __DIR__ . '/configs/form.elements.config.php';
     }
     
     public function getAutoloaderConfig() {
