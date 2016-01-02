@@ -15,7 +15,7 @@ class UserParamsFieldset extends Fieldset {
 
         parent::__construct($name, $options);
 
-        $this->attributes['class'] = 'user-params';
+        $this->attributes['class'] = $name;
         
         // User Params
         $this->add(array(
@@ -26,7 +26,7 @@ class UserParamsFieldset extends Fieldset {
                 'allow_add' => true,
                 'should_create_template' => true,
                 'target_element' => array(
-                    'type' => 'Edm\Form\KeyValuePairFieldset',
+                    'type' => 'KeyValuePairFieldset',
                     'options' => array(
                         'label' => 'Key value pair'
                     )),
